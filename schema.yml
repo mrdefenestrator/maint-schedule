@@ -1,0 +1,64 @@
+title: car
+type: object
+properties:
+  make:
+    type: string
+  model:
+    type: string
+  trim:
+    type: string
+  year:
+    type: year
+  purchaseDate:
+    type: string
+    format: ISO8601
+  purchaseMiles:
+    type: number
+  rules:
+    type: array
+    items: 
+      title: rule
+      type: object
+      properties: 
+        item:
+          type: string
+        verb:
+          type: string
+        intervalMiles:
+          type: number
+        intervalMonths:
+          type: number
+        severeIntervalMiles:
+          type: number
+        severeIntervalMonths:
+          type: number
+        notes:
+          type: string
+        startMiles:
+          type: number
+          default: 0
+        stopMiles:
+          type: number
+          default: 999999999
+        startMonths:
+          type: number
+          default: 0
+        stopMonths:
+          type: number
+          default: 9999
+        aftermarket:
+          type: boolean
+          default: false
+      required:
+        - item
+        - verb
+        - intervalMiles
+        - intervalMonths
+required:
+  - make
+  - model
+  - trim
+  - year
+  - purchaseDate
+  - purchaseMiles
+  - rules
