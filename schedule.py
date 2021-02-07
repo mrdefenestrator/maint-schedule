@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import json
 import yaml
 from typing import List
+from types import SimpleNamespace
 
 
 class Rule:
@@ -87,12 +89,13 @@ def as_car(dct):
 
 def load_yaml_file(filename):
     with open(filename, 'rb') as fp:
-        return yaml.load(fp, Loader=yaml.FullLoader, object_hook=as_car)
+        json_data = json.dumps(yaml.load(fp, Loader=yaml.FullLoader))
+        return json.loads(json_data, object_hook=as_car)
 
 
 def main():
-    # schema = load_yaml_file('schema.yml')
-    car = load_yaml_file('wrx-rules.yml')
+    # schema = load_yaml_file('schema.yaml')
+    car = load_yaml_file('wrx-rules.yaml')
 
     for rule in car['rules']:
         print(rule['verb'], rule['item'], rule['intervalMiles'])

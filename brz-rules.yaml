@@ -4,7 +4,7 @@ car:
   model: BRZ
   trim: Premium
   year: 2015
-  purchaseDate: 2016-11-12
+  purchaseDate: '2016-11-12'
   purchaseMiles: 21216
 rules:
   - item: accessory drive belt
