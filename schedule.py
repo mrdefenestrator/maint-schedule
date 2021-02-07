@@ -20,8 +20,19 @@ class Rule:
     aftermarket: bool = False
 
     def __init__(
-            self, item, verb, interval_miles, interval_months, severe_interval_miles, severe_interval_months, notes,
-            start_miles, stop_miles, start_months, stop_months, aftermarket
+            self,
+            item,
+            verb,
+            interval_miles,
+            interval_months,
+            severe_interval_miles,
+            severe_interval_months,
+            notes,
+            start_miles=0,
+            stop_miles=999999999,
+            start_months=0,
+            stop_months=999,
+            aftermarket=False,
     ):
         self.item = item
         self.verb = verb
