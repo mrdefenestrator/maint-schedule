@@ -30,7 +30,7 @@ rules:
     stopMonths: 132
     notes: >
       Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000 
+      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
       km) after the 1st. If towing replace more often. Use Subaru coolant only,
       do not mix with other types or it will reduce protection
   - item: engine coolant
@@ -43,7 +43,7 @@ rules:
     startMonths: 132
     notes: >
       Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000 
+      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
       km) after the 1st. If towing replace more often. Use Subaru coolant only,
       do not mix with other types or it will reduce protection
   - item: cooling system hoses, radiator
@@ -75,7 +75,7 @@ rules:
     severeIntervalMiles: 15000
     severeIntervalMonths: 15
     notes: >
-      when used in dusty conditions, the air filter should be replaced more often 
+      when used in dusty conditions, the air filter should be replaced more often
   - item: spark plugs
     verb: replace
     intervalMiles: 60000
@@ -115,8 +115,8 @@ rules:
     severeIntervalMiles: 15000
     severeIntervalMonths: 15
     notes: >
-       when used in high humidity or mountainous areas replace the brake fluid
-       and clutch fluid every 15,000 miles or 15 months whichever comes first
+      when used in high humidity or mountainous areas replace the brake fluid
+      and clutch fluid every 15,000 miles or 15 months whichever comes first
   - item: clutch fluid
     verb: replace
     intervalMiles: 30000
@@ -124,8 +124,8 @@ rules:
     severeIntervalMiles: 15000
     severeIntervalMonths: 15
     notes: >
-       when used in high humidity or mountainous areas replace the brake fluid
-       and clutch fluid every 15,000 miles or 15 months whichever comes first
+      when used in high humidity or mountainous areas replace the brake fluid
+      and clutch fluid every 15,000 miles or 15 months whichever comes first
   - item: brake pads, linings, parking brake
     verb: inspect
     intervalMiles: 12000
@@ -155,8 +155,8 @@ rules:
     severeIntervalMiles: 6000
     severeIntervalMonths: 6
     notes: >
-       under severe driving, brake and steering system inspection should be
-       performed every 6000 miles or 6 months whichever comes first
+      under severe driving, brake and steering system inspection should be
+      performed every 6000 miles or 6 months whichever comes first
   - item: front / rear wheel bearing lubricant
     verb: inspect
     intervalMiles: 60000
