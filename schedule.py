@@ -44,52 +44,62 @@ class Car:
     year: int
     purchase_date: str
     purchase_miles: float
-    rules: List[Rule]
 
-    def __init__(self, make, model, trim, year, purchase_date, purchase_miles, rules):
+    def __init__(self, make, model, trim, year, purchase_date, purchase_miles):
         self.make = make
         self.model = model
         self.trim = trim
         self.year = year
         self.purchase_date = purchase_date
         self.purchase_miles = purchase_miles
+
+
+class Ruleset:
+    car: Car
+    rules: List[Rule]
+
+    def __init__(self, car, rules):
+        self.car = car
         self.rules = rules
 
 
-def as_rule(dct):
-    return Rule(
-        dct['item'],
-        dct['verb'],
-        dct['intervalMiles'],
-        dct['intervalMonths'],
-        dct['severeIntervalMiles'],
-        dct['severeIntervalMonths'],
-        dct['notes'],
-        dct['startMiles'],
-        dct['stopMiles'],
-        dct['startMonths'],
-        dct['stopMonths'],
-        dct['aftermarket'],
-    )
-
-
 def as_car(dct):
-    rules = [as_rule(_) for _ in dct['rules']]
-    car = Car(
-        dct['make'],
-        dct['model'],
-        dct['trim'],
-        dct['year'],
-        dct['purchaseDate'],
-        dct['purchaseMiles'],
-        rules,
-    )
-    return car
+    if 'make' in dct:
+        return Car(
+            dct['make'],
+            dct['model'],
+            dct['trim'],
+            dct['year'],
+            dct['purchaseDate'],
+            dct['purchaseMiles'],
+        )
+    elif 'item' in dct:
+        return Rule(
+            dct['item'],
+            dct['verb'],
+            dct.get('intervalMiles'),
+            dct.get('intervalMonths'),
+            dct.get('severeIntervalMiles'),
+            dct.get('severeIntervalMonths'),
+            dct.get('notes'),
+            dct.get('startMiles'),
+            dct.get('stopMiles'),
+            dct.get('startMonths'),
+            dct.get('stopMonths'),
+            dct.get('aftermarket'),
+        )
+    elif 'rules' in dct:
+        return Ruleset(
+            dct['car'],
+            dct['rules'],
+        )
+    else:
+        raise TypeError('unable to determine object type')
 
 
 def load_yaml_file(filename):
     with open(filename, 'rb') as fp:
-        json_data = json.dumps(yaml.load(fp, Loader=yaml.FullLoader))
+        json_data = json.dumps(yaml.load(fp, Loader=yaml.FullLoader), indent=4)
         return json.loads(json_data, object_hook=as_car)
 
 
@@ -97,8 +107,8 @@ def main():
     # schema = load_yaml_file('schema.yaml')
     car = load_yaml_file('wrx-rules.yaml')
 
-    for rule in car['rules']:
-        print(rule['verb'], rule['item'], rule['intervalMiles'])
+    for rule in car.rules:
+        print(rule.verb, rule.item, rule.interval_miles)
 
     for x in range(10):
         print(car.rules[0].interval_miles * x)
