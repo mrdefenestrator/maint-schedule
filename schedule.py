@@ -232,16 +232,20 @@ class Vehicle:
 
     def calculate_service_due(self, rule: Rule,
                                due_soon_miles: float = 1000,
-                               due_soon_months: float = 1) -> ServiceDue:
+                               due_soon_months: float = 1,
+                               severe: bool = False) -> ServiceDue:
         """
         Calculate when a service is due for a given rule.
 
         Logic:
         - If rule is not active at current mileage: status = INACTIVE
         - Find last service for this item/verb (any phase)
-        - If no history: due at intervalMiles from odometer 0
+        - If no history: due at startMiles + intervalMiles
         - If has history: due at last_service_miles + intervalMiles
         - Compare to current miles/date to determine status
+
+        Args:
+            severe: If True, use severe intervals (falls back to normal if not defined)
         """
         current_miles = self.current_miles
         current_date = date.fromisoformat(self.as_of_date)
@@ -256,12 +260,17 @@ class Vehicle:
         last_date_str = last_service.date if last_service else None
         last_date = date.fromisoformat(last_date_str) if last_date_str else None
 
-        # Calculate due points (normal and severe)
-        due_miles = _calc_due_miles(last_miles, rule.interval_miles, rule.start_miles)
-        severe_due_miles = _calc_due_miles(last_miles, rule.severe_interval_miles,
-                                           rule.start_miles)
-        due_date = _calc_due_date(last_date, rule.interval_months)
-        severe_due_date = _calc_due_date(last_date, rule.severe_interval_months)
+        # Select intervals based on mode (severe falls back to normal if not defined)
+        if severe:
+            interval_miles = rule.severe_interval_miles or rule.interval_miles
+            interval_months = rule.severe_interval_months or rule.interval_months
+        else:
+            interval_miles = rule.interval_miles
+            interval_months = rule.interval_months
+
+        # Calculate due points
+        due_miles = _calc_due_miles(last_miles, interval_miles, rule.start_miles)
+        due_date = _calc_due_date(last_date, interval_months)
 
         # Determine status
         if due_miles is None and due_date is None:
@@ -289,15 +298,16 @@ class Vehicle:
             last_service_date=last_date_str,
             due_miles=due_miles,
             due_date=due_date.isoformat() if due_date else None,
-            severe_due_miles=severe_due_miles,
-            severe_due_date=severe_due_date.isoformat() if severe_due_date else None,
+            severe_due_miles=None,  # No longer needed in output
+            severe_due_date=None,
             miles_remaining=miles_remaining,
         )
 
     def get_all_service_status(self, due_soon_miles: float = 1000,
-                                due_soon_months: float = 1) -> List[ServiceDue]:
+                                due_soon_months: float = 1,
+                                severe: bool = False) -> List[ServiceDue]:
         """Calculate service status for all active rules."""
-        return [self.calculate_service_due(rule, due_soon_miles, due_soon_months)
+        return [self.calculate_service_due(rule, due_soon_miles, due_soon_months, severe)
                 for rule in self.rules]
 
 
@@ -371,6 +381,11 @@ def main():
         type=Path,
         help="Path to vehicle YAML file (e.g., wrx-rules.yaml)"
     )
+    parser.add_argument(
+        "--severe",
+        action="store_true",
+        help="Use severe driving intervals (shorter intervals for demanding conditions)"
+    )
     args = parser.parse_args()
 
     if not args.vehicle_file.exists():
@@ -381,12 +396,14 @@ def main():
 
     print(f"Vehicle: {vehicle.car.name}")
     print(f"Current mileage: {vehicle.current_miles:,.0f} (as of {vehicle.as_of_date})")
+    if args.severe:
+        print("Mode: SEVERE DRIVING (shorter intervals)")
     print(f"Rules: {len(vehicle.rules)}")
     print(f"History entries: {len(vehicle.history)}")
     print()
 
     # Get all service statuses
-    statuses = vehicle.get_all_service_status()
+    statuses = vehicle.get_all_service_status(severe=args.severe)
 
     # Group by status
     overdue = [s for s in statuses if s.status == Status.OVERDUE]
@@ -423,11 +440,10 @@ def main():
                 format_miles(svc.due_miles),
                 svc.due_date or "-",
                 format_remaining(svc),
-                format_miles(svc.severe_due_miles),
             ])
         return rows
 
-    headers = ["Rule", "Last Done", "Due (mi)", "Due (date)", "Remaining", "Severe"]
+    headers = ["Rule", "Last Done", "Due (mi)", "Due (date)", "Remaining"]
 
     if overdue:
         print("OVERDUE:")

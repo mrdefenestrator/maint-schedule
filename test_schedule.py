@@ -378,8 +378,8 @@ class TestServiceDueCalculation:
         assert result.due_miles == 215000  # 140000 + 75000
         assert result.miles_remaining == 35000
 
-    def test_severe_intervals_calculated(self, car):
-        """Severe intervals are calculated alongside normal intervals."""
+    def test_severe_mode_uses_severe_intervals(self, car):
+        """Severe mode uses severe intervals for calculation."""
         rule = Rule(
             item="oil", verb="replace",
             interval_miles=7500, severe_interval_miles=3750
@@ -391,10 +391,30 @@ class TestServiceDueCalculation:
             state_current_miles=92000
         )
 
-        result = vehicle.calculate_service_due(rule)
+        # Normal mode
+        result_normal = vehicle.calculate_service_due(rule, severe=False)
+        assert result_normal.due_miles == 97500  # 90000 + 7500
 
-        assert result.due_miles == 97500  # 90000 + 7500
-        assert result.severe_due_miles == 93750  # 90000 + 3750
+        # Severe mode
+        result_severe = vehicle.calculate_service_due(rule, severe=True)
+        assert result_severe.due_miles == 93750  # 90000 + 3750
+
+    def test_severe_mode_falls_back_to_normal(self, car):
+        """Severe mode falls back to normal interval when severe not defined."""
+        rule = Rule(
+            item="oil", verb="replace",
+            interval_miles=7500  # No severe interval defined
+        )
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[
+                HistoryEntry("oil/replace", "2025-01-15", mileage=90000)
+            ],
+            state_current_miles=92000
+        )
+
+        # Severe mode should fall back to normal interval
+        result = vehicle.calculate_service_due(rule, severe=True)
+        assert result.due_miles == 97500  # Falls back to 90000 + 7500
 
     def test_time_only_rule_unknown_without_history(self, car):
         """Time-only rule with no history is UNKNOWN."""

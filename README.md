@@ -56,12 +56,15 @@ uv pip install -r requirements.txt
 ## Usage
 
 ```bash
-python schedule.py <vehicle-file>
+python schedule.py <vehicle-file> [--severe]
 
 # Examples:
-python schedule.py wrx-rules.yaml
+python schedule.py wrx-rules.yaml           # Normal driving intervals
+python schedule.py wrx-rules.yaml --severe  # Severe driving intervals
 python schedule.py brz-rules.yaml
 ```
+
+The `--severe` flag switches to severe driving intervals (shorter intervals for demanding conditions like frequent short trips, dusty environments, towing, etc.). If a rule doesn't define a severe interval, it falls back to the normal interval.
 
 ## Vehicle File Format
 
