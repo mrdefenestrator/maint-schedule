@@ -128,7 +128,10 @@ def cmd_status(args):
         print()
 
     if inactive:
-        print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage)")
+        print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage):")
+        for svc in inactive:
+            print(f"  {svc.rule.key}")
+        print()
 
     return 0
 
