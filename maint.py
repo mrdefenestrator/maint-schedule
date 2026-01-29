@@ -181,19 +181,43 @@ def cmd_status(args):
         "Remaining (time)",
     ]
 
+    # Column alignment: left, left, right, left, right, right
+    colalign = ("left", "left", "right", "left", "right", "right")
+
     if overdue:
         print("OVERDUE:")
-        print(tabulate(make_status_table(overdue), headers=headers, tablefmt="simple"))
+        print(
+            tabulate(
+                make_status_table(overdue),
+                headers=headers,
+                tablefmt="simple",
+                colalign=colalign,
+            )
+        )
         print()
 
     if due_soon:
         print("DUE SOON:")
-        print(tabulate(make_status_table(due_soon), headers=headers, tablefmt="simple"))
+        print(
+            tabulate(
+                make_status_table(due_soon),
+                headers=headers,
+                tablefmt="simple",
+                colalign=colalign,
+            )
+        )
         print()
 
     if ok:
         print("OK:")
-        print(tabulate(make_status_table(ok), headers=headers, tablefmt="simple"))
+        print(
+            tabulate(
+                make_status_table(ok),
+                headers=headers,
+                tablefmt="simple",
+                colalign=colalign,
+            )
+        )
         print()
 
     if unknown:
@@ -277,9 +301,16 @@ def cmd_history(args):
         return 0
 
     headers = ["Date", "Mileage", "Rule", "Performed By", "Cost", "Notes"]
+
+    # Column alignment: left, right, left, left, right, left
+    colalign = ("left", "right", "left", "left", "right", "left")
+
     print(
         tabulate(
-            make_history_table(entries, vehicle), headers=headers, tablefmt="simple"
+            make_history_table(entries, vehicle),
+            headers=headers,
+            tablefmt="simple",
+            colalign=colalign,
         )
     )
 
@@ -398,24 +429,44 @@ def cmd_rules(args):
 
     rows = []
     for rule in sorted_rules:
-        interval = []
-        if rule.interval_miles:
-            interval.append(f"{rule.interval_miles:,.0f} mi")
-        if rule.interval_months:
-            interval.append(f"{rule.interval_months} mo")
-        interval_str = " / ".join(interval) if interval else "-"
+        # Format interval miles
+        interval_miles = f"{rule.interval_miles:,.0f}" if rule.interval_miles else "-"
 
-        severe = []
-        if rule.severe_interval_miles:
-            severe.append(f"{rule.severe_interval_miles:,.0f} mi")
-        if rule.severe_interval_months:
-            severe.append(f"{rule.severe_interval_months} mo")
-        severe_str = " / ".join(severe) if severe else "-"
+        # Format interval time
+        interval_time = f"{rule.interval_months} mo" if rule.interval_months else "-"
 
-        rows.append([rule.display_name, interval_str, severe_str])
+        # Format severe interval miles
+        severe_miles = (
+            f"{rule.severe_interval_miles:,.0f}" if rule.severe_interval_miles else "-"
+        )
 
-    headers = ["Rule", "Interval", "Severe Interval"]
-    print(tabulate(rows, headers=headers, tablefmt="simple"))
+        # Format severe interval time
+        severe_time = (
+            f"{rule.severe_interval_months} mo" if rule.severe_interval_months else "-"
+        )
+
+        rows.append(
+            [
+                rule.display_name,
+                interval_miles,
+                interval_time,
+                severe_miles,
+                severe_time,
+            ]
+        )
+
+    headers = [
+        "Rule",
+        "Interval (mi)",
+        "Interval (time)",
+        "Severe (mi)",
+        "Severe (time)",
+    ]
+
+    # Column alignment: left, right, right, right, right
+    colalign = ("left", "right", "right", "right", "right")
+
+    print(tabulate(rows, headers=headers, tablefmt="simple", colalign=colalign))
 
     return 0
 
