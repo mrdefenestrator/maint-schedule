@@ -103,6 +103,288 @@ class TestVehicleHistoryLookup:
         last = vehicle.get_last_service_for_item("coolant", "replace")
         assert last is None
 
+    def test_get_last_service_for_item_prefers_entries_with_mileage(self, car):
+        """Prefers entries with mileage over those without."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15"),  # No mileage
+                HistoryEntry("oil/replace", "2024-07-15", mileage=87500),
+                HistoryEntry("oil/replace", "2025-01-20"),  # More recent but no mileage
+            ],
+        )
+        last = vehicle.get_last_service_for_item("oil", "replace")
+        assert last.mileage == 87500
+        assert last.date == "2024-07-15"
+
+    def test_get_last_service_for_item_all_without_mileage(self, car):
+        """When all entries lack mileage, returns most recent by date."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("coolant/inspect", "2024-01-15"),
+                HistoryEntry("coolant/inspect", "2025-01-15"),
+                HistoryEntry("coolant/inspect", "2024-07-15"),
+            ],
+        )
+        last = vehicle.get_last_service_for_item("coolant", "inspect")
+        assert last.date == "2025-01-15"
+        assert last.mileage is None
+
+
+class TestVehicleLastServiceProperty:
+    """Tests for Vehicle.last_service property."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_last_service_returns_most_recent(self, car):
+        """Returns the most recent service entry overall."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        last = vehicle.last_service
+        assert last.rule_key == "tires/rotate"
+        assert last.date == "2025-01-15"
+
+    def test_last_service_returns_none_when_no_history(self, car):
+        """Returns None when vehicle has no history."""
+        vehicle = Vehicle(car=car, rules=[], history=[])
+        assert vehicle.last_service is None
+
+
+class TestVehicleGetRule:
+    """Tests for Vehicle.get_rule method."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_get_rule_finds_matching_rule(self, car):
+        """Finds and returns rule with matching key."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),
+            Rule(item="tires", verb="rotate", interval_miles=7500),
+            Rule(item="coolant", verb="replace", interval_miles=137500),
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[])
+
+        rule = vehicle.get_rule("tires/rotate")
+        assert rule is not None
+        assert rule.item == "tires"
+        assert rule.verb == "rotate"
+
+    def test_get_rule_returns_none_when_not_found(self, car):
+        """Returns None when rule key doesn't match any rule."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[])
+
+        rule = vehicle.get_rule("nonexistent/rule")
+        assert rule is None
+
+
+class TestVehicleGetHistoryForRule:
+    """Tests for Vehicle.get_history_for_rule method."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_get_history_for_rule_returns_matching_entries(self, car):
+        """Returns all entries matching the rule key."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2024-02-15", mileage=82500),
+                HistoryEntry("oil/replace", "2024-07-15", mileage=87500),
+                HistoryEntry("oil/replace", "2025-01-15", mileage=95000),
+            ],
+        )
+        entries = vehicle.get_history_for_rule("oil/replace")
+        assert len(entries) == 3
+        assert all(e.rule_key == "oil/replace" for e in entries)
+
+    def test_get_history_for_rule_returns_empty_list_when_no_match(self, car):
+        """Returns empty list when no entries match."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+            ],
+        )
+        entries = vehicle.get_history_for_rule("coolant/replace")
+        assert entries == []
+
+
+class TestVehicleGetLastService:
+    """Tests for Vehicle.get_last_service method."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_get_last_service_returns_most_recent_for_rule(self, car):
+        """Returns the most recent entry for a specific rule."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("oil/replace", "2024-07-15", mileage=87500),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("oil/replace", "2025-01-10", mileage=94500),
+            ],
+        )
+        last = vehicle.get_last_service("oil/replace")
+        assert last.date == "2025-01-10"
+        assert last.mileage == 94500
+
+    def test_get_last_service_returns_none_when_no_match(self, car):
+        """Returns None when no entries match the rule."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+            ],
+        )
+        last = vehicle.get_last_service("coolant/replace")
+        assert last is None
+
+
+class TestVehicleGetHistorySorted:
+    """Tests for Vehicle.get_history_sorted method."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_sort_by_date_descending(self, car):
+        """Sort by date, newest first (default)."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="date", reverse=True)
+        assert sorted_history[0].date == "2025-01-15"
+        assert sorted_history[1].date == "2024-07-15"
+        assert sorted_history[2].date == "2024-01-15"
+
+    def test_sort_by_date_ascending(self, car):
+        """Sort by date, oldest first."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="date", reverse=False)
+        assert sorted_history[0].date == "2024-01-15"
+        assert sorted_history[1].date == "2024-07-15"
+        assert sorted_history[2].date == "2025-01-15"
+
+    def test_sort_by_miles_descending(self, car):
+        """Sort by mileage, highest first."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="miles", reverse=True)
+        assert sorted_history[0].mileage == 95000
+        assert sorted_history[1].mileage == 87500
+        assert sorted_history[2].mileage == 80000
+
+    def test_sort_by_miles_ascending(self, car):
+        """Sort by mileage, lowest first."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="miles", reverse=False)
+        assert sorted_history[0].mileage == 80000
+        assert sorted_history[1].mileage == 87500
+        assert sorted_history[2].mileage == 95000
+
+    def test_sort_by_rule_descending(self, car):
+        """Sort by rule key, Z to A."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="rule", reverse=True)
+        assert sorted_history[0].rule_key == "tires/rotate"
+        assert sorted_history[1].rule_key == "oil/replace"
+        assert sorted_history[2].rule_key == "brakes/inspect"
+
+    def test_sort_by_rule_ascending(self, car):
+        """Sort by rule key, A to Z."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=95000),
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="rule", reverse=False)
+        assert sorted_history[0].rule_key == "brakes/inspect"
+        assert sorted_history[1].rule_key == "oil/replace"
+        assert sorted_history[2].rule_key == "tires/rotate"
+
+    def test_sort_handles_missing_mileage(self, car):
+        """Entries without mileage sort as 0."""
+        vehicle = Vehicle(
+            car=car,
+            rules=[],
+            history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("coolant/inspect", "2025-01-15"),  # No mileage
+                HistoryEntry("brakes/inspect", "2024-07-15", mileage=87500),
+            ],
+        )
+        sorted_history = vehicle.get_history_sorted(sort_by="miles", reverse=False)
+        assert sorted_history[0].mileage is None  # Sorts as 0
+        assert sorted_history[1].mileage == 80000
+        assert sorted_history[2].mileage == 87500
+
 
 # =============================================================================
 # Integration Tests: Service Due Calculation

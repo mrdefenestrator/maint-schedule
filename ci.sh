@@ -63,10 +63,10 @@ fi
 echo
 
 # --------------------------------
-# Run tests
+# Run tests with coverage
 # --------------------------------
-echo "Running tests..."
-if pytest tests/ -v; then
+echo "Running tests with coverage..."
+if pytest tests/ -v --cov=models --cov-report=term-missing; then
     success "All tests passed"
 else
     fail "Tests failed"
