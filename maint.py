@@ -18,10 +18,10 @@ from typing import List, Optional
 
 from models import Status, ServiceDue, HistoryEntry, load_vehicle, save_history_entry
 
-
 # =============================================================================
 # Formatting helpers
 # =============================================================================
+
 
 def format_miles(miles: Optional[float]) -> str:
     """Format mileage for display."""
@@ -54,6 +54,7 @@ def truncate(text: Optional[str], max_len: int = 30) -> str:
 # =============================================================================
 # Status command
 # =============================================================================
+
 
 def make_status_table(services: List[ServiceDue]) -> List[List[str]]:
     """Convert service status list to table rows."""
@@ -136,6 +137,7 @@ def cmd_status(args):
 # History command
 # =============================================================================
 
+
 def make_history_table(entries: List[HistoryEntry]) -> List[List[str]]:
     """Convert history entries to table rows."""
     rows = []
@@ -202,6 +204,7 @@ def cmd_history(args):
 # Log command
 # =============================================================================
 
+
 def cmd_log(args):
     """Add a new service entry."""
     vehicle = load_vehicle(args.vehicle_file)
@@ -255,6 +258,7 @@ def cmd_log(args):
 # Rules command
 # =============================================================================
 
+
 def cmd_rules(args):
     """List available maintenance rules."""
     vehicle = load_vehicle(args.vehicle_file)
@@ -291,6 +295,7 @@ def cmd_rules(args):
 # Main
 # =============================================================================
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Vehicle maintenance tracker",
@@ -301,7 +306,7 @@ Examples:
   %(prog)s vehicles/brz.yaml status --severe
   %(prog)s vehicles/brz.yaml history --rule "oil"
   %(prog)s vehicles/brz.yaml rules
-  %(prog)s vehicles/brz.yaml log "engine oil and filter/replace" --mileage 58000 --by self
+  %(prog)s vehicles/brz.yaml log "oil/replace" --mileage 58000 --by self
 """,
     )
     parser.add_argument(

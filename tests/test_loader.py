@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Tests for YAML loading and saving utilities."""
 
-import pytest
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 import yaml
 
@@ -15,7 +13,6 @@ from models import (
     HistoryEntry,
     Vehicle,
 )
-
 
 # =============================================================================
 # load_vehicle tests
