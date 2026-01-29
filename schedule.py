@@ -19,11 +19,19 @@ class Status(Enum):
     UNKNOWN = 5   # Can't calculate (missing data)
 
 
-def _calc_due_miles(last_miles: Optional[float], interval: Optional[float]) -> Optional[float]:
-    """Calculate next due mileage: last + interval, or just interval if no history."""
+def _calc_due_miles(last_miles: Optional[float], interval: Optional[float],
+                    start_miles: float = 0) -> Optional[float]:
+    """
+    Calculate next due mileage.
+
+    - With history: last_miles + interval
+    - Without history: start_miles + interval (accounts for parts added later)
+    """
     if interval is None:
         return None
-    return (last_miles + interval) if last_miles is not None else interval
+    if last_miles is not None:
+        return last_miles + interval
+    return start_miles + interval
 
 
 def _calc_due_date(last_date: Optional[date], interval_months: Optional[float]) -> Optional[date]:
@@ -248,8 +256,9 @@ class Vehicle:
         last_date = date.fromisoformat(last_date_str) if last_date_str else None
 
         # Calculate due points (normal and severe)
-        due_miles = _calc_due_miles(last_miles, rule.interval_miles)
-        severe_due_miles = _calc_due_miles(last_miles, rule.severe_interval_miles)
+        due_miles = _calc_due_miles(last_miles, rule.interval_miles, rule.start_miles)
+        severe_due_miles = _calc_due_miles(last_miles, rule.severe_interval_miles,
+                                           rule.start_miles)
         due_date = _calc_due_date(last_date, rule.interval_months)
         severe_due_date = _calc_due_date(last_date, rule.severe_interval_months)
 

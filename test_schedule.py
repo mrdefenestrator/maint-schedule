@@ -1,0 +1,486 @@
+#!/usr/bin/env python3
+"""
+Unit and integration tests for schedule.py
+
+Tests are organized to verify the documented calculation rules:
+1. Fresh at zero - all systems assumed fresh at 0 miles
+2. Service-based intervals - next due calculated from actual service, not scheduled
+3. Whichever comes first - due when either miles OR time threshold crossed
+4. Lifecycle rules - item/verb matching ignores phase for history lookup
+5. Start/stop thresholds - rules outside current mileage are INACTIVE
+"""
+import pytest
+from datetime import date
+from schedule import (
+    Rule, Car, HistoryEntry, Vehicle, Status, ServiceDue,
+    _calc_due_miles, _calc_due_date, _check_status,
+)
+
+
+# =============================================================================
+# Unit Tests: Helper Functions
+# =============================================================================
+
+class TestCalcDueMiles:
+    """Tests for _calc_due_miles helper function."""
+
+    def test_with_history(self):
+        """last_miles + interval when history exists."""
+        assert _calc_due_miles(50000, 7500) == 57500
+
+    def test_without_history_default_start(self):
+        """start_miles + interval when no history (default start=0)."""
+        assert _calc_due_miles(None, 7500) == 7500
+
+    def test_without_history_custom_start(self):
+        """start_miles + interval when no history and part added later."""
+        assert _calc_due_miles(None, 10000, start_miles=60000) == 70000
+
+    def test_with_history_ignores_start(self):
+        """start_miles is ignored when history exists."""
+        assert _calc_due_miles(65000, 10000, start_miles=60000) == 75000
+
+    def test_no_interval(self):
+        """None when no interval defined."""
+        assert _calc_due_miles(50000, None) is None
+        assert _calc_due_miles(None, None) is None
+
+
+class TestCalcDueDate:
+    """Tests for _calc_due_date helper function."""
+
+    def test_with_history(self):
+        """last_date + interval_months when history exists."""
+        last = date(2025, 1, 15)
+        result = _calc_due_date(last, 6)
+        assert result == date(2025, 7, 15)
+
+    def test_fractional_months(self):
+        """Handles fractional months (converted to days)."""
+        last = date(2025, 1, 15)
+        result = _calc_due_date(last, 7.5)  # 7 months + 15 days
+        assert result == date(2025, 8, 30)
+
+    def test_without_history(self):
+        """None when no history (can't calculate date-based due)."""
+        assert _calc_due_date(None, 6) is None
+
+    def test_no_interval(self):
+        """None when no interval defined."""
+        assert _calc_due_date(date(2025, 1, 15), None) is None
+
+
+class TestCheckStatus:
+    """Tests for _check_status helper function."""
+
+    def test_overdue(self):
+        """OVERDUE when current >= due."""
+        assert _check_status(100, 90, 10) == Status.OVERDUE
+        assert _check_status(100, 100, 10) == Status.OVERDUE
+
+    def test_due_soon(self):
+        """DUE_SOON when current >= due - threshold."""
+        assert _check_status(95, 100, 10) == Status.DUE_SOON
+        assert _check_status(90, 100, 10) == Status.DUE_SOON
+
+    def test_ok(self):
+        """OK when current < due - threshold."""
+        assert _check_status(80, 100, 10) == Status.OK
+        assert _check_status(0, 100, 10) == Status.OK
+
+
+# =============================================================================
+# Unit Tests: Rule Class
+# =============================================================================
+
+class TestRule:
+    """Tests for Rule class."""
+
+    def test_key_without_phase(self):
+        """Key is item/verb when no phase."""
+        rule = Rule(item="engine oil", verb="replace", interval_miles=7500)
+        assert rule.key == "engine oil/replace"
+
+    def test_key_with_phase(self):
+        """Key includes phase when present."""
+        rule = Rule(item="engine coolant", verb="replace", phase="initial",
+                    interval_miles=137500)
+        assert rule.key == "engine coolant/replace/initial"
+
+    def test_base_key_strips_phase(self):
+        """Base key is always item/verb without phase."""
+        rule = Rule(item="engine coolant", verb="replace", phase="ongoing",
+                    interval_miles=75000)
+        assert rule.base_key == "engine coolant/replace"
+
+    def test_is_active_at_default_range(self):
+        """Rule with default start/stop is always active."""
+        rule = Rule(item="oil", verb="replace", interval_miles=7500)
+        assert rule.is_active_at(0)
+        assert rule.is_active_at(100000)
+        assert rule.is_active_at(500000)
+
+    def test_is_active_at_with_start(self):
+        """Rule with startMiles only activates after threshold."""
+        rule = Rule(item="coolant", verb="replace", interval_miles=75000,
+                    start_miles=137500)
+        assert not rule.is_active_at(100000)
+        assert rule.is_active_at(137500)
+        assert rule.is_active_at(200000)
+
+    def test_is_active_at_with_stop(self):
+        """Rule with stopMiles deactivates at threshold."""
+        rule = Rule(item="coolant", verb="replace", interval_miles=137500,
+                    stop_miles=137500)
+        assert rule.is_active_at(0)
+        assert rule.is_active_at(137499)
+        assert not rule.is_active_at(137500)
+
+    def test_is_active_at_with_start_and_stop(self):
+        """Rule with both start and stop has bounded range."""
+        rule = Rule(item="part", verb="replace", interval_miles=10000,
+                    start_miles=50000, stop_miles=100000)
+        assert not rule.is_active_at(49999)
+        assert rule.is_active_at(50000)
+        assert rule.is_active_at(75000)
+        assert not rule.is_active_at(100000)
+
+
+# =============================================================================
+# Unit Tests: Vehicle Class
+# =============================================================================
+
+class TestVehicleCurrentMiles:
+    """Tests for Vehicle.current_miles auto-computation."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_explicit_state_takes_precedence(self, car):
+        """Explicit currentMiles in state overrides history."""
+        vehicle = Vehicle(
+            car=car, rules=[], history=[
+                HistoryEntry("oil/replace", "2025-01-15", mileage=50000)
+            ],
+            state_current_miles=60000
+        )
+        assert vehicle.current_miles == 60000
+
+    def test_computed_from_history(self, car):
+        """currentMiles is max mileage from history."""
+        vehicle = Vehicle(
+            car=car, rules=[], history=[
+                HistoryEntry("oil/replace", "2025-01-01", mileage=30000),
+                HistoryEntry("tires/rotate", "2025-01-15", mileage=35000),
+                HistoryEntry("brakes/inspect", "2025-01-10", mileage=32000),
+            ]
+        )
+        assert vehicle.current_miles == 35000
+
+    def test_falls_back_to_purchase_miles(self, car):
+        """currentMiles is purchaseMiles when no history."""
+        vehicle = Vehicle(car=car, rules=[], history=[])
+        assert vehicle.current_miles == 6
+
+
+class TestVehicleHistoryLookup:
+    """Tests for Vehicle history lookup methods."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_get_last_service_for_item_ignores_phase(self, car):
+        """History lookup matches on item/verb, ignoring phase."""
+        vehicle = Vehicle(
+            car=car, rules=[], history=[
+                HistoryEntry("engine coolant/replace/initial", "2024-06-15",
+                             mileage=140000),
+            ]
+        )
+        # Should find the initial phase entry when looking up any coolant replace
+        last = vehicle.get_last_service_for_item("engine coolant", "replace")
+        assert last is not None
+        assert last.mileage == 140000
+
+    def test_get_last_service_for_item_returns_most_recent(self, car):
+        """Returns most recent service by date."""
+        vehicle = Vehicle(
+            car=car, rules=[], history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=80000),
+                HistoryEntry("oil/replace", "2024-07-15", mileage=87500),
+                HistoryEntry("oil/replace", "2025-01-15", mileage=95000),
+            ]
+        )
+        last = vehicle.get_last_service_for_item("oil", "replace")
+        assert last.mileage == 95000
+
+    def test_get_last_service_for_item_no_match(self, car):
+        """Returns None when no matching history."""
+        vehicle = Vehicle(
+            car=car, rules=[], history=[
+                HistoryEntry("oil/replace", "2025-01-15", mileage=95000),
+            ]
+        )
+        last = vehicle.get_last_service_for_item("coolant", "replace")
+        assert last is None
+
+
+# =============================================================================
+# Integration Tests: Service Due Calculation
+# =============================================================================
+
+class TestServiceDueCalculation:
+    """Integration tests for the complete service due calculation logic."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_no_history_due_at_interval_from_zero(self, car):
+        """
+        Rule: No history → due at intervalMiles from odometer 0
+        (Fresh at zero assumption)
+        """
+        rule = Rule(item="oil", verb="replace", interval_miles=7500)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=5000
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.due_miles == 7500  # 0 + 7500
+        assert result.status == Status.OK
+        assert result.miles_remaining == 2500
+
+    def test_with_history_due_at_last_plus_interval(self, car):
+        """
+        Rule: Has history → due at last_service_miles + intervalMiles
+        (Service-based intervals)
+        """
+        rule = Rule(item="oil", verb="replace", interval_miles=7500)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[
+                HistoryEntry("oil/replace", "2025-01-15", mileage=94500)
+            ],
+            state_current_miles=96000
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.due_miles == 102000  # 94500 + 7500
+        assert result.last_service_miles == 94500
+        assert result.miles_remaining == 6000
+
+    def test_overdue_by_miles(self, car):
+        """Status is OVERDUE when current mileage exceeds due mileage."""
+        rule = Rule(item="oil", verb="replace", interval_miles=7500)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=10000
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.status == Status.OVERDUE
+        assert result.due_miles == 7500
+        assert result.miles_remaining == -2500
+
+    def test_overdue_by_date(self, car):
+        """
+        Rule: Whichever comes first - overdue by date even if OK by miles
+        """
+        rule = Rule(item="oil", verb="replace",
+                    interval_miles=7500, interval_months=7.5)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[
+                HistoryEntry("oil/replace", "2024-01-15", mileage=90000)
+            ],
+            state_current_miles=91000,  # Only 1000 miles, OK by miles
+            state_as_of_date="2025-01-15"  # But 12 months later, overdue by date
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.status == Status.OVERDUE
+        assert result.miles_remaining == 6500  # Still has miles remaining
+        # Due date was ~Aug 2024, now Jan 2025
+
+    def test_due_soon_by_miles(self, car):
+        """Status is DUE_SOON when within threshold of due mileage."""
+        rule = Rule(item="oil", verb="replace", interval_miles=7500)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=6800  # 700 miles remaining, within 1000 threshold
+        )
+
+        result = vehicle.calculate_service_due(rule, due_soon_miles=1000)
+
+        assert result.status == Status.DUE_SOON
+        assert result.miles_remaining == 700
+
+    def test_lifecycle_rule_initial_phase(self, car):
+        """Initial phase rule active before threshold."""
+        rule_initial = Rule(
+            item="coolant", verb="replace", phase="initial",
+            interval_miles=137500, stop_miles=137500
+        )
+        vehicle = Vehicle(
+            car=car, rules=[rule_initial], history=[],
+            state_current_miles=100000
+        )
+
+        result = vehicle.calculate_service_due(rule_initial)
+
+        assert result.status == Status.OK
+        assert result.due_miles == 137500
+        assert result.miles_remaining == 37500
+
+    def test_lifecycle_rule_initial_becomes_inactive(self, car):
+        """Initial phase rule becomes INACTIVE after threshold."""
+        rule_initial = Rule(
+            item="coolant", verb="replace", phase="initial",
+            interval_miles=137500, stop_miles=137500
+        )
+        vehicle = Vehicle(
+            car=car, rules=[rule_initial], history=[],
+            state_current_miles=140000  # Past stop threshold
+        )
+
+        result = vehicle.calculate_service_due(rule_initial)
+
+        assert result.status == Status.INACTIVE
+
+    def test_lifecycle_rule_ongoing_uses_any_phase_history(self, car):
+        """
+        Rule: Lifecycle rules - item/verb matching ignores phase
+        Ongoing phase finds history logged under initial phase.
+        """
+        rule_ongoing = Rule(
+            item="coolant", verb="replace", phase="ongoing",
+            interval_miles=75000, start_miles=137500
+        )
+        vehicle = Vehicle(
+            car=car, rules=[rule_ongoing], history=[
+                # History logged under "initial" phase
+                HistoryEntry("coolant/replace/initial", "2024-06-15",
+                             mileage=140000)
+            ],
+            state_current_miles=180000
+        )
+
+        result = vehicle.calculate_service_due(rule_ongoing)
+
+        assert result.status == Status.OK
+        assert result.last_service_miles == 140000  # Found initial phase history
+        assert result.due_miles == 215000  # 140000 + 75000
+        assert result.miles_remaining == 35000
+
+    def test_severe_intervals_calculated(self, car):
+        """Severe intervals are calculated alongside normal intervals."""
+        rule = Rule(
+            item="oil", verb="replace",
+            interval_miles=7500, severe_interval_miles=3750
+        )
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[
+                HistoryEntry("oil/replace", "2025-01-15", mileage=90000)
+            ],
+            state_current_miles=92000
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.due_miles == 97500  # 90000 + 7500
+        assert result.severe_due_miles == 93750  # 90000 + 3750
+
+    def test_time_only_rule_unknown_without_history(self, car):
+        """Time-only rule with no history is UNKNOWN."""
+        rule = Rule(item="airbags", verb="inspect", interval_months=120)
+        vehicle = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=100000
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.status == Status.UNKNOWN
+        assert result.due_miles is None
+        assert result.due_date is None
+
+    def test_aftermarket_part_with_start_miles(self, car):
+        """
+        Rule: Start/stop thresholds - parts added later (aftermarket)
+        Part added at 60000 miles, rule not active before that.
+        """
+        rule = Rule(
+            item="cusco lsd fluid", verb="replace",
+            interval_miles=10000, start_miles=60000, aftermarket=True
+        )
+
+        # Before part was installed
+        vehicle_before = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=50000
+        )
+        result_before = vehicle_before.calculate_service_due(rule)
+        assert result_before.status == Status.INACTIVE
+
+        # After part was installed
+        vehicle_after = Vehicle(
+            car=car, rules=[rule], history=[],
+            state_current_miles=65000
+        )
+        result_after = vehicle_after.calculate_service_due(rule)
+        assert result_after.status == Status.OK
+        assert result_after.due_miles == 70000  # start_miles + interval = 60k + 10k
+        assert result_after.miles_remaining == 5000
+
+
+class TestGetAllServiceStatus:
+    """Tests for getting status of all rules at once."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_returns_status_for_all_rules(self, car):
+        """Returns ServiceDue for every rule."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),
+            Rule(item="tires", verb="rotate", interval_miles=7500),
+            Rule(item="coolant", verb="replace", interval_miles=137500),
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[],
+                          state_current_miles=50000)
+
+        statuses = vehicle.get_all_service_status()
+
+        assert len(statuses) == 3
+        assert all(isinstance(s, ServiceDue) for s in statuses)
+
+    def test_filters_by_status(self, car):
+        """Can filter results by status category."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),  # Overdue at 50k
+            Rule(item="coolant", verb="replace", interval_miles=137500),  # OK
+            Rule(item="lsd", verb="replace", interval_miles=10000,
+                 start_miles=60000),  # Inactive
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[],
+                          state_current_miles=50000)
+
+        statuses = vehicle.get_all_service_status()
+
+        overdue = [s for s in statuses if s.status == Status.OVERDUE]
+        ok = [s for s in statuses if s.status == Status.OK]
+        inactive = [s for s in statuses if s.status == Status.INACTIVE]
+
+        assert len(overdue) == 1
+        assert overdue[0].rule.item == "oil"
+        assert len(ok) == 1
+        assert ok[0].rule.item == "coolant"
+        assert len(inactive) == 1
+        assert inactive[0].rule.item == "lsd"

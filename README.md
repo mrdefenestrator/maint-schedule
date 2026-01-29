@@ -194,9 +194,11 @@ The system calculates when each service is due based on these rules:
 
 | Scenario | How "Next Due" is Calculated |
 |----------|------------------------------|
-| No service history | Due at `intervalMiles` on odometer (i.e., 0 + interval) |
+| No service history | Due at `startMiles + intervalMiles` (startMiles defaults to 0) |
 | Has service history | Due at `lastServiceMiles + intervalMiles` |
 | Time-based only (no miles) | Due at `lastServiceDate + intervalMonths` |
+
+For parts added later (aftermarket), set `startMiles` to when the part was installed. The first service will be due at `startMiles + intervalMiles`.
 
 ### Lifecycle Rules
 
