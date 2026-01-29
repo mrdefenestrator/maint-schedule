@@ -6,6 +6,13 @@ car:
   year: 2015
   purchaseDate: '2016-11-12'
   purchaseMiles: 21216
+
+state:
+  # currentMiles auto-computed from history if not set
+  # asOfDate defaults to today if not set
+
+history: []
+
 rules:
   - item: accessory drive belt
     verb: inspect

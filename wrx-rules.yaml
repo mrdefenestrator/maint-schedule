@@ -6,6 +6,19 @@ car:
   year: 2012
   purchaseDate: '2012-03-23'
   purchaseMiles: 6
+
+state:
+  # currentMiles auto-computed from history if not set
+  # asOfDate defaults to today if not set
+
+history:
+  - ruleKey: engine oil and filter/replace
+    date: '2025-01-15'
+    mileage: 94500
+    performedBy: self
+    notes: "Motul 5W-30 synthetic"
+    cost: 45.00
+
 rules:
   - item: accessory belt
     verb: inspect

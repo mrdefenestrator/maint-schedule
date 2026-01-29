@@ -1,25 +1,46 @@
-title: car
+title: vehicle
 type: object
 properties:
-  make:
-    type: string
-  model:
-    type: string
-  trim:
-    type: string
-  year:
-    type: year
-  purchaseDate:
-    type: string
-    format: ISO8601
-  purchaseMiles:
-    type: number
+  car:
+    type: object
+    properties:
+      make:
+        type: string
+      model:
+        type: string
+      trim:
+        type: string
+      year:
+        type: integer
+      purchaseDate:
+        type: string
+        format: ISO8601
+      purchaseMiles:
+        type: number
+    required:
+      - make
+      - model
+      - trim
+      - year
+      - purchaseDate
+      - purchaseMiles
+  state:
+    type: object
+    description: >
+      Current vehicle state. currentMiles is auto-computed from history
+      if not explicitly set.
+    properties:
+      currentMiles:
+        type: number
+      asOfDate:
+        type: string
+        format: ISO8601
   rules:
     type: array
-    items: 
+    items:
       title: rule
       type: object
-      properties: 
+      properties:
         item:
           type: string
         verb:
@@ -60,11 +81,31 @@ properties:
         - item
         - verb
         # At least one of intervalMiles or intervalMonths should be provided
+  history:
+    type: array
+    description: Log of maintenance services performed
+    items:
+      title: historyEntry
+      type: object
+      properties:
+        ruleKey:
+          type: string
+          description: Natural key of the rule (item/verb or item/verb/phase)
+        date:
+          type: string
+          format: ISO8601
+        mileage:
+          type: number
+        performedBy:
+          type: string
+          description: Who performed the service (self, shop name, etc.)
+        notes:
+          type: string
+        cost:
+          type: number
+      required:
+        - ruleKey
+        - date
 required:
-  - make
-  - model
-  - trim
-  - year
-  - purchaseDate
-  - purchaseMiles
+  - car
   - rules
