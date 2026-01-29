@@ -1,4 +1,5 @@
 """Helper functions for service due calculations."""
+
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from typing import Optional
@@ -6,8 +7,9 @@ from typing import Optional
 from .status import Status
 
 
-def calc_due_miles(last_miles: Optional[float], interval: Optional[float],
-                   start_miles: float = 0) -> Optional[float]:
+def calc_due_miles(
+    last_miles: Optional[float], interval: Optional[float], start_miles: float = 0
+) -> Optional[float]:
     """
     Calculate next due mileage.
 
@@ -21,7 +23,9 @@ def calc_due_miles(last_miles: Optional[float], interval: Optional[float],
     return start_miles + interval
 
 
-def calc_due_date(last_date: Optional[date], interval_months: Optional[float]) -> Optional[date]:
+def calc_due_date(
+    last_date: Optional[date], interval_months: Optional[float]
+) -> Optional[date]:
     """Calculate next due date: last + interval months."""
     if interval_months is None or last_date is None:
         return None

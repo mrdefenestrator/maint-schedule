@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for HistoryEntry class."""
-import pytest
+
 from models import HistoryEntry
 
 
@@ -21,7 +21,7 @@ class TestHistoryEntry:
             mileage=50000,
             performed_by="self",
             notes="Used synthetic oil",
-            cost=75.50
+            cost=75.50,
         )
         assert entry.mileage == 50000
         assert entry.performed_by == "self"

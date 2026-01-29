@@ -1,4 +1,5 @@
 """Rule class for maintenance interval definitions."""
+
 from typing import Optional
 
 
@@ -6,20 +7,20 @@ class Rule:
     """A maintenance rule defining when a service should be performed."""
 
     def __init__(
-            self,
-            item: str,
-            verb: str,
-            interval_miles: Optional[float] = None,
-            interval_months: Optional[float] = None,
-            severe_interval_miles: Optional[float] = None,
-            severe_interval_months: Optional[float] = None,
-            notes: Optional[str] = None,
-            phase: Optional[str] = None,
-            start_miles: float = 0,
-            stop_miles: float = 999999999,
-            start_months: float = 0,
-            stop_months: float = 9999,
-            aftermarket: bool = False,
+        self,
+        item: str,
+        verb: str,
+        interval_miles: Optional[float] = None,
+        interval_months: Optional[float] = None,
+        severe_interval_miles: Optional[float] = None,
+        severe_interval_months: Optional[float] = None,
+        notes: Optional[str] = None,
+        phase: Optional[str] = None,
+        start_miles: float = 0,
+        stop_miles: float = 999999999,
+        start_months: float = 0,
+        stop_months: float = 9999,
+        aftermarket: bool = False,
     ):
         self.item = item
         self.verb = verb

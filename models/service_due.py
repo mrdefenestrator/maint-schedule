@@ -1,4 +1,5 @@
 """ServiceDue dataclass for calculated service status."""
+
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
 
@@ -11,7 +12,8 @@ if TYPE_CHECKING:
 @dataclass
 class ServiceDue:
     """Calculated service due information for a rule."""
-    rule: 'Rule'
+
+    rule: "Rule"
     status: Status
     last_service_miles: Optional[float] = None
     last_service_date: Optional[str] = None

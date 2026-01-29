@@ -1,4 +1,5 @@
 """Vehicle class - the main aggregate for vehicle data and calculations."""
+
 from datetime import date
 from typing import List, Optional
 
@@ -14,12 +15,12 @@ class Vehicle:
     """Complete vehicle record with car info, rules, and maintenance history."""
 
     def __init__(
-            self,
-            car: Car,
-            rules: List[Rule],
-            history: Optional[List[HistoryEntry]] = None,
-            state_as_of_date: Optional[str] = None,
-            state_current_miles: Optional[float] = None,
+        self,
+        car: Car,
+        rules: List[Rule],
+        history: Optional[List[HistoryEntry]] = None,
+        state_as_of_date: Optional[str] = None,
+        state_current_miles: Optional[float] = None,
     ):
         self.car = car
         self.rules = rules
@@ -34,7 +35,9 @@ class Vehicle:
             return self._state_current_miles
         # Auto-compute from history
         if self.history:
-            miles_from_history = [h.mileage for h in self.history if h.mileage is not None]
+            miles_from_history = [
+                h.mileage for h in self.history if h.mileage is not None
+            ]
             if miles_from_history:
                 return max(miles_from_history)
         return self.car.purchase_miles
@@ -87,7 +90,9 @@ class Vehicle:
             return max(with_mileage, key=lambda h: (h.date, h.mileage))
         return max(matching, key=lambda h: h.date)
 
-    def get_history_sorted(self, sort_by: str = "date", reverse: bool = True) -> List[HistoryEntry]:
+    def get_history_sorted(
+        self, sort_by: str = "date", reverse: bool = True
+    ) -> List[HistoryEntry]:
         """
         Get history entries sorted by specified field.
 
@@ -100,13 +105,18 @@ class Vehicle:
         elif sort_by == "miles":
             return sorted(self.history, key=lambda h: h.mileage or 0, reverse=reverse)
         elif sort_by == "rule":
-            return sorted(self.history, key=lambda h: (h.rule_key, h.date), reverse=reverse)
+            return sorted(
+                self.history, key=lambda h: (h.rule_key, h.date), reverse=reverse
+            )
         return self.history
 
-    def calculate_service_due(self, rule: Rule,
-                               due_soon_miles: float = 1000,
-                               due_soon_months: float = 1,
-                               severe: bool = False) -> ServiceDue:
+    def calculate_service_due(
+        self,
+        rule: Rule,
+        due_soon_miles: float = 1000,
+        due_soon_months: float = 1,
+        severe: bool = False,
+    ) -> ServiceDue:
         """
         Calculate when a service is due for a given rule.
 
@@ -156,7 +166,7 @@ class Vehicle:
                 date_status = check_status(
                     current_date.toordinal(),
                     due_date.toordinal(),
-                    int(due_soon_months * 30)
+                    int(due_soon_months * 30),
                 )
                 # Escalate status if date check is worse
                 if date_status.value < status.value:  # OVERDUE < DUE_SOON < OK
@@ -176,9 +186,14 @@ class Vehicle:
             miles_remaining=miles_remaining,
         )
 
-    def get_all_service_status(self, due_soon_miles: float = 1000,
-                                due_soon_months: float = 1,
-                                severe: bool = False) -> List[ServiceDue]:
+    def get_all_service_status(
+        self,
+        due_soon_miles: float = 1000,
+        due_soon_months: float = 1,
+        severe: bool = False,
+    ) -> List[ServiceDue]:
         """Calculate service status for all active rules."""
-        return [self.calculate_service_due(rule, due_soon_miles, due_soon_months, severe)
-                for rule in self.rules]
+        return [
+            self.calculate_service_due(rule, due_soon_miles, due_soon_months, severe)
+            for rule in self.rules
+        ]

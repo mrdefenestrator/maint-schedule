@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate vehicle YAML files against the schema."""
+
 import sys
 from pathlib import Path
 

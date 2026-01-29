@@ -4,8 +4,15 @@
 class Car:
     """Vehicle identification and purchase information."""
 
-    def __init__(self, make: str, model: str, trim: str, year: int,
-                 purchase_date: str, purchase_miles: float):
+    def __init__(
+        self,
+        make: str,
+        model: str,
+        trim: str,
+        year: int,
+        purchase_date: str,
+        purchase_miles: float,
+    ):
         self.make = make
         self.model = model
         self.trim = trim

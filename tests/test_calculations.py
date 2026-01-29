@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for calculation helper functions."""
-import pytest
+
 from datetime import date
 from models import calc_due_miles, calc_due_date, check_status, Status
 

@@ -25,7 +25,7 @@ properties:
       - purchaseDate
       - purchaseMiles
   state:
-    type: object
+    type: [object, "null"]
     description: >
       Current vehicle state. currentMiles is auto-computed from history
       if not explicitly set.

@@ -9,6 +9,7 @@ This package provides data models for tracking vehicle maintenance:
 - ServiceDue: Calculated service status
 - Vehicle: Main aggregate combining all data
 """
+
 from .status import Status
 from .car import Car
 from .rule import Rule
@@ -19,14 +20,14 @@ from .calculations import calc_due_miles, calc_due_date, check_status
 from .loader import load_vehicle
 
 __all__ = [
-    'Status',
-    'Car',
-    'Rule',
-    'HistoryEntry',
-    'ServiceDue',
-    'Vehicle',
-    'calc_due_miles',
-    'calc_due_date',
-    'check_status',
-    'load_vehicle',
+    "Status",
+    "Car",
+    "Rule",
+    "HistoryEntry",
+    "ServiceDue",
+    "Vehicle",
+    "calc_due_miles",
+    "calc_due_date",
+    "check_status",
+    "load_vehicle",
 ]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for Car class."""
-import pytest
+
 from models import Car
 
 

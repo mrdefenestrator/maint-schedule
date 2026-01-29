@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for ServiceDue dataclass."""
-import pytest
+
 from models import ServiceDue, Status, Rule
 
 

@@ -5,6 +5,7 @@ CLI for viewing vehicle maintenance history.
 Shows all recorded maintenance services with date, mileage,
 who performed the work, cost, and notes.
 """
+
 import argparse
 from pathlib import Path
 from tabulate import tabulate
@@ -29,53 +30,49 @@ def truncate(text: Optional[str], max_len: int = 30) -> str:
         return "-"
     if len(text) <= max_len:
         return text
-    return text[:max_len - 3] + "..."
+    return text[: max_len - 3] + "..."
 
 
 def make_table(entries: List[HistoryEntry]) -> List[List[str]]:
     """Convert history entries to table rows."""
     rows = []
     for entry in entries:
-        rows.append([
-            entry.date,
-            format_miles(entry.mileage),
-            entry.rule_key,
-            entry.performed_by or "-",
-            format_cost(entry.cost),
-            truncate(entry.notes),
-        ])
+        rows.append(
+            [
+                entry.date,
+                format_miles(entry.mileage),
+                entry.rule_key,
+                entry.performed_by or "-",
+                format_cost(entry.cost),
+                truncate(entry.notes),
+            ]
+        )
     return rows
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Vehicle maintenance history viewer"
-    )
+    parser = argparse.ArgumentParser(description="Vehicle maintenance history viewer")
     parser.add_argument(
         "vehicle_file",
         type=Path,
-        help="Path to vehicle YAML file (e.g., wrx-rules.yaml)"
+        help="Path to vehicle YAML file (e.g., wrx-rules.yaml)",
     )
     parser.add_argument(
         "--rule",
         type=str,
-        help="Filter to specific rule key (e.g., 'engine oil and filter/replace')"
+        help="Filter to specific rule key (e.g., 'engine oil and filter/replace')",
     )
     parser.add_argument(
-        "--since",
-        type=str,
-        help="Show only entries since date (YYYY-MM-DD)"
+        "--since", type=str, help="Show only entries since date (YYYY-MM-DD)"
     )
     parser.add_argument(
         "--sort",
         choices=["date", "miles", "rule"],
         default="date",
-        help="Sort order (default: date)"
+        help="Sort order (default: date)",
     )
     parser.add_argument(
-        "--asc",
-        action="store_true",
-        help="Sort ascending instead of descending"
+        "--asc", action="store_true", help="Sort ascending instead of descending"
     )
     args = parser.parse_args()
 
@@ -124,5 +121,5 @@ def main():
     print(tabulate(make_table(entries), headers=headers, tablefmt="simple"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

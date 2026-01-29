@@ -5,6 +5,7 @@ CLI for viewing vehicle maintenance schedule status.
 Shows what maintenance is due, overdue, or upcoming based on
 the vehicle's maintenance rules and service history.
 """
+
 import argparse
 from pathlib import Path
 from tabulate import tabulate
@@ -40,29 +41,29 @@ def make_table(services: List[ServiceDue]) -> List[List[str]]:
                 parts.append(f"{svc.last_service_miles:,.0f}")
             last_done = " @ ".join(parts)
 
-        rows.append([
-            svc.rule.key,
-            last_done,
-            format_miles(svc.due_miles),
-            svc.due_date or "-",
-            format_remaining(svc),
-        ])
+        rows.append(
+            [
+                svc.rule.key,
+                last_done,
+                format_miles(svc.due_miles),
+                svc.due_date or "-",
+                format_remaining(svc),
+            ]
+        )
     return rows
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Vehicle maintenance schedule tracker"
-    )
+    parser = argparse.ArgumentParser(description="Vehicle maintenance schedule tracker")
     parser.add_argument(
         "vehicle_file",
         type=Path,
-        help="Path to vehicle YAML file (e.g., wrx-rules.yaml)"
+        help="Path to vehicle YAML file (e.g., wrx-rules.yaml)",
     )
     parser.add_argument(
         "--severe",
         action="store_true",
-        help="Use severe driving intervals (shorter intervals for demanding conditions)"
+        help="Use severe driving intervals (shorter intervals)",
     )
     args = parser.parse_args()
 
@@ -118,5 +119,5 @@ def main():
         print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

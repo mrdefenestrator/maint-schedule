@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for Status enum."""
-import pytest
+
 from models import Status
 
 
