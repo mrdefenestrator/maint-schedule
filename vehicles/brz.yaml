@@ -1,4 +1,3 @@
----
 car:
   make: Subaru
   model: BRZ
@@ -6,314 +5,283 @@ car:
   year: 2015
   purchaseDate: '2016-11-12'
   purchaseMiles: 21216
-
 state:
-  # currentMiles auto-computed from history if not set
-  # asOfDate defaults to today if not set
-
+  currentMiles: 59995.0
 history:
-  # 2017
-  - ruleKey: brake fluid/replace
-    date: '2017-03-16'
-    mileage: 23538
-    performedBy: self
-    notes: "Subaru DOT3. Installed Speed Bleeders SB1010"
-    cost: 70.98
-  - ruleKey: brake pads, linings, parking brake/inspect
-    date: '2017-03-16'
-    mileage: 23538
-    performedBy: self
-    notes: "Measured brake pads: Front left 9.07mm, 8.97mm"
-  - ruleKey: engine oil and filter/replace
-    date: '2017-03-31'
-    mileage: 23290
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer. Installed Greddy magnetic oil drain plug"
-    cost: 20.16
-  - ruleKey: engine oil and filter/replace
-    date: '2017-06-18'
-    mileage: 26855
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 44.72
-  - ruleKey: transmission fluid/replace
-    date: '2017-06-27'
-    mileage: 27318
-    performedBy: self
-    notes: "Motul Gear 300 75w90 GL5"
-    cost: 88.57
-  - ruleKey: rear differential fluid/replace
-    date: '2017-06-27'
-    mileage: 27318
-    performedBy: self
-    notes: "Motul Gear 300 75w90 GL5"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2017-08-23'
-    mileage: 29912
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 42.58
-  - ruleKey: engine oil and filter/replace
-    date: '2017-10-21'
-    mileage: 32802
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 42.00
-
-  # 2018
-  - ruleKey: engine oil and filter/replace
-    date: '2018-03-03'
-    mileage: 35810
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 41.77
-  - ruleKey: brake pads, linings, parking brake/replace
-    date: '2018-03-03'
-    mileage: 35810
-    performedBy: self
-    notes: "Installed Stoptech Sport pads, slotted rotors, and stainless lines"
-    cost: 459.28
-  - ruleKey: brake fluid/replace
-    date: '2018-03-03'
-    mileage: 35810
-    performedBy: self
-    notes: "Valvoline DOT 3/4 fluid"
-    cost: 33.26
-  - ruleKey: rotate tires/perform
-    date: '2018-03-27'
-    mileage: 36611
-    performedBy: self
-    notes: "Installed Enkei TS-10 17x9+45 black wheels with Bridgestone RE-71R 245/40R17"
-    cost: 1552.56
-  - ruleKey: engine oil and filter/replace
-    date: '2018-05-29'
-    mileage: 38901
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 0
-  - ruleKey: rotate tires/perform
-    date: '2018-06-24'
-    mileage: 39625
-    performedBy: self
-    notes: "Rotated Enkei TS10 & RE-71R F->R R->F. Aligned rear right wheel to match camber of rear left (camber: -1.9*, toe: 0*)"
-  - ruleKey: engine oil and filter/replace
-    date: '2018-08-20'
-    mileage: 42001
-    performedBy: self
-    notes: "Subaru Synthetic 5W30 6qt, OEM Filter, Crush Washer (switched to 5W30 after supercharger install)"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2018-11-21'
-    mileage: 44951
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 0
-
-  # 2019
-  - ruleKey: rotate tires/perform
-    date: '2019-03-08'
-    mileage: 47000
-    performedBy: Discount Tire
-    notes: "Installed new Bridgestone RE-71Rs 255/40R17 on RPF-1s"
-  - ruleKey: engine oil and filter/replace
-    date: '2019-05-03'
-    mileage: 47900
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 0
-  - ruleKey: accessory drive belt/replace
-    date: '2019-06-09'
-    mileage: 49592
-    performedBy: self
-    notes: "Replaced accessory & supercharger belt (Gates)"
-    cost: 0
-  - ruleKey: brake fluid/replace
-    date: '2019-06-22'
-    mileage: 49801
-    performedBy: self
-    notes: "Valvoline Synthetic Dot 3/4"
-    cost: 0
-
-  # 2020
-  - ruleKey: engine oil and filter/replace
-    date: '2020-01-15'
-    mileage: 54235
-    performedBy: self
-    notes: "Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer"
-    cost: 0
-  - ruleKey: cabin air filter/replace
-    date: '2020-04-22'
-    mileage: 54648
-    performedBy: self
-
+- ruleKey: brake fluid/replace
+  date: '2017-03-16'
+  mileage: 23538
+  performedBy: self
+  notes: Subaru DOT3. Installed Speed Bleeders SB1010
+  cost: 70.98
+- ruleKey: brake pads, linings, parking brake/inspect
+  date: '2017-03-16'
+  mileage: 23538
+  performedBy: self
+  notes: 'Measured brake pads: Front left 9.07mm, 8.97mm'
+- ruleKey: engine oil and filter/replace
+  date: '2017-03-31'
+  mileage: 23290
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer. Installed Greddy magnetic oil drain plug
+  cost: 20.16
+- ruleKey: engine oil and filter/replace
+  date: '2017-06-18'
+  mileage: 26855
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 44.72
+- ruleKey: transmission fluid/replace
+  date: '2017-06-27'
+  mileage: 27318
+  performedBy: self
+  notes: Motul Gear 300 75w90 GL5
+  cost: 88.57
+- ruleKey: rear differential fluid/replace
+  date: '2017-06-27'
+  mileage: 27318
+  performedBy: self
+  notes: Motul Gear 300 75w90 GL5
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2017-08-23'
+  mileage: 29912
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 42.58
+- ruleKey: engine oil and filter/replace
+  date: '2017-10-21'
+  mileage: 32802
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 42.0
+- ruleKey: engine oil and filter/replace
+  date: '2018-03-03'
+  mileage: 35810
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 41.77
+- ruleKey: brake pads, linings, parking brake/replace
+  date: '2018-03-03'
+  mileage: 35810
+  performedBy: self
+  notes: Installed Stoptech Sport pads, slotted rotors, and stainless lines
+  cost: 459.28
+- ruleKey: brake fluid/replace
+  date: '2018-03-03'
+  mileage: 35810
+  performedBy: self
+  notes: Valvoline DOT 3/4 fluid
+  cost: 33.26
+- ruleKey: rotate tires/perform
+  date: '2018-03-27'
+  mileage: 36611
+  performedBy: self
+  notes: Installed Enkei TS-10 17x9+45 black wheels with Bridgestone RE-71R 245/40R17
+  cost: 1552.56
+- ruleKey: engine oil and filter/replace
+  date: '2018-05-29'
+  mileage: 38901
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 0
+- ruleKey: rotate tires/perform
+  date: '2018-06-24'
+  mileage: 39625
+  performedBy: self
+  notes: 'Rotated Enkei TS10 & RE-71R F->R R->F. Aligned rear right wheel to match camber of rear left (camber: -1.9*, toe:
+    0*)'
+- ruleKey: engine oil and filter/replace
+  date: '2018-08-20'
+  mileage: 42001
+  performedBy: self
+  notes: Subaru Synthetic 5W30 6qt, OEM Filter, Crush Washer (switched to 5W30 after supercharger install)
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2018-11-21'
+  mileage: 44951
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 0
+- ruleKey: rotate tires/perform
+  date: '2019-03-08'
+  mileage: 47000
+  performedBy: Discount Tire
+  notes: Installed new Bridgestone RE-71Rs 255/40R17 on RPF-1s
+- ruleKey: engine oil and filter/replace
+  date: '2019-05-03'
+  mileage: 47900
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 0
+- ruleKey: accessory drive belt/replace
+  date: '2019-06-09'
+  mileage: 49592
+  performedBy: self
+  notes: Replaced accessory & supercharger belt (Gates)
+  cost: 0
+- ruleKey: brake fluid/replace
+  date: '2019-06-22'
+  mileage: 49801
+  performedBy: self
+  notes: Valvoline Synthetic Dot 3/4
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2020-01-15'
+  mileage: 54235
+  performedBy: self
+  notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
+  cost: 0
+- ruleKey: cabin air filter/replace
+  date: '2020-04-22'
+  mileage: 54648
+  performedBy: self
 rules:
-  - item: accessory drive belt
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-  - item: engine oil and filter
-    verb: replace
-    intervalMiles: 6000
-    intervalMonths: 6
-    severeIntervalMiles: 3000
-    severeIntervalMonths: 3
-    notes: >
-      under severe driving replace oil and filter every 3,000 miles or 3 months
-      whichever comes first
-  - item: engine coolant
-    verb: replace
-    phase: initial
-    intervalMiles: 137500
-    intervalMonths: 132
-    severeIntervalMiles: 137500
-    severeIntervalMonths: 132
-    stopMiles: 137500
-    stopMonths: 132
-    notes: >
-      Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
-      km) after the 1st. If towing replace more often. Use Subaru coolant only,
-      do not mix with other types or it will reduce protection
-  - item: engine coolant
-    verb: replace
-    phase: ongoing
-    intervalMiles: 75000
-    intervalMonths: 72
-    severeIntervalMiles: 75000
-    severeIntervalMonths: 72
-    startMiles: 137500
-    startMonths: 132
-    notes: >
-      Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
-      km) after the 1st. If towing replace more often. Use Subaru coolant only,
-      do not mix with other types or it will reduce protection
-  - item: cooling system hoses, radiator
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-  - item: fuel system lines, connections
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 6000
-    severeIntervalMonths: 6
-    notes: >
-      under severe driving, brake and steering system inspection should be
-      performed every 6000 miles or 6 months whichever comes first
-  - item: fuel filter
-    verb: replace
-    intervalMiles: 72000
-    intervalMonths: 72
-    severeIntervalMiles: 60000
-    severeIntervalMonths: 60
-    notes: >
-      the filter is in the fuel tank, under extremely cold or hot weather
-      replace the filter more often
-  - item: engine air filter
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      when used in dusty conditions, the air filter should be replaced more often
-  - item: spark plugs
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-  - item: transmission fluid
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-  - item: transmission fluid
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      under severe driving replace every 15,000 miles or 15 months whichever
-      comes first
-  - item: rear differential fluid
-    verb: inspect
-    intervalMiles: 12000
-    intervalMonths: 12
-  - item: rear differential fluid
-    verb: replace
-    intervalMiles: 96000
-    intervalMonths: 96
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      under severe driving replace every 15,000 miles or 15 months whichever
-      comes first
-  - item: brake fluid
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      when used in high humidity or mountainous areas replace the brake fluid
-      and clutch fluid every 15,000 miles or 15 months whichever comes first
-  - item: clutch fluid
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      when used in high humidity or mountainous areas replace the brake fluid
-      and clutch fluid every 15,000 miles or 15 months whichever comes first
-  - item: brake pads, linings, parking brake
-    verb: inspect
-    intervalMiles: 12000
-    intervalMonths: 12
-    severeIntervalMiles: 6000
-    severeIntervalMonths: 6
-    notes: >
-      under severe driving, brake and steering system inspection should be
-      performed every 6000 miles or 6 months whichever comes first
-  - item: front / rear axle boots, cv joints, axle half shaft
-    verb: inspect
-    intervalMiles: 12000
-    intervalMonths: 12
-    severeIntervalMiles: 6000
-    severeIntervalMonths: 6
-    notes: >
-      under severe driving, brake and steering system inspection should be
-      performed every 6000 miles or 6 months whichever comes first
-  - item: clutch operation
-    verb: inspect
-    intervalMiles: 12000
-    intervalMonths: 12
-  - item: steering and suspension
-    verb: inspect
-    intervalMiles: 12000
-    intervalMonths: 12
-    severeIntervalMiles: 6000
-    severeIntervalMonths: 6
-    notes: >
-      under severe driving, brake and steering system inspection should be
-      performed every 6000 miles or 6 months whichever comes first
-  - item: front / rear wheel bearing lubricant
-    verb: inspect
-    intervalMiles: 60000
-    intervalMonths: 60
-  - item: rotate tires
-    verb: perform
-    intervalMiles: 6000
-    severeIntervalMiles: 3000
-  - item: cabin air filter
-    verb: replace
-    intervalMiles: 12000
-    intervalMonths: 12
-    severeIntervalMiles: 6000
-    severeIntervalMonths: 6
-    notes: >
-      when used in dusty conditions, the air filter should be replaced more
-      often
+- item: accessory drive belt
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+- item: engine oil and filter
+  verb: replace
+  intervalMiles: 6000
+  intervalMonths: 6
+  severeIntervalMiles: 3000
+  severeIntervalMonths: 3
+  notes: 'under severe driving replace oil and filter every 3,000 miles or 3 months whichever comes first'
+- item: engine coolant
+  verb: replace
+  phase: initial
+  intervalMiles: 137500
+  intervalMonths: 132
+  severeIntervalMiles: 137500
+  severeIntervalMonths: 132
+  stopMiles: 137500
+  stopMonths: 132
+  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+    6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
+    other types or it will reduce protection'
+- item: engine coolant
+  verb: replace
+  phase: ongoing
+  intervalMiles: 75000
+  intervalMonths: 72
+  severeIntervalMiles: 75000
+  severeIntervalMonths: 72
+  startMiles: 137500
+  startMonths: 132
+  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+    6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
+    other types or it will reduce protection'
+- item: cooling system hoses, radiator
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+- item: fuel system lines, connections
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 6000
+  severeIntervalMonths: 6
+  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first'
+- item: fuel filter
+  verb: replace
+  intervalMiles: 72000
+  intervalMonths: 72
+  severeIntervalMiles: 60000
+  severeIntervalMonths: 60
+  notes: 'the filter is in the fuel tank, under extremely cold or hot weather replace the filter more often'
+- item: engine air filter
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'when used in dusty conditions, the air filter should be replaced more often'
+- item: spark plugs
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+- item: transmission fluid
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+- item: transmission fluid
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'under severe driving replace every 15,000 miles or 15 months whichever comes first'
+- item: rear differential fluid
+  verb: inspect
+  intervalMiles: 12000
+  intervalMonths: 12
+- item: rear differential fluid
+  verb: replace
+  intervalMiles: 96000
+  intervalMonths: 96
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'under severe driving replace every 15,000 miles or 15 months whichever comes first'
+- item: brake fluid
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
+    months whichever comes first'
+- item: clutch fluid
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
+    months whichever comes first'
+- item: brake pads, linings, parking brake
+  verb: inspect
+  intervalMiles: 12000
+  intervalMonths: 12
+  severeIntervalMiles: 6000
+  severeIntervalMonths: 6
+  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first'
+- item: front / rear axle boots, cv joints, axle half shaft
+  verb: inspect
+  intervalMiles: 12000
+  intervalMonths: 12
+  severeIntervalMiles: 6000
+  severeIntervalMonths: 6
+  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first'
+- item: clutch operation
+  verb: inspect
+  intervalMiles: 12000
+  intervalMonths: 12
+- item: steering and suspension
+  verb: inspect
+  intervalMiles: 12000
+  intervalMonths: 12
+  severeIntervalMiles: 6000
+  severeIntervalMonths: 6
+  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first'
+- item: front / rear wheel bearing lubricant
+  verb: inspect
+  intervalMiles: 60000
+  intervalMonths: 60
+- item: rotate tires
+  verb: perform
+  intervalMiles: 6000
+  severeIntervalMiles: 3000
+- item: cabin air filter
+  verb: replace
+  intervalMiles: 12000
+  intervalMonths: 12
+  severeIntervalMiles: 6000
+  severeIntervalMonths: 6
+  notes: 'when used in dusty conditions, the air filter should be replaced more often'

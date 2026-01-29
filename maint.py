@@ -102,7 +102,7 @@ def make_status_table(services: List[ServiceDue]) -> List[List[str]]:
 
         rows.append(
             [
-                svc.rule.key,
+                svc.rule.display_name,
                 last_done,
                 format_miles(svc.due_miles),
                 svc.due_date or "-",
@@ -117,24 +117,60 @@ def cmd_status(args):
     """Show what maintenance is due, overdue, or upcoming."""
     vehicle = load_vehicle(args.vehicle_file)
 
+    # Validate mutually exclusive flags
+    if args.miles_only and args.time_only:
+        print("Error: --miles-only and --time-only cannot be used together")
+        return 1
+
+    # Parse exclude-verbs
+    exclude_verbs = None
+    if args.exclude_verbs:
+        exclude_verbs = [v.strip() for v in args.exclude_verbs.split(",")]
+
     # Header
     print(f"Vehicle: {vehicle.car.name}")
     print(f"Current mileage: {vehicle.current_miles:,.0f} (as of {vehicle.as_of_date})")
     if args.severe:
         print("Mode: SEVERE DRIVING (shorter intervals)")
+    if args.miles_only:
+        print("Filter: MILEAGE ONLY (ignoring time-based intervals)")
+    if args.time_only:
+        print("Filter: TIME ONLY (ignoring mileage-based intervals)")
+    if exclude_verbs:
+        print(f"Filter: EXCLUDING VERBS: {', '.join(exclude_verbs)}")
     print(f"Rules: {len(vehicle.rules)}")
     print(f"History entries: {len(vehicle.history)}")
     print()
 
     # Get all service statuses
-    statuses = vehicle.get_all_service_status(severe=args.severe)
+    statuses = vehicle.get_all_service_status(
+        severe=args.severe,
+        miles_only=args.miles_only,
+        time_only=args.time_only,
+        exclude_verbs=exclude_verbs,
+    )
 
-    # Group by status
-    overdue = [s for s in statuses if s.status == Status.OVERDUE]
-    due_soon = [s for s in statuses if s.status == Status.DUE_SOON]
-    ok = [s for s in statuses if s.status == Status.OK]
-    inactive = [s for s in statuses if s.status == Status.INACTIVE]
-    unknown = [s for s in statuses if s.status == Status.UNKNOWN]
+    # Group by status and sort by item for logical grouping
+    overdue = sorted(
+        [s for s in statuses if s.status == Status.OVERDUE],
+        key=lambda s: (s.rule.item, s.rule.verb, s.rule.phase or ""),
+    )
+    due_soon = sorted(
+        [s for s in statuses if s.status == Status.DUE_SOON],
+        key=lambda s: (s.rule.item, s.rule.verb, s.rule.phase or ""),
+    )
+    ok = sorted(
+        [s for s in statuses if s.status == Status.OK],
+        key=lambda s: (s.rule.item, s.rule.verb, s.rule.phase or ""),
+    )
+    inactive = sorted(
+        [s for s in statuses if s.status == Status.INACTIVE],
+        key=lambda s: (s.rule.item, s.rule.verb, s.rule.phase or ""),
+    )
+    unknown = sorted(
+        [s for s in statuses if s.status == Status.UNKNOWN],
+        key=lambda s: (s.rule.item, s.rule.verb, s.rule.phase or ""),
+    )
 
     headers = [
         "Rule",
@@ -163,13 +199,13 @@ def cmd_status(args):
     if unknown:
         print("UNKNOWN (no history):")
         for svc in unknown:
-            print(f"  {svc.rule.key}")
+            print(f"  {svc.rule.display_name}")
         print()
 
     if inactive:
         print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage):")
         for svc in inactive:
-            print(f"  {svc.rule.key}")
+            print(f"  {svc.rule.display_name}")
         print()
 
     return 0
@@ -180,15 +216,19 @@ def cmd_status(args):
 # =============================================================================
 
 
-def make_history_table(entries: List[HistoryEntry]) -> List[List[str]]:
+def make_history_table(entries: List[HistoryEntry], vehicle) -> List[List[str]]:
     """Convert history entries to table rows."""
     rows = []
     for entry in entries:
+        # Find the rule to get display name, fallback to key if not found
+        rule = vehicle.get_rule(entry.rule_key)
+        display_name = rule.display_name if rule else entry.rule_key
+
         rows.append(
             [
                 entry.date,
                 format_miles(entry.mileage),
-                entry.rule_key,
+                display_name,
                 entry.performed_by or "-",
                 format_cost(entry.cost),
                 truncate(entry.notes),
@@ -237,7 +277,11 @@ def cmd_history(args):
         return 0
 
     headers = ["Date", "Mileage", "Rule", "Performed By", "Cost", "Notes"]
-    print(tabulate(make_history_table(entries), headers=headers, tablefmt="simple"))
+    print(
+        tabulate(
+            make_history_table(entries, vehicle), headers=headers, tablefmt="simple"
+        )
+    )
 
     return 0
 
@@ -251,19 +295,32 @@ def cmd_log(args):
     """Add a new service entry."""
     vehicle = load_vehicle(args.vehicle_file)
 
-    # Validate rule key exists
-    rule = vehicle.get_rule(args.rule_key)
+    # Normalize rule key to lowercase for case-insensitive matching
+    normalized_key = args.rule_key.lower()
+
+    # Try to find the rule (case-insensitive)
+    rule = None
+    for r in vehicle.rules:
+        if r.key.lower() == normalized_key:
+            rule = r
+            break
+
     if rule is None:
         print(f"Error: Unknown rule key '{args.rule_key}'")
         print("\nAvailable rules:")
-        for r in vehicle.rules:
-            print(f"  {r.key}")
+        # Sort by item for easier scanning
+        sorted_rules = sorted(
+            vehicle.rules, key=lambda r: (r.item, r.verb, r.phase or "")
+        )
+        for r in sorted_rules:
+            print(f"  {r.display_name}")
+            print(f"    Key: {r.key}")
         return 1
 
-    # Build the entry
+    # Build the entry using the canonical key from the matched rule
     entry_date = args.date or date.today().isoformat()
     entry = HistoryEntry(
-        rule_key=args.rule_key,
+        rule_key=rule.key,  # Use canonical key from matched rule
         date=entry_date,
         mileage=args.mileage,
         performed_by=args.by,
@@ -273,7 +330,7 @@ def cmd_log(args):
 
     # Show what will be added
     print(f"Adding service entry to {args.vehicle_file}:")
-    print(f"  Rule:    {entry.rule_key}")
+    print(f"  Rule:    {rule.display_name}")
     print(f"  Date:    {entry.date}")
     if entry.mileage:
         print(f"  Mileage: {entry.mileage:,.0f}")
@@ -336,8 +393,11 @@ def cmd_rules(args):
     print(f"Rules: {len(vehicle.rules)}")
     print()
 
+    # Sort rules by item, then verb, then phase for logical grouping
+    sorted_rules = sorted(vehicle.rules, key=lambda r: (r.item, r.verb, r.phase or ""))
+
     rows = []
-    for rule in vehicle.rules:
+    for rule in sorted_rules:
         interval = []
         if rule.interval_miles:
             interval.append(f"{rule.interval_miles:,.0f} mi")
@@ -352,9 +412,9 @@ def cmd_rules(args):
             severe.append(f"{rule.severe_interval_months} mo")
         severe_str = " / ".join(severe) if severe else "-"
 
-        rows.append([rule.key, interval_str, severe_str])
+        rows.append([rule.display_name, interval_str, severe_str])
 
-    headers = ["Rule Key", "Interval", "Severe Interval"]
+    headers = ["Rule", "Interval", "Severe Interval"]
     print(tabulate(rows, headers=headers, tablefmt="simple"))
 
     return 0
@@ -373,9 +433,13 @@ def main():
 Examples:
   %(prog)s vehicles/brz.yaml status
   %(prog)s vehicles/brz.yaml status --severe
+  %(prog)s vehicles/brz.yaml status --miles-only
+  %(prog)s vehicles/brz.yaml status --exclude-verbs inspect
   %(prog)s vehicles/brz.yaml history --rule "oil"
+  %(prog)s vehicles/brz.yaml history --since 2024-01-01
   %(prog)s vehicles/brz.yaml rules
-  %(prog)s vehicles/brz.yaml log "oil/replace" --mileage 58000 --by self
+  %(prog)s vehicles/brz.yaml log "engine oil and filter/replace" \\
+      --mileage 58000 --by self
   %(prog)s vehicles/brz.yaml update-miles 58000
 """,
     )
@@ -396,13 +460,31 @@ Examples:
         action="store_true",
         help="Use severe driving intervals (shorter intervals)",
     )
+    status_parser.add_argument(
+        "--miles-only",
+        action="store_true",
+        help="Only consider mileage-based intervals (ignore time)",
+    )
+    status_parser.add_argument(
+        "--time-only",
+        action="store_true",
+        help="Only consider time-based intervals (ignore mileage)",
+    )
+    status_parser.add_argument(
+        "--exclude-verbs",
+        type=str,
+        help=(
+            "Exclude rules with specified verbs "
+            '(comma-separated, e.g., "inspect,rotate")'
+        ),
+    )
 
     # History subcommand
     history_parser = subparsers.add_parser("history", help="View service history")
     history_parser.add_argument(
         "--rule",
         type=str,
-        help="Filter to specific rule key (e.g., 'engine oil')",
+        help="Filter to rules containing text (case-insensitive, e.g., 'oil', 'brake')",
     )
     history_parser.add_argument(
         "--since",

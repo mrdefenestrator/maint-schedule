@@ -1,4 +1,3 @@
----
 car:
   make: Subaru
   model: Impreza
@@ -6,682 +5,642 @@ car:
   year: 2012
   purchaseDate: '2012-03-23'
   purchaseMiles: 6
-
 state:
-  # currentMiles auto-computed from history if not set
-  # asOfDate defaults to today if not set
-
+  currentMiles: 104980.0
 history:
-  # 2012
-  - ruleKey: engine oil and filter/replace
-    date: '2012-04-30'
-    mileage: 2970
-    performedBy: Shortline Subaru
-    notes: "Subaru Synthetic 5W30"
-    cost: 73.00
-  - ruleKey: rotate tires/perform
-    date: '2012-05-30'
-    mileage: 5110
-    performedBy: Discount Tire Boulder
-    notes: "f->r, rxf"
-  - ruleKey: engine oil and filter/replace
-    date: '2012-06-22'
-    mileage: 7059
-    performedBy: Flatirons Subaru
-    notes: "Subaru Synthetic 5W30"
-    cost: 73.00
-  - ruleKey: rotate tires/perform
-    date: '2012-08-10'
-    mileage: 9990
-    performedBy: self
-    notes: "f->r, rxf. Pressures adjusted"
-  - ruleKey: engine oil and filter/replace
-    date: '2012-08-24'
-    mileage: 10944
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 40.00
-  - ruleKey: engine oil and filter/replace
-    date: '2012-11-10'
-    mileage: 14911
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 40.00
-  - ruleKey: rotate tires/perform
-    date: '2012-11-10'
-    mileage: 14911
-    performedBy: self
-    notes: "f->r, rxf. Pressures adjusted"
-  - ruleKey: engine air filter/replace
-    date: '2012-12-06'
-    mileage: 16487
-    performedBy: Flatirons Subaru
-    notes: "Subaru OEM"
-    cost: 26.60
-  - ruleKey: rotate tires/perform
-    date: '2012-12-11'
-    mileage: 16628
-    performedBy: self
-    notes: "Mounted Winter Wheels 1234"
-
-  # 2013
-  - ruleKey: engine oil and filter/replace
-    date: '2013-01-27'
-    mileage: 18920
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter. Installed Greddy magnetic oil drain plug"
-    cost: 40.00
-  - ruleKey: rotate tires/perform
-    date: '2013-02-23'
-    mileage: 20400
-    performedBy: self
-    notes: "Rotated to summer wheels 4312"
-  - ruleKey: engine oil and filter/replace
-    date: '2013-04-13'
-    mileage: 23200
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 40.00
-  - ruleKey: clutch/replace
-    date: '2013-07-18'
-    mileage: 25640
-    performedBy: Flatirons Subaru
-    notes: "Replaced clutch pressure plate & throwout bearing under warranty"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2013-08-05'
-    mileage: 26300
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 40.00
-  - ruleKey: rotate tires/perform
-    date: '2013-10-12'
-    mileage: 27636
-    performedBy: self
-    notes: "Rotated summer wheels 2143"
-  - ruleKey: cabin air filter/replace
-    date: '2013-12-22'
-    mileage: 29574
-    performedBy: self
-    notes: "Subaru OEM"
-    cost: 29.16
-  - ruleKey: engine oil and filter/replace
-    date: '2013-12-29'
-    mileage: 29871
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 44.10
-  - ruleKey: engine air filter/replace
-    date: '2013-12-29'
-    mileage: 29871
-    performedBy: self
-    notes: "Subaru OEM"
-    cost: 23.75
-
-  # 2014
-  - ruleKey: brake fluid/replace
-    date: '2014-01-19'
-    mileage: 30441
-    performedBy: self
-    notes: "Subaru DOT3"
-    cost: 19.84
-  - ruleKey: transmission / front differential fluid/replace
-    date: '2014-02-25'
-    mileage: 30950
-    performedBy: Flatirons Subaru
-    notes: "Replaced trans & diff fluid"
-    cost: 104.64
-  - ruleKey: rear differential fluid/replace
-    date: '2014-02-25'
-    mileage: 30950
-    performedBy: Flatirons Subaru
-    notes: "Replaced trans & diff fluid"
-    cost: 0
-  - ruleKey: power steering fluid/replace
-    date: '2014-03-01'
-    mileage: 31012
-    performedBy: self
-    notes: "Fluid was dark brown. Subaru ATF"
-    cost: 9.24
-  - ruleKey: engine oil and filter/replace
-    date: '2014-05-18'
-    mileage: 33718
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 89.18
-  - ruleKey: rotate tires/perform
-    date: '2014-08-16'
-    mileage: 37241
-    performedBy: self
-    notes: "Rotated summer tires 3421"
-  - ruleKey: engine oil and filter/replace
-    date: '2014-08-18'
-    mileage: 37350
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 26.55
-  - ruleKey: engine air filter/replace
-    date: '2014-09-07'
-    mileage: 37807
-    performedBy: self
-    notes: "Subaru OEM"
-    cost: 28.54
-  - ruleKey: rotate tires/perform
-    date: '2014-09-27'
-    mileage: 38499
-    performedBy: self
-    notes: "Rotated summer tires 1234"
-
-  # 2015
-  - ruleKey: brake fluid/replace
-    date: '2015-03-07'
-    mileage: 42180
-    performedBy: self
-    notes: "Installed Speed Bleeders SB1010 & Bled brakes"
-    cost: 48.56
-  - ruleKey: rotate tires/perform
-    date: '2015-03-22'
-    mileage: 42730
-    performedBy: self
-    notes: "Rotated summer tires 4312"
-  - ruleKey: brake pads, linings, parking brake/inspect
-    date: '2015-03-22'
-    mileage: 42730
-    performedBy: self
-    notes: "Checked brake pads: 7.5mm, 7.6mm, 4.7mm, 4.5mm"
-  - ruleKey: engine oil and filter/replace
-    date: '2015-05-16'
-    mileage: 44983
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 34.18
-  - ruleKey: rotate tires/perform
-    date: '2015-05-16'
-    mileage: 44983
-    performedBy: self
-    notes: "Rotated summer tires 2143"
-  - ruleKey: rotate tires/perform
-    date: '2015-07-01'
-    mileage: 45980
-    performedBy: self
-    notes: "Installed Kosei K63 17x8+50 wheels with Dunlop Direzza ZII SS 245/40r17"
-    cost: 1512.02
-  - ruleKey: rotate tires/perform
-    date: '2015-07-24'
-    mileage: 46700
-    performedBy: Canyon Automotive
-    notes: "Alignment 0* toe, maxed front negative camber"
-    cost: 79.95
-  - ruleKey: engine oil and filter/replace
-    date: '2015-09-28'
-    mileage: 48550
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 42.72
-  - ruleKey: rotate tires/perform
-    date: '2015-11-21'
-    mileage: 49756
-    performedBy: self
-    notes: "Swapped to winter wheels"
-
-  # 2016
-  - ruleKey: rotate tires/perform
-    date: '2016-02-17'
-    mileage: 51506
-    performedBy: self
-    notes: "Swapped to autox wheels"
-  - ruleKey: rotate tires/perform
-    date: '2016-02-22'
-    mileage: 51688
-    performedBy: self
-    notes: "Swapped to winter wheels"
-  - ruleKey: engine oil and filter/replace
-    date: '2016-04-02'
-    mileage: 52522
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 32.97
-  - ruleKey: rotate tires/perform
-    date: '2016-04-02'
-    mileage: 52522
-    performedBy: self
-    notes: "Swapped to summer wheels 3421"
-  - ruleKey: rotate tires/perform
-    date: '2016-05-27'
-    mileage: 53900
-    performedBy: self
-    notes: "Swapped to autox wheels 3412"
-  - ruleKey: engine oil and filter/replace
-    date: '2016-07-24'
-    mileage: 56202
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 49.00
-  - ruleKey: brake fluid/replace
-    date: '2016-07-24'
-    mileage: 56202
-    performedBy: self
-    notes: "Subaru DOT-3. Checked pads: FR 5.84i 6.86o, FL 6.63o 6.07i, RL 3.65o 3.13i, RR 3.64o 3.29i"
-    cost: 22.68
-  - ruleKey: power steering fluid/replace
-    date: '2016-07-24'
-    mileage: 56202
-    performedBy: self
-    notes: "Subaru ATF"
-    cost: 7.76
-  - ruleKey: brake pads, linings, parking brake/inspect
-    date: '2016-07-24'
-    mileage: 56202
-    performedBy: self
-    notes: "Checked pads: FR 5.84i 6.86o, FL 6.63o 6.07i, RL 3.65o 3.13i, RR 3.64o 3.29i"
-  - ruleKey: cusco type rs rear lsd fluid/replace
-    date: '2016-10-01'
-    mileage: 58246
-    performedBy: self
-    notes: "Installed Cusco R160 1.5-Way LSD (1.5-Way, 12 springs, 80%). Redline Gear Oil Full Synthetic 75w90 GL-5, Redline Friction modifier"
-    cost: 1470.91
-  - ruleKey: cusco type rs rear lsd fluid/replace
-    date: '2016-10-10'
-    mileage: 58878
-    performedBy: self
-    notes: "Changed settings (1.5-Way, 4 springs, 80%). Motul Gear 300 LS 75w90 GL-5"
-    cost: 23.86
-  - ruleKey: engine air filter/replace
-    date: '2016-10-27'
-    mileage: 59720
-    performedBy: self
-    notes: "Replaced with accessory belts, spark plugs, cabin air filter"
-    cost: 0
-  - ruleKey: cabin air filter/replace
-    date: '2016-10-27'
-    mileage: 59720
-    performedBy: self
-    notes: "Replaced with accessory belts, spark plugs, engine air filter"
-    cost: 0
-  - ruleKey: spark plugs/replace
-    date: '2016-10-27'
-    mileage: 59720
-    performedBy: self
-    notes: "Replaced with accessory belts, cabin air filter, engine air filter"
-    cost: 0
-  - ruleKey: accessory belt/replace
-    date: '2016-10-27'
-    mileage: 59720
-    performedBy: self
-    notes: "Replaced with spark plugs, cabin air filter, engine air filter"
-    cost: 172.07
-  - ruleKey: engine oil and filter/replace
-    date: '2016-10-28'
-    mileage: 59950
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 67.93
-  - ruleKey: clutch fluid/replace
-    date: '2016-11-20'
-    mileage: 60500
-    performedBy: self
-    notes: "Flushed & bled clutch (Subaru DOT-3)"
-    cost: 24.76
-  - ruleKey: rotate tires/perform
-    date: '2016-12-01'
-    mileage: 60532
-    performedBy: self
-    notes: "Installed winter tires 4123"
-  - ruleKey: transmission / front differential fluid/replace
-    date: '2016-12-04'
-    mileage: 60775
-    performedBy: self
-    notes: "Motul Gear 300 75w90 GL-5"
-    cost: 90.60
-
-  # 2017
-  - ruleKey: brake fluid/replace
-    date: '2017-07-22'
-    mileage: 64040
-    performedBy: self
-    notes: "Valvoline DOT 3/4 fluid with big brake install"
-    cost: 44.45
-  - ruleKey: brake pads, linings, parking brake/replace
-    date: '2017-07-22'
-    mileage: 64040
-    performedBy: self
-    notes: "Installed FHI 4/2 piston brake calipers, KNS rear caliper adapters, Stoptech Sport pads, slotted rotors, stainless lines"
-    cost: 1859.46
-  - ruleKey: engine oil and filter/replace
-    date: '2017-10-21'
-    mileage: 64642
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 38.64
-
-  # 2018
-  - ruleKey: engine oil and filter/replace
-    date: '2018-02-04'
-    mileage: 67269
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 40.21
-  - ruleKey: cusco type rs rear lsd fluid/replace
-    date: '2018-04-22'
-    mileage: 69197
-    performedBy: self
-    notes: "Motul Gear 300 LSD 75w90 GL-5"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2018-07-01'
-    mileage: 71210
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 0
-  - ruleKey: rotate tires/perform
-    date: '2018-09-14'
-    mileage: 72300
-    performedBy: self
-    notes: "Installed Michelin Pilot Sport 4S 235/45R17 on Koseis"
-    cost: 800.00
-  - ruleKey: cobb engine air filter/clean
-    date: '2018-11-30'
-    mileage: 74103
-    performedBy: self
-  - ruleKey: engine oil and filter/replace
-    date: '2018-12-19'
-    mileage: 74979
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 0
-  - ruleKey: rotate tires/perform
-    date: '2018-12-21'
-    mileage: 74979
-    performedBy: self
-    notes: "Rotated Blizzak WS80s"
-
-  # 2019
-  - ruleKey: cobb engine air filter/clean
-    date: '2019-04-12'
-    mileage: 76000
-    performedBy: self
-  - ruleKey: brake fluid/replace
-    date: '2019-06-22'
-    mileage: 80975
-    performedBy: self
-    notes: "Valvoline Synthetic Dot 3/4"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2019-07-21'
-    mileage: 82862
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 0
-  - ruleKey: rotate tires/perform
-    date: '2019-10-15'
-    mileage: 85000
-    performedBy: Tire Rack
-    notes: "Blizzak WS90 235/45R17 tires"
-
-  # 2020
-  - ruleKey: engine oil and filter/replace
-    date: '2020-01-15'
-    mileage: 87947
-    performedBy: self
-    notes: "Subaru Synthetic 5W30, Subaru Filter"
-    cost: 0
-  - ruleKey: cobb engine air filter/clean
-    date: '2020-01-15'
-    mileage: 87947
-    performedBy: self
-  - ruleKey: cabin air filter/replace
-    date: '2020-04-22'
-    mileage: 89538
-    performedBy: self
-  - ruleKey: engine oil and filter/replace
-    date: '2020-06-06'
-    mileage: 90031
-    performedBy: self
-    notes: "Idemitsu Synthetic 5W30, Subaru Filter"
-    cost: 0
-
-  # 2021
-  - ruleKey: engine oil and filter/replace
-    date: '2021-04-17'
-    mileage: 93016
-    performedBy: self
-    notes: "Changed during timing belt service"
-    cost: 0
-  - ruleKey: camshaft belt/replace
-    date: '2021-04-17'
-    mileage: 93016
-    performedBy: self
-    notes: "Replaced water pump, timing belt, idler pulleys, tensioner, All C stretch belt. Installed water to oil cooler"
-    cost: 0
-  - ruleKey: engine coolant/replace
-    date: '2021-04-17'
-    mileage: 93016
-    performedBy: self
-    notes: "Replaced during timing belt service"
-    cost: 0
-
-  # 2023
-  - ruleKey: clutch/replace
-    date: '2023-04-02'
-    mileage: 96066
-    performedBy: self
-    notes: "Exedy Stage 1, clutch pressure plate, flywheel, sumo TSK, versus forged clutch fork, versus billet fork pivot, Goodridge stainless line"
-    cost: 0
-  - ruleKey: engine oil and filter/replace
-    date: '2023-08-26'
-    mileage: 97721
-    performedBy: self
-    notes: "Idemitsu GL-6 5W30, Subaru Filter"
-    cost: 0
-  - ruleKey: cusco type rs rear lsd fluid/replace
-    date: '2023-08-26'
-    mileage: 97721
-    performedBy: self
-    notes: "Motul Gear 300 LS"
-    cost: 0
-
-  # 2024
-  - ruleKey: brake fluid/replace
-    date: '2024-08-25'
-    mileage: 102377
-    performedBy: self
-    notes: "Dot 3/4"
-    cost: 0
-  - ruleKey: cusco type rs rear lsd fluid/replace
-    date: '2024-08-25'
-    mileage: 102377
-    performedBy: self
-    notes: "Added friction modifier to rear diff"
-    cost: 0
-  - ruleKey: brake pads, linings, parking brake/replace
-    date: '2024-08-25'
-    mileage: 102377
-    performedBy: self
-    notes: "Replaced front brake pads and rotors (Stoptech Sport, Stoptech Slotted)"
-    cost: 0
-
-  # 2025
-  - ruleKey: engine oil and filter/replace
-    date: '2025-04-22'
-    mileage: 103617
-    performedBy: self
-    notes: "Idemitsu GL-6 5W30, Subaru Filter"
-    cost: 0
-
+- ruleKey: engine oil and filter/replace
+  date: '2012-04-30'
+  mileage: 2970
+  performedBy: Shortline Subaru
+  notes: Subaru Synthetic 5W30
+  cost: 73.0
+- ruleKey: rotate tires/perform
+  date: '2012-05-30'
+  mileage: 5110
+  performedBy: Discount Tire Boulder
+  notes: f->r, rxf
+- ruleKey: engine oil and filter/replace
+  date: '2012-06-22'
+  mileage: 7059
+  performedBy: Flatirons Subaru
+  notes: Subaru Synthetic 5W30
+  cost: 73.0
+- ruleKey: rotate tires/perform
+  date: '2012-08-10'
+  mileage: 9990
+  performedBy: self
+  notes: f->r, rxf. Pressures adjusted
+- ruleKey: engine oil and filter/replace
+  date: '2012-08-24'
+  mileage: 10944
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 40.0
+- ruleKey: engine oil and filter/replace
+  date: '2012-11-10'
+  mileage: 14911
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 40.0
+- ruleKey: rotate tires/perform
+  date: '2012-11-10'
+  mileage: 14911
+  performedBy: self
+  notes: f->r, rxf. Pressures adjusted
+- ruleKey: engine air filter/replace
+  date: '2012-12-06'
+  mileage: 16487
+  performedBy: Flatirons Subaru
+  notes: Subaru OEM
+  cost: 26.6
+- ruleKey: rotate tires/perform
+  date: '2012-12-11'
+  mileage: 16628
+  performedBy: self
+  notes: Mounted Winter Wheels 1234
+- ruleKey: engine oil and filter/replace
+  date: '2013-01-27'
+  mileage: 18920
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter. Installed Greddy magnetic oil drain plug
+  cost: 40.0
+- ruleKey: rotate tires/perform
+  date: '2013-02-23'
+  mileage: 20400
+  performedBy: self
+  notes: Rotated to summer wheels 4312
+- ruleKey: engine oil and filter/replace
+  date: '2013-04-13'
+  mileage: 23200
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 40.0
+- ruleKey: clutch/replace
+  date: '2013-07-18'
+  mileage: 25640
+  performedBy: Flatirons Subaru
+  notes: Replaced clutch pressure plate & throwout bearing under warranty
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2013-08-05'
+  mileage: 26300
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 40.0
+- ruleKey: rotate tires/perform
+  date: '2013-10-12'
+  mileage: 27636
+  performedBy: self
+  notes: Rotated summer wheels 2143
+- ruleKey: cabin air filter/replace
+  date: '2013-12-22'
+  mileage: 29574
+  performedBy: self
+  notes: Subaru OEM
+  cost: 29.16
+- ruleKey: engine oil and filter/replace
+  date: '2013-12-29'
+  mileage: 29871
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 44.1
+- ruleKey: engine air filter/replace
+  date: '2013-12-29'
+  mileage: 29871
+  performedBy: self
+  notes: Subaru OEM
+  cost: 23.75
+- ruleKey: brake fluid/replace
+  date: '2014-01-19'
+  mileage: 30441
+  performedBy: self
+  notes: Subaru DOT3
+  cost: 19.84
+- ruleKey: transmission / front differential fluid/replace
+  date: '2014-02-25'
+  mileage: 30950
+  performedBy: Flatirons Subaru
+  notes: Replaced trans & diff fluid
+  cost: 104.64
+- ruleKey: rear differential fluid/replace
+  date: '2014-02-25'
+  mileage: 30950
+  performedBy: Flatirons Subaru
+  notes: Replaced trans & diff fluid
+  cost: 0
+- ruleKey: power steering fluid/replace
+  date: '2014-03-01'
+  mileage: 31012
+  performedBy: self
+  notes: Fluid was dark brown. Subaru ATF
+  cost: 9.24
+- ruleKey: engine oil and filter/replace
+  date: '2014-05-18'
+  mileage: 33718
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 89.18
+- ruleKey: rotate tires/perform
+  date: '2014-08-16'
+  mileage: 37241
+  performedBy: self
+  notes: Rotated summer tires 3421
+- ruleKey: engine oil and filter/replace
+  date: '2014-08-18'
+  mileage: 37350
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 26.55
+- ruleKey: engine air filter/replace
+  date: '2014-09-07'
+  mileage: 37807
+  performedBy: self
+  notes: Subaru OEM
+  cost: 28.54
+- ruleKey: rotate tires/perform
+  date: '2014-09-27'
+  mileage: 38499
+  performedBy: self
+  notes: Rotated summer tires 1234
+- ruleKey: brake fluid/replace
+  date: '2015-03-07'
+  mileage: 42180
+  performedBy: self
+  notes: Installed Speed Bleeders SB1010 & Bled brakes
+  cost: 48.56
+- ruleKey: rotate tires/perform
+  date: '2015-03-22'
+  mileage: 42730
+  performedBy: self
+  notes: Rotated summer tires 4312
+- ruleKey: brake pads, linings, parking brake/inspect
+  date: '2015-03-22'
+  mileage: 42730
+  performedBy: self
+  notes: 'Checked brake pads: 7.5mm, 7.6mm, 4.7mm, 4.5mm'
+- ruleKey: engine oil and filter/replace
+  date: '2015-05-16'
+  mileage: 44983
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 34.18
+- ruleKey: rotate tires/perform
+  date: '2015-05-16'
+  mileage: 44983
+  performedBy: self
+  notes: Rotated summer tires 2143
+- ruleKey: rotate tires/perform
+  date: '2015-07-01'
+  mileage: 45980
+  performedBy: self
+  notes: Installed Kosei K63 17x8+50 wheels with Dunlop Direzza ZII SS 245/40r17
+  cost: 1512.02
+- ruleKey: rotate tires/perform
+  date: '2015-07-24'
+  mileage: 46700
+  performedBy: Canyon Automotive
+  notes: Alignment 0* toe, maxed front negative camber
+  cost: 79.95
+- ruleKey: engine oil and filter/replace
+  date: '2015-09-28'
+  mileage: 48550
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 42.72
+- ruleKey: rotate tires/perform
+  date: '2015-11-21'
+  mileage: 49756
+  performedBy: self
+  notes: Swapped to winter wheels
+- ruleKey: rotate tires/perform
+  date: '2016-02-17'
+  mileage: 51506
+  performedBy: self
+  notes: Swapped to autox wheels
+- ruleKey: rotate tires/perform
+  date: '2016-02-22'
+  mileage: 51688
+  performedBy: self
+  notes: Swapped to winter wheels
+- ruleKey: engine oil and filter/replace
+  date: '2016-04-02'
+  mileage: 52522
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 32.97
+- ruleKey: rotate tires/perform
+  date: '2016-04-02'
+  mileage: 52522
+  performedBy: self
+  notes: Swapped to summer wheels 3421
+- ruleKey: rotate tires/perform
+  date: '2016-05-27'
+  mileage: 53900
+  performedBy: self
+  notes: Swapped to autox wheels 3412
+- ruleKey: engine oil and filter/replace
+  date: '2016-07-24'
+  mileage: 56202
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 49.0
+- ruleKey: brake fluid/replace
+  date: '2016-07-24'
+  mileage: 56202
+  performedBy: self
+  notes: 'Subaru DOT-3. Checked pads: FR 5.84i 6.86o, FL 6.63o 6.07i, RL 3.65o 3.13i, RR 3.64o 3.29i'
+  cost: 22.68
+- ruleKey: power steering fluid/replace
+  date: '2016-07-24'
+  mileage: 56202
+  performedBy: self
+  notes: Subaru ATF
+  cost: 7.76
+- ruleKey: brake pads, linings, parking brake/inspect
+  date: '2016-07-24'
+  mileage: 56202
+  performedBy: self
+  notes: 'Checked pads: FR 5.84i 6.86o, FL 6.63o 6.07i, RL 3.65o 3.13i, RR 3.64o 3.29i'
+- ruleKey: cusco type rs rear lsd fluid/replace
+  date: '2016-10-01'
+  mileage: 58246
+  performedBy: self
+  notes: Installed Cusco R160 1.5-Way LSD (1.5-Way, 12 springs, 80%). Redline Gear Oil Full Synthetic 75w90 GL-5, Redline
+    Friction modifier
+  cost: 1470.91
+- ruleKey: cusco type rs rear lsd fluid/replace
+  date: '2016-10-10'
+  mileage: 58878
+  performedBy: self
+  notes: Changed settings (1.5-Way, 4 springs, 80%). Motul Gear 300 LS 75w90 GL-5
+  cost: 23.86
+- ruleKey: engine air filter/replace
+  date: '2016-10-27'
+  mileage: 59720
+  performedBy: self
+  notes: Replaced with accessory belts, spark plugs, cabin air filter
+  cost: 0
+- ruleKey: cabin air filter/replace
+  date: '2016-10-27'
+  mileage: 59720
+  performedBy: self
+  notes: Replaced with accessory belts, spark plugs, engine air filter
+  cost: 0
+- ruleKey: spark plugs/replace
+  date: '2016-10-27'
+  mileage: 59720
+  performedBy: self
+  notes: Replaced with accessory belts, cabin air filter, engine air filter
+  cost: 0
+- ruleKey: accessory belt/replace
+  date: '2016-10-27'
+  mileage: 59720
+  performedBy: self
+  notes: Replaced with spark plugs, cabin air filter, engine air filter
+  cost: 172.07
+- ruleKey: engine oil and filter/replace
+  date: '2016-10-28'
+  mileage: 59950
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 67.93
+- ruleKey: clutch fluid/replace
+  date: '2016-11-20'
+  mileage: 60500
+  performedBy: self
+  notes: Flushed & bled clutch (Subaru DOT-3)
+  cost: 24.76
+- ruleKey: rotate tires/perform
+  date: '2016-12-01'
+  mileage: 60532
+  performedBy: self
+  notes: Installed winter tires 4123
+- ruleKey: transmission / front differential fluid/replace
+  date: '2016-12-04'
+  mileage: 60775
+  performedBy: self
+  notes: Motul Gear 300 75w90 GL-5
+  cost: 90.6
+- ruleKey: brake fluid/replace
+  date: '2017-07-22'
+  mileage: 64040
+  performedBy: self
+  notes: Valvoline DOT 3/4 fluid with big brake install
+  cost: 44.45
+- ruleKey: brake pads, linings, parking brake/replace
+  date: '2017-07-22'
+  mileage: 64040
+  performedBy: self
+  notes: Installed FHI 4/2 piston brake calipers, KNS rear caliper adapters, Stoptech Sport pads, slotted rotors, stainless
+    lines
+  cost: 1859.46
+- ruleKey: engine oil and filter/replace
+  date: '2017-10-21'
+  mileage: 64642
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 38.64
+- ruleKey: engine oil and filter/replace
+  date: '2018-02-04'
+  mileage: 67269
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 40.21
+- ruleKey: cusco type rs rear lsd fluid/replace
+  date: '2018-04-22'
+  mileage: 69197
+  performedBy: self
+  notes: Motul Gear 300 LSD 75w90 GL-5
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2018-07-01'
+  mileage: 71210
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 0
+- ruleKey: rotate tires/perform
+  date: '2018-09-14'
+  mileage: 72300
+  performedBy: self
+  notes: Installed Michelin Pilot Sport 4S 235/45R17 on Koseis
+  cost: 800.0
+- ruleKey: cobb engine air filter/clean
+  date: '2018-11-30'
+  mileage: 74103
+  performedBy: self
+- ruleKey: engine oil and filter/replace
+  date: '2018-12-19'
+  mileage: 74979
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 0
+- ruleKey: rotate tires/perform
+  date: '2018-12-21'
+  mileage: 74979
+  performedBy: self
+  notes: Rotated Blizzak WS80s
+- ruleKey: cobb engine air filter/clean
+  date: '2019-04-12'
+  mileage: 76000
+  performedBy: self
+- ruleKey: brake fluid/replace
+  date: '2019-06-22'
+  mileage: 80975
+  performedBy: self
+  notes: Valvoline Synthetic Dot 3/4
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2019-07-21'
+  mileage: 82862
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 0
+- ruleKey: rotate tires/perform
+  date: '2019-10-15'
+  mileage: 85000
+  performedBy: Tire Rack
+  notes: Blizzak WS90 235/45R17 tires
+- ruleKey: engine oil and filter/replace
+  date: '2020-01-15'
+  mileage: 87947
+  performedBy: self
+  notes: Subaru Synthetic 5W30, Subaru Filter
+  cost: 0
+- ruleKey: cobb engine air filter/clean
+  date: '2020-01-15'
+  mileage: 87947
+  performedBy: self
+- ruleKey: cabin air filter/replace
+  date: '2020-04-22'
+  mileage: 89538
+  performedBy: self
+- ruleKey: engine oil and filter/replace
+  date: '2020-06-06'
+  mileage: 90031
+  performedBy: self
+  notes: Idemitsu Synthetic 5W30, Subaru Filter
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2021-04-17'
+  mileage: 93016
+  performedBy: self
+  notes: Changed during timing belt service
+  cost: 0
+- ruleKey: camshaft belt/replace
+  date: '2021-04-17'
+  mileage: 93016
+  performedBy: self
+  notes: Replaced water pump, timing belt, idler pulleys, tensioner, All C stretch belt. Installed water to oil cooler
+  cost: 0
+- ruleKey: engine coolant/replace
+  date: '2021-04-17'
+  mileage: 93016
+  performedBy: self
+  notes: Replaced during timing belt service
+  cost: 0
+- ruleKey: clutch/replace
+  date: '2023-04-02'
+  mileage: 96066
+  performedBy: self
+  notes: Exedy Stage 1, clutch pressure plate, flywheel, sumo TSK, versus forged clutch fork, versus billet fork pivot, Goodridge
+    stainless line
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2023-08-26'
+  mileage: 97721
+  performedBy: self
+  notes: Idemitsu GL-6 5W30, Subaru Filter
+  cost: 0
+- ruleKey: cusco type rs rear lsd fluid/replace
+  date: '2023-08-26'
+  mileage: 97721
+  performedBy: self
+  notes: Motul Gear 300 LS
+  cost: 0
+- ruleKey: brake fluid/replace
+  date: '2024-08-25'
+  mileage: 102377
+  performedBy: self
+  notes: Dot 3/4
+  cost: 0
+- ruleKey: cusco type rs rear lsd fluid/replace
+  date: '2024-08-25'
+  mileage: 102377
+  performedBy: self
+  notes: Added friction modifier to rear diff
+  cost: 0
+- ruleKey: brake pads, linings, parking brake/replace
+  date: '2024-08-25'
+  mileage: 102377
+  performedBy: self
+  notes: Replaced front brake pads and rotors (Stoptech Sport, Stoptech Slotted)
+  cost: 0
+- ruleKey: engine oil and filter/replace
+  date: '2025-04-22'
+  mileage: 103617
+  performedBy: self
+  notes: Idemitsu GL-6 5W30, Subaru Filter
+  cost: 0
 rules:
-  - item: accessory belt
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-  - item: camshaft belt
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-  - item: camshaft belt
-    verb: replace
-    intervalMiles: 105000
-    intervalMonths: 105
-  - item: engine oil and filter
-    verb: replace
-    intervalMiles: 7500
-    intervalMonths: 7.5
-    severeIntervalMiles: 3750
-    severeIntervalMonths: 3.75
-    notes: >
-      Under Severe driving replace every 3,750 miles.  Turbos must have the
-      synthetic oil service done at least every 3,750 miles or 3 3/4 months
-  - item: engine coolant
-    verb: replace
-    phase: initial
-    intervalMiles: 137500
-    intervalMonths: 132
-    severeIntervalMiles: 137500
-    severeIntervalMonths: 132
-    stopMiles: 137500
-    stopMonths: 132
-    notes: >
-      Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
-      km) after the 1st. If towing replace more often. Use Subaru coolant only,
-      do not mix with other types or it will reduce protection
-  - item: engine coolant
-    verb: replace
-    phase: ongoing
-    intervalMiles: 75000
-    intervalMonths: 72
-    severeIntervalMiles: 75000
-    severeIntervalMonths: 72
-    startMiles: 137500
-    startMonths: 132
-    notes: >
-      Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles
-      (220,000 km). 2nd replacement interval is 6 years/ 75,000 miles (120,000
-      km) after the 1st. If towing replace more often. Use Subaru coolant only,
-      do not mix with other types or it will reduce protection
-  - item: fuel system lines, connections
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 7500
-    severeIntervalMonths: 7.5
-    notes: >
-      under severe driving inspect 7,500-15,000 miles
-  - item: fuel filter
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-    notes: >
-      the filter is in the fuel tank
-  - item: engine air filter
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      under severe driving replace 7,500-15,000 miles
-  - item: spark plugs
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-  - item: transmission / front differential fluid
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-  - item: transmission / front differential fluid
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-    severeIntervalMiles: 30000
-    severeIntervalMonths: 30
-    notes: >
-      under severe driving replace 30,000 miles
-  - item: rear differential fluid
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 30
-  - item: rear differential fluid
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 60
-    severeIntervalMiles: 30000
-    severeIntervalMonths: 30
-    notes: >
-      under severe driving replace 30,000 miles
-    stopMiles: 60000
-    stopMonths: 60
-  - item: brake fluid
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 30
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 15
-    notes: >
-      under severe driving replace 7,500-15,000 miles
-  - item: brake pads, linings, parking brake
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 15
-    notes: >
-      under severe driving replace 7,500-15,000 miles
-  - item: front / rear axle boots, cv joints, axle half shaft
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 15
-    severeIntervalMiles: 7500
-    severeIntervalMonths: 7.5
-    notes: >
-      under severe driving replace 7,500-15,000 miles
-  - item: clutch
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 15
-  - item: steering and suspension
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 15
-    severeIntervalMiles: 7500
-    severeIntervalMonths: 7.5
-    notes: >
-      under severe driving replace 7,500-15,000 miles
-  - item: front / rear wheel bearing lubricant
-    verb: inspect
-    intervalMiles: 60000
-    intervalMonths: 60
-  - item: rotate tires
-    verb: perform
-    intervalMiles: 7500
-  - item: valve clearance
-    verb: inspect
-    intervalMiles: 105000
-    intervalMonths: 105
-  - item: cabin air filter
-    verb: replace
-    intervalMiles: 15000
-    intervalMonths: 24
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 12
-  - item: srs airbags
-    verb: inspect
-    intervalMonths: 120
-  - item: cobb engine air filter
-    verb: inspect
-    intervalMiles: 3750
-    intervalMonths: 3.75
-    aftermarket: yes
-  - item: cobb engine air filter
-    verb: clean
-    intervalMiles: 15000
-    intervalMonths: 15
-    severeIntervalMiles: 7500
-    severeIntervalMonths: 7.5
-    aftermarket: yes
-  - item: cusco type rs rear lsd fluid
-    verb: replace
-    intervalMiles: 10000
-    intervalMonths: 10
-    startMiles: 60000
-    startMonths: 60
-    aftermarket: yes
+- item: accessory belt
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+- item: camshaft belt
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+- item: camshaft belt
+  verb: replace
+  intervalMiles: 105000
+  intervalMonths: 105
+- item: engine oil and filter
+  verb: replace
+  intervalMiles: 7500
+  intervalMonths: 7.5
+  severeIntervalMiles: 3750
+  severeIntervalMonths: 3.75
+  notes: 'Under Severe driving replace every 3,750 miles. Turbos must have the synthetic oil service done at least every
+    3,750 miles or 3 3/4 months'
+- item: engine coolant
+  verb: replace
+  phase: initial
+  intervalMiles: 137500
+  intervalMonths: 132
+  severeIntervalMiles: 137500
+  severeIntervalMonths: 132
+  stopMiles: 137500
+  stopMonths: 132
+  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+    6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
+    other types or it will reduce protection'
+- item: engine coolant
+  verb: replace
+  phase: ongoing
+  intervalMiles: 75000
+  intervalMonths: 72
+  severeIntervalMiles: 75000
+  severeIntervalMonths: 72
+  startMiles: 137500
+  startMonths: 132
+  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+    6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
+    other types or it will reduce protection'
+- item: fuel system lines, connections
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 7500
+  severeIntervalMonths: 7.5
+  notes: 'under severe driving inspect 7,500-15,000 miles'
+- item: fuel filter
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+  notes: 'the filter is in the fuel tank'
+- item: engine air filter
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'under severe driving replace 7,500-15,000 miles'
+- item: spark plugs
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+- item: transmission / front differential fluid
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+- item: transmission / front differential fluid
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+  severeIntervalMiles: 30000
+  severeIntervalMonths: 30
+  notes: 'under severe driving replace 30,000 miles'
+- item: rear differential fluid
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 30
+- item: rear differential fluid
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 60
+  severeIntervalMiles: 30000
+  severeIntervalMonths: 30
+  notes: 'under severe driving replace 30,000 miles'
+  stopMiles: 60000
+  stopMonths: 60
+- item: brake fluid
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 30
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 15
+  notes: 'under severe driving replace 7,500-15,000 miles'
+- item: brake pads, linings, parking brake
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 15
+  notes: 'under severe driving replace 7,500-15,000 miles'
+- item: front / rear axle boots, cv joints, axle half shaft
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 15
+  severeIntervalMiles: 7500
+  severeIntervalMonths: 7.5
+  notes: 'under severe driving replace 7,500-15,000 miles'
+- item: clutch
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 15
+- item: steering and suspension
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 15
+  severeIntervalMiles: 7500
+  severeIntervalMonths: 7.5
+  notes: 'under severe driving replace 7,500-15,000 miles'
+- item: front / rear wheel bearing lubricant
+  verb: inspect
+  intervalMiles: 60000
+  intervalMonths: 60
+- item: rotate tires
+  verb: perform
+  intervalMiles: 7500
+- item: valve clearance
+  verb: inspect
+  intervalMiles: 105000
+  intervalMonths: 105
+- item: cabin air filter
+  verb: replace
+  intervalMiles: 15000
+  intervalMonths: 24
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 12
+- item: srs airbags
+  verb: inspect
+  intervalMonths: 120
+- item: cobb engine air filter
+  verb: inspect
+  intervalMiles: 3750
+  intervalMonths: 3.75
+  aftermarket: true
+- item: cobb engine air filter
+  verb: clean
+  intervalMiles: 15000
+  intervalMonths: 15
+  severeIntervalMiles: 7500
+  severeIntervalMonths: 7.5
+  aftermarket: true
+- item: cusco type rs rear lsd fluid
+  verb: replace
+  intervalMiles: 10000
+  intervalMonths: 10
+  startMiles: 60000
+  startMonths: 60
+  aftermarket: true

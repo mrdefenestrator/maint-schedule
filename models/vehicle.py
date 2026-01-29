@@ -116,6 +116,8 @@ class Vehicle:
         due_soon_miles: float = 1000,
         due_soon_months: float = 1,
         severe: bool = False,
+        miles_only: bool = False,
+        time_only: bool = False,
     ) -> ServiceDue:
         """
         Calculate when a service is due for a given rule.
@@ -129,6 +131,8 @@ class Vehicle:
 
         Args:
             severe: If True, use severe intervals (falls back to normal if not defined)
+            miles_only: If True, only consider mileage-based intervals (ignore time)
+            time_only: If True, only consider time-based intervals (ignore mileage)
         """
         current_miles = self.current_miles
         current_date = date.fromisoformat(self.as_of_date)
@@ -150,6 +154,12 @@ class Vehicle:
         else:
             interval_miles = rule.interval_miles
             interval_months = rule.interval_months
+
+        # Apply miles_only or time_only filters
+        if miles_only:
+            interval_months = None  # Ignore time-based intervals
+        if time_only:
+            interval_miles = None  # Ignore mileage-based intervals
 
         # Calculate due points
         due_miles = calc_due_miles(last_miles, interval_miles, rule.start_miles)
@@ -193,9 +203,27 @@ class Vehicle:
         due_soon_miles: float = 1000,
         due_soon_months: float = 1,
         severe: bool = False,
+        miles_only: bool = False,
+        time_only: bool = False,
+        exclude_verbs: Optional[List[str]] = None,
     ) -> List[ServiceDue]:
-        """Calculate service status for all active rules."""
+        """
+        Calculate service status for all active rules.
+
+        Args:
+            exclude_verbs: List of verbs to exclude (e.g., ["inspect", "rotate"])
+        """
+        # Filter rules if verbs to exclude are specified
+        rules_to_check = self.rules
+        if exclude_verbs:
+            exclude_verbs_lower = [v.lower() for v in exclude_verbs]
+            rules_to_check = [
+                r for r in self.rules if r.verb.lower() not in exclude_verbs_lower
+            ]
+
         return [
-            self.calculate_service_due(rule, due_soon_miles, due_soon_months, severe)
-            for rule in self.rules
+            self.calculate_service_due(
+                rule, due_soon_miles, due_soon_months, severe, miles_only, time_only
+            )
+            for rule in rules_to_check
         ]

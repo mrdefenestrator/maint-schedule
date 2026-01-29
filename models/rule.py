@@ -49,6 +49,14 @@ class Rule:
         """Generate base key from item/verb (without phase)."""
         return f"{self.item}/{self.verb}"
 
+    @property
+    def display_name(self) -> str:
+        """Generate human-readable display name: VERB - item [phase]."""
+        name = f"{self.verb.capitalize()} - {self.item}"
+        if self.phase:
+            name += f" [{self.phase}]"
+        return name
+
     def is_active_at(self, miles: float) -> bool:
         """Check if this rule applies at the given mileage."""
         return self.start_miles <= miles < self.stop_miles
