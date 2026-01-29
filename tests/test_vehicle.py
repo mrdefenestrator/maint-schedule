@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Unit and integration tests for schedule.py
+Tests for Vehicle class.
 
-Tests are organized to verify the documented calculation rules:
+Includes integration tests for the complete service due calculation logic:
 1. Fresh at zero - all systems assumed fresh at 0 miles
 2. Service-based intervals - next due calculated from actual service, not scheduled
 3. Whichever comes first - due when either miles OR time threshold crossed
@@ -10,144 +10,11 @@ Tests are organized to verify the documented calculation rules:
 5. Start/stop thresholds - rules outside current mileage are INACTIVE
 """
 import pytest
-from datetime import date
-from schedule import (
-    Rule, Car, HistoryEntry, Vehicle, Status, ServiceDue,
-    _calc_due_miles, _calc_due_date, _check_status,
-)
+from models import Vehicle, Car, Rule, HistoryEntry, ServiceDue, Status
 
 
 # =============================================================================
-# Unit Tests: Helper Functions
-# =============================================================================
-
-class TestCalcDueMiles:
-    """Tests for _calc_due_miles helper function."""
-
-    def test_with_history(self):
-        """last_miles + interval when history exists."""
-        assert _calc_due_miles(50000, 7500) == 57500
-
-    def test_without_history_default_start(self):
-        """start_miles + interval when no history (default start=0)."""
-        assert _calc_due_miles(None, 7500) == 7500
-
-    def test_without_history_custom_start(self):
-        """start_miles + interval when no history and part added later."""
-        assert _calc_due_miles(None, 10000, start_miles=60000) == 70000
-
-    def test_with_history_ignores_start(self):
-        """start_miles is ignored when history exists."""
-        assert _calc_due_miles(65000, 10000, start_miles=60000) == 75000
-
-    def test_no_interval(self):
-        """None when no interval defined."""
-        assert _calc_due_miles(50000, None) is None
-        assert _calc_due_miles(None, None) is None
-
-
-class TestCalcDueDate:
-    """Tests for _calc_due_date helper function."""
-
-    def test_with_history(self):
-        """last_date + interval_months when history exists."""
-        last = date(2025, 1, 15)
-        result = _calc_due_date(last, 6)
-        assert result == date(2025, 7, 15)
-
-    def test_fractional_months(self):
-        """Handles fractional months (converted to days)."""
-        last = date(2025, 1, 15)
-        result = _calc_due_date(last, 7.5)  # 7 months + 15 days
-        assert result == date(2025, 8, 30)
-
-    def test_without_history(self):
-        """None when no history (can't calculate date-based due)."""
-        assert _calc_due_date(None, 6) is None
-
-    def test_no_interval(self):
-        """None when no interval defined."""
-        assert _calc_due_date(date(2025, 1, 15), None) is None
-
-
-class TestCheckStatus:
-    """Tests for _check_status helper function."""
-
-    def test_overdue(self):
-        """OVERDUE when current >= due."""
-        assert _check_status(100, 90, 10) == Status.OVERDUE
-        assert _check_status(100, 100, 10) == Status.OVERDUE
-
-    def test_due_soon(self):
-        """DUE_SOON when current >= due - threshold."""
-        assert _check_status(95, 100, 10) == Status.DUE_SOON
-        assert _check_status(90, 100, 10) == Status.DUE_SOON
-
-    def test_ok(self):
-        """OK when current < due - threshold."""
-        assert _check_status(80, 100, 10) == Status.OK
-        assert _check_status(0, 100, 10) == Status.OK
-
-
-# =============================================================================
-# Unit Tests: Rule Class
-# =============================================================================
-
-class TestRule:
-    """Tests for Rule class."""
-
-    def test_key_without_phase(self):
-        """Key is item/verb when no phase."""
-        rule = Rule(item="engine oil", verb="replace", interval_miles=7500)
-        assert rule.key == "engine oil/replace"
-
-    def test_key_with_phase(self):
-        """Key includes phase when present."""
-        rule = Rule(item="engine coolant", verb="replace", phase="initial",
-                    interval_miles=137500)
-        assert rule.key == "engine coolant/replace/initial"
-
-    def test_base_key_strips_phase(self):
-        """Base key is always item/verb without phase."""
-        rule = Rule(item="engine coolant", verb="replace", phase="ongoing",
-                    interval_miles=75000)
-        assert rule.base_key == "engine coolant/replace"
-
-    def test_is_active_at_default_range(self):
-        """Rule with default start/stop is always active."""
-        rule = Rule(item="oil", verb="replace", interval_miles=7500)
-        assert rule.is_active_at(0)
-        assert rule.is_active_at(100000)
-        assert rule.is_active_at(500000)
-
-    def test_is_active_at_with_start(self):
-        """Rule with startMiles only activates after threshold."""
-        rule = Rule(item="coolant", verb="replace", interval_miles=75000,
-                    start_miles=137500)
-        assert not rule.is_active_at(100000)
-        assert rule.is_active_at(137500)
-        assert rule.is_active_at(200000)
-
-    def test_is_active_at_with_stop(self):
-        """Rule with stopMiles deactivates at threshold."""
-        rule = Rule(item="coolant", verb="replace", interval_miles=137500,
-                    stop_miles=137500)
-        assert rule.is_active_at(0)
-        assert rule.is_active_at(137499)
-        assert not rule.is_active_at(137500)
-
-    def test_is_active_at_with_start_and_stop(self):
-        """Rule with both start and stop has bounded range."""
-        rule = Rule(item="part", verb="replace", interval_miles=10000,
-                    start_miles=50000, stop_miles=100000)
-        assert not rule.is_active_at(49999)
-        assert rule.is_active_at(50000)
-        assert rule.is_active_at(75000)
-        assert not rule.is_active_at(100000)
-
-
-# =============================================================================
-# Unit Tests: Vehicle Class
+# Unit Tests: Vehicle Properties
 # =============================================================================
 
 class TestVehicleCurrentMiles:

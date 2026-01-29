@@ -1,0 +1,6 @@
+# Development and CI dependencies
+# Install with: uv pip install -r requirements-dev.txt
+
+black>=24.0
+flake8>=7.0
+jsonschema>=4.0

@@ -17,13 +17,32 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 ## Project Structure
 
 ```
-├── schedule.py        # Main Python script with Vehicle, Rule, and HistoryEntry classes
-├── schema.yaml        # YAML schema definition for validation
-├── wrx-rules.yaml     # Vehicle file for a 2012 Subaru WRX (rules + history)
-├── brz-rules.yaml     # Vehicle file for a 2015 Subaru BRZ (rules + history)
-├── requirements.txt   # Python dependencies
-├── setup.sh           # Environment setup script
-└── .mise.toml         # mise configuration (Python + uv versions)
+├── models/                # Data models package
+│   ├── __init__.py        # Package exports
+│   ├── status.py          # Status enum (urgency levels)
+│   ├── car.py             # Car class (vehicle identification)
+│   ├── rule.py            # Rule class (maintenance intervals)
+│   ├── history_entry.py   # HistoryEntry class (service records)
+│   ├── service_due.py     # ServiceDue dataclass (calculated status)
+│   ├── vehicle.py         # Vehicle class (main aggregate)
+│   ├── calculations.py    # Helper functions for due calculations
+│   └── loader.py          # YAML loading utilities
+├── tests/                 # Test files (1:1 with models)
+│   ├── test_status.py
+│   ├── test_car.py
+│   ├── test_rule.py
+│   ├── test_history_entry.py
+│   ├── test_service_due.py
+│   ├── test_vehicle.py
+│   └── test_calculations.py
+├── schedule.py            # CLI: View maintenance schedule status
+├── history.py             # CLI: View maintenance history
+├── schema.yaml            # YAML schema definition for validation
+├── wrx-rules.yaml         # Vehicle file for a 2012 Subaru WRX
+├── brz-rules.yaml         # Vehicle file for a 2015 Subaru BRZ
+├── requirements.txt       # Python dependencies
+├── setup.sh               # Environment setup script
+└── .mise.toml             # mise configuration (Python + uv versions)
 ```
 
 ## Prerequisites
@@ -55,16 +74,36 @@ uv pip install -r requirements.txt
 
 ## Usage
 
+### View Maintenance Schedule
+
 ```bash
 python schedule.py <vehicle-file> [--severe]
 
 # Examples:
 python schedule.py wrx-rules.yaml           # Normal driving intervals
 python schedule.py wrx-rules.yaml --severe  # Severe driving intervals
-python schedule.py brz-rules.yaml
 ```
 
 The `--severe` flag switches to severe driving intervals (shorter intervals for demanding conditions like frequent short trips, dusty environments, towing, etc.). If a rule doesn't define a severe interval, it falls back to the normal interval.
+
+### View Maintenance History
+
+```bash
+python history.py <vehicle-file> [options]
+
+# Examples:
+python history.py wrx-rules.yaml                    # All history
+python history.py wrx-rules.yaml --rule "oil"       # Filter by rule
+python history.py wrx-rules.yaml --since 2023-01-01 # Filter by date
+python history.py wrx-rules.yaml --sort miles       # Sort by mileage
+python history.py wrx-rules.yaml --asc              # Ascending order
+```
+
+**Options:**
+- `--rule <text>` - Filter to rules containing text (case-insensitive)
+- `--since <YYYY-MM-DD>` - Show only entries since date
+- `--sort <date|miles|rule>` - Sort order (default: date)
+- `--asc` - Sort ascending instead of descending
 
 ## Vehicle File Format
 
