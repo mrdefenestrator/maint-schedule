@@ -164,14 +164,15 @@ rules:
   - item: rotate tires
     verb: perform
     intervalMiles: 7500
-    intervalMonths: 7.5
   - item: valve clearance
     verb: inspect
     intervalMiles: 105000
     intervalMonths: 105
   - item: cabin air filter
     verb: replace
+    intervalMiles: 15000
     intervalMonths: 24
+    severeIntervalMiles: 15000
     severeIntervalMonths: 12
   - item: srs airbags
     verb: inspect
