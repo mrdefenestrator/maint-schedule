@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from enum import Enum
 from pathlib import Path
+from tabulate import tabulate
 from typing import List, Optional
 
 
@@ -394,45 +395,57 @@ def main():
     inactive = [s for s in statuses if s.status == Status.INACTIVE]
     unknown = [s for s in statuses if s.status == Status.UNKNOWN]
 
-    def print_service(svc: ServiceDue):
-        parts = [f"  {svc.rule.key}"]
-        if svc.due_miles is not None:
-            parts.append(f"due @ {svc.due_miles:,.0f} mi")
-            if svc.miles_remaining is not None:
-                if svc.miles_remaining < 0:
-                    parts.append(f"({abs(svc.miles_remaining):,.0f} mi overdue)")
-                else:
-                    parts.append(f"({svc.miles_remaining:,.0f} mi remaining)")
-        if svc.due_date is not None:
-            parts.append(f"or by {svc.due_date}")
-        if svc.severe_due_miles is not None:
-            parts.append(f"[severe: {svc.severe_due_miles:,.0f} mi]")
-        print(" - ".join(parts))
+    def format_miles(miles: Optional[float]) -> str:
+        return f"{miles:,.0f}" if miles is not None else "-"
+
+    def format_remaining(svc: ServiceDue) -> str:
+        if svc.miles_remaining is None:
+            return "-"
+        if svc.miles_remaining < 0:
+            return f"-{abs(svc.miles_remaining):,.0f}"
+        return f"{svc.miles_remaining:,.0f}"
+
+    def make_table(services: List[ServiceDue]) -> List[List[str]]:
+        rows = []
+        for svc in services:
+            last_done = "-"
+            if svc.last_service_date or svc.last_service_miles:
+                parts = []
+                if svc.last_service_date:
+                    parts.append(svc.last_service_date)
+                if svc.last_service_miles:
+                    parts.append(f"{svc.last_service_miles:,.0f}")
+                last_done = " @ ".join(parts)
+
+            rows.append([
+                svc.rule.key,
+                last_done,
+                format_miles(svc.due_miles),
+                svc.due_date or "-",
+                format_remaining(svc),
+                format_miles(svc.severe_due_miles),
+            ])
+        return rows
+
+    headers = ["Rule", "Last Done", "Due (mi)", "Due (date)", "Remaining", "Severe"]
 
     if overdue:
         print("OVERDUE:")
-        print("-" * 60)
-        for svc in overdue:
-            print_service(svc)
+        print(tabulate(make_table(overdue), headers=headers, tablefmt="simple"))
         print()
 
     if due_soon:
         print("DUE SOON:")
-        print("-" * 60)
-        for svc in due_soon:
-            print_service(svc)
+        print(tabulate(make_table(due_soon), headers=headers, tablefmt="simple"))
         print()
 
     if ok:
         print("OK:")
-        print("-" * 60)
-        for svc in ok:
-            print_service(svc)
+        print(tabulate(make_table(ok), headers=headers, tablefmt="simple"))
         print()
 
     if unknown:
         print("UNKNOWN (no history):")
-        print("-" * 60)
         for svc in unknown:
             print(f"  {svc.rule.key}")
         print()
