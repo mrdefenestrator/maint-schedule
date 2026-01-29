@@ -66,7 +66,7 @@ def _parse_object(dct):
 def load_vehicle(filename: str) -> Vehicle:
     """Load a vehicle from a YAML file."""
     with open(filename, "rb") as fp:
-        json_data = json.dumps(yaml.load(fp, Loader=yaml.FullLoader), indent=4)
+        json_data = json.dumps(yaml.load(fp, Loader=yaml.SafeLoader), indent=4)
         return json.loads(json_data, object_hook=_parse_object)
 
 
@@ -79,7 +79,7 @@ def save_history_entry(filename: str, entry: HistoryEntry) -> None:
     """
     # Load the raw YAML data (not parsed into objects)
     with open(filename, "r") as fp:
-        data = yaml.load(fp, Loader=yaml.FullLoader)
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
 
     # Ensure history list exists
     if data.get("history") is None:
