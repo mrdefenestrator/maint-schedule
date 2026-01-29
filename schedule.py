@@ -1,8 +1,65 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import yaml
-from datetime import date
+from dataclasses import dataclass
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+from enum import Enum
+from pathlib import Path
 from typing import List, Optional
+
+
+class Status(Enum):
+    """Maintenance status categories. Lower value = more urgent."""
+    OVERDUE = 1
+    DUE_SOON = 2
+    OK = 3
+    INACTIVE = 4  # Rule doesn't apply at current mileage (start/stop)
+    UNKNOWN = 5   # Can't calculate (missing data)
+
+
+def _calc_due_miles(last_miles: Optional[float], interval: Optional[float]) -> Optional[float]:
+    """Calculate next due mileage: last + interval, or just interval if no history."""
+    if interval is None:
+        return None
+    return (last_miles + interval) if last_miles is not None else interval
+
+
+def _calc_due_date(last_date: Optional[date], interval_months: Optional[float]) -> Optional[date]:
+    """Calculate next due date: last + interval months."""
+    if interval_months is None or last_date is None:
+        return None
+    months = int(interval_months)
+    days = int((interval_months - months) * 30)
+    return last_date + relativedelta(months=months, days=days)
+
+
+def _check_status(current: float, due: float, soon_threshold: float) -> Status:
+    """Determine status by comparing current value to due threshold."""
+    if current >= due:
+        return Status.OVERDUE
+    if current >= due - soon_threshold:
+        return Status.DUE_SOON
+    return Status.OK
+
+
+@dataclass
+class ServiceDue:
+    """Calculated service due information for a rule."""
+    rule: 'Rule'
+    status: Status
+    last_service_miles: Optional[float] = None
+    last_service_date: Optional[str] = None
+    due_miles: Optional[float] = None
+    due_date: Optional[str] = None
+    severe_due_miles: Optional[float] = None
+    severe_due_date: Optional[str] = None
+    miles_remaining: Optional[float] = None
+
+    @property
+    def is_due(self) -> bool:
+        return self.status in (Status.OVERDUE, Status.DUE_SOON)
 
 
 class Rule:
@@ -45,6 +102,15 @@ class Rule:
         if self.phase:
             return f"{base}/{self.phase}"
         return base
+
+    @property
+    def base_key(self) -> str:
+        """Generate base key from item/verb (without phase)."""
+        return f"{self.item}/{self.verb}"
+
+    def is_active_at(self, miles: float) -> bool:
+        """Check if this rule applies at the given mileage."""
+        return self.start_miles <= miles < self.stop_miles
 
 
 class Car:
@@ -139,6 +205,91 @@ class Vehicle:
             return None
         return max(entries, key=lambda h: h.date)
 
+    def get_last_service_for_item(self, item: str, verb: str) -> Optional[HistoryEntry]:
+        """
+        Get the most recent service for an item/verb combination,
+        regardless of phase. Used for lifecycle rules where history
+        may be logged under different phases.
+        """
+        base_key = f"{item}/{verb}"
+        matching = [h for h in self.history if h.rule_key.startswith(base_key)]
+        if not matching:
+            return None
+        # Prefer entries with mileage for calculation
+        with_mileage = [h for h in matching if h.mileage is not None]
+        if with_mileage:
+            return max(with_mileage, key=lambda h: (h.date, h.mileage))
+        return max(matching, key=lambda h: h.date)
+
+    def calculate_service_due(self, rule: Rule,
+                               due_soon_miles: float = 1000,
+                               due_soon_months: float = 1) -> ServiceDue:
+        """
+        Calculate when a service is due for a given rule.
+
+        Logic:
+        - If rule is not active at current mileage: status = INACTIVE
+        - Find last service for this item/verb (any phase)
+        - If no history: due at intervalMiles from odometer 0
+        - If has history: due at last_service_miles + intervalMiles
+        - Compare to current miles/date to determine status
+        """
+        current_miles = self.current_miles
+        current_date = date.fromisoformat(self.as_of_date)
+
+        # Check if rule is active at current mileage
+        if not rule.is_active_at(current_miles):
+            return ServiceDue(rule=rule, status=Status.INACTIVE)
+
+        # Find last service (match on item/verb, ignore phase)
+        last_service = self.get_last_service_for_item(rule.item, rule.verb)
+        last_miles = last_service.mileage if last_service else None
+        last_date_str = last_service.date if last_service else None
+        last_date = date.fromisoformat(last_date_str) if last_date_str else None
+
+        # Calculate due points (normal and severe)
+        due_miles = _calc_due_miles(last_miles, rule.interval_miles)
+        severe_due_miles = _calc_due_miles(last_miles, rule.severe_interval_miles)
+        due_date = _calc_due_date(last_date, rule.interval_months)
+        severe_due_date = _calc_due_date(last_date, rule.severe_interval_months)
+
+        # Determine status
+        if due_miles is None and due_date is None:
+            status = Status.UNKNOWN
+        else:
+            status = Status.OK
+            if due_miles is not None:
+                status = _check_status(current_miles, due_miles, due_soon_miles)
+            if due_date is not None:
+                date_status = _check_status(
+                    current_date.toordinal(),
+                    due_date.toordinal(),
+                    int(due_soon_months * 30)
+                )
+                # Escalate status if date check is worse
+                if date_status.value < status.value:  # OVERDUE < DUE_SOON < OK
+                    status = date_status
+
+        miles_remaining = (due_miles - current_miles) if due_miles else None
+
+        return ServiceDue(
+            rule=rule,
+            status=status,
+            last_service_miles=last_miles,
+            last_service_date=last_date_str,
+            due_miles=due_miles,
+            due_date=due_date.isoformat() if due_date else None,
+            severe_due_miles=severe_due_miles,
+            severe_due_date=severe_due_date.isoformat() if severe_due_date else None,
+            miles_remaining=miles_remaining,
+        )
+
+    def get_all_service_status(self, due_soon_miles: float = 1000,
+                                due_soon_months: float = 1) -> List[ServiceDue]:
+        """Calculate service status for all active rules."""
+        return [self.calculate_service_due(rule, due_soon_miles, due_soon_months)
+                for rule in self.rules]
+
 
 def _parse_object(dct):
     """Parse dictionary into appropriate object type."""
@@ -202,23 +353,83 @@ def load_vehicle(filename: str) -> Vehicle:
 
 
 def main():
-    vehicle = load_vehicle('wrx-rules.yaml')
+    parser = argparse.ArgumentParser(
+        description="Vehicle maintenance schedule tracker"
+    )
+    parser.add_argument(
+        "vehicle_file",
+        type=Path,
+        help="Path to vehicle YAML file (e.g., wrx-rules.yaml)"
+    )
+    args = parser.parse_args()
+
+    if not args.vehicle_file.exists():
+        print(f"Error: File not found: {args.vehicle_file}")
+        return 1
+
+    vehicle = load_vehicle(args.vehicle_file)
 
     print(f"Vehicle: {vehicle.car.name}")
-    print(f"Current mileage: {vehicle.current_miles} (as of {vehicle.as_of_date})")
+    print(f"Current mileage: {vehicle.current_miles:,.0f} (as of {vehicle.as_of_date})")
     print(f"Rules: {len(vehicle.rules)}")
     print(f"History entries: {len(vehicle.history)}")
     print()
 
-    print("Maintenance Schedule:")
-    print("-" * 60)
-    for rule in vehicle.rules:
-        interval = []
-        if rule.interval_miles:
-            interval.append(f"{rule.interval_miles:,.0f} mi")
-        if rule.interval_months:
-            interval.append(f"{rule.interval_months} mo")
-        print(f"  {rule.key}: {' / '.join(interval)}")
+    # Get all service statuses
+    statuses = vehicle.get_all_service_status()
+
+    # Group by status
+    overdue = [s for s in statuses if s.status == Status.OVERDUE]
+    due_soon = [s for s in statuses if s.status == Status.DUE_SOON]
+    ok = [s for s in statuses if s.status == Status.OK]
+    inactive = [s for s in statuses if s.status == Status.INACTIVE]
+    unknown = [s for s in statuses if s.status == Status.UNKNOWN]
+
+    def print_service(svc: ServiceDue):
+        parts = [f"  {svc.rule.key}"]
+        if svc.due_miles is not None:
+            parts.append(f"due @ {svc.due_miles:,.0f} mi")
+            if svc.miles_remaining is not None:
+                if svc.miles_remaining < 0:
+                    parts.append(f"({abs(svc.miles_remaining):,.0f} mi overdue)")
+                else:
+                    parts.append(f"({svc.miles_remaining:,.0f} mi remaining)")
+        if svc.due_date is not None:
+            parts.append(f"or by {svc.due_date}")
+        if svc.severe_due_miles is not None:
+            parts.append(f"[severe: {svc.severe_due_miles:,.0f} mi]")
+        print(" - ".join(parts))
+
+    if overdue:
+        print("OVERDUE:")
+        print("-" * 60)
+        for svc in overdue:
+            print_service(svc)
+        print()
+
+    if due_soon:
+        print("DUE SOON:")
+        print("-" * 60)
+        for svc in due_soon:
+            print_service(svc)
+        print()
+
+    if ok:
+        print("OK:")
+        print("-" * 60)
+        for svc in ok:
+            print_service(svc)
+        print()
+
+    if unknown:
+        print("UNKNOWN (no history):")
+        print("-" * 60)
+        for svc in unknown:
+            print(f"  {svc.rule.key}")
+        print()
+
+    if inactive:
+        print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage)")
 
 
 if __name__ == '__main__':

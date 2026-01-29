@@ -56,7 +56,11 @@ uv pip install -r requirements.txt
 ## Usage
 
 ```bash
-python schedule.py
+python schedule.py <vehicle-file>
+
+# Examples:
+python schedule.py wrx-rules.yaml
+python schedule.py brz-rules.yaml
 ```
 
 ## Vehicle File Format
@@ -176,8 +180,45 @@ Some maintenance items have different intervals at different points in the vehic
   startMonths: 132
 ```
 
-## Requirements
+## Service Due Calculation
 
-- Python 3.12+ (managed via mise)
-- PyYAML 6.0+
-- [uv](https://github.com/astral-sh/uv) (installed via mise)
+The system calculates when each service is due based on these rules:
+
+### Core Assumptions
+
+1. **Fresh at zero** - All vehicle systems are assumed fresh when the car was built (0 miles on odometer)
+2. **Service-based intervals** - After any service, the next due is calculated from when you *actually* did it, not when it was scheduled
+3. **Whichever comes first** - Services are due when *either* the mileage OR time threshold is crossed
+
+### Calculation Logic
+
+| Scenario | How "Next Due" is Calculated |
+|----------|------------------------------|
+| No service history | Due at `intervalMiles` on odometer (i.e., 0 + interval) |
+| Has service history | Due at `lastServiceMiles + intervalMiles` |
+| Time-based only (no miles) | Due at `lastServiceDate + intervalMonths` |
+
+### Lifecycle Rules
+
+When looking up service history, the system matches on **item + verb** regardless of phase. This allows lifecycle phases to hand off correctly:
+
+1. You service coolant at 140,000 mi, log as `engine coolant/replace/initial`
+2. At 200,000 mi, the "ongoing" rule is now active (startMiles: 137500)
+3. System finds last coolant service at 140,000 mi (ignoring phase)
+4. Next due: 140,000 + 75,000 = 215,000 mi
+
+### Start/Stop Thresholds
+
+- `startMiles` / `stopMiles` define when a rule is **active**
+- Rules outside the current mileage range are marked **INACTIVE**
+- Use case: Parts that were added later (aftermarket) or removed
+
+### Status Categories
+
+| Status | Meaning |
+|--------|---------|
+| **OVERDUE** | Past due mileage OR past due date |
+| **DUE_SOON** | Within 1,000 miles OR 1 month of due |
+| **OK** | Not yet due |
+| **INACTIVE** | Rule doesn't apply at current mileage |
+| **UNKNOWN** | Cannot calculate (e.g., time-only rule with no history) |
