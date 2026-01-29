@@ -1,0 +1,411 @@
+#!/usr/bin/env python3
+"""
+Unified CLI for vehicle maintenance tracking.
+
+Commands:
+  status  - Show what maintenance is due, overdue, or upcoming
+  history - View service history
+  log     - Add a new service entry
+  rules   - List available maintenance rules
+"""
+
+import argparse
+import sys
+from datetime import date
+from pathlib import Path
+from tabulate import tabulate
+from typing import List, Optional
+
+from models import Status, ServiceDue, HistoryEntry, load_vehicle, save_history_entry
+
+
+# =============================================================================
+# Formatting helpers
+# =============================================================================
+
+def format_miles(miles: Optional[float]) -> str:
+    """Format mileage for display."""
+    return f"{miles:,.0f}" if miles is not None else "-"
+
+
+def format_cost(cost: Optional[float]) -> str:
+    """Format cost for display."""
+    return f"${cost:,.2f}" if cost is not None else "-"
+
+
+def format_remaining(svc: ServiceDue) -> str:
+    """Format remaining miles for display."""
+    if svc.miles_remaining is None:
+        return "-"
+    if svc.miles_remaining < 0:
+        return f"-{abs(svc.miles_remaining):,.0f}"
+    return f"{svc.miles_remaining:,.0f}"
+
+
+def truncate(text: Optional[str], max_len: int = 30) -> str:
+    """Truncate text with ellipsis if too long."""
+    if text is None:
+        return "-"
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3] + "..."
+
+
+# =============================================================================
+# Status command
+# =============================================================================
+
+def make_status_table(services: List[ServiceDue]) -> List[List[str]]:
+    """Convert service status list to table rows."""
+    rows = []
+    for svc in services:
+        last_done = "-"
+        if svc.last_service_date or svc.last_service_miles:
+            parts = []
+            if svc.last_service_date:
+                parts.append(svc.last_service_date)
+            if svc.last_service_miles:
+                parts.append(f"{svc.last_service_miles:,.0f}")
+            last_done = " @ ".join(parts)
+
+        rows.append(
+            [
+                svc.rule.key,
+                last_done,
+                format_miles(svc.due_miles),
+                svc.due_date or "-",
+                format_remaining(svc),
+            ]
+        )
+    return rows
+
+
+def cmd_status(args):
+    """Show what maintenance is due, overdue, or upcoming."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    # Header
+    print(f"Vehicle: {vehicle.car.name}")
+    print(f"Current mileage: {vehicle.current_miles:,.0f} (as of {vehicle.as_of_date})")
+    if args.severe:
+        print("Mode: SEVERE DRIVING (shorter intervals)")
+    print(f"Rules: {len(vehicle.rules)}")
+    print(f"History entries: {len(vehicle.history)}")
+    print()
+
+    # Get all service statuses
+    statuses = vehicle.get_all_service_status(severe=args.severe)
+
+    # Group by status
+    overdue = [s for s in statuses if s.status == Status.OVERDUE]
+    due_soon = [s for s in statuses if s.status == Status.DUE_SOON]
+    ok = [s for s in statuses if s.status == Status.OK]
+    inactive = [s for s in statuses if s.status == Status.INACTIVE]
+    unknown = [s for s in statuses if s.status == Status.UNKNOWN]
+
+    headers = ["Rule", "Last Done", "Due (mi)", "Due (date)", "Remaining"]
+
+    if overdue:
+        print("OVERDUE:")
+        print(tabulate(make_status_table(overdue), headers=headers, tablefmt="simple"))
+        print()
+
+    if due_soon:
+        print("DUE SOON:")
+        print(tabulate(make_status_table(due_soon), headers=headers, tablefmt="simple"))
+        print()
+
+    if ok:
+        print("OK:")
+        print(tabulate(make_status_table(ok), headers=headers, tablefmt="simple"))
+        print()
+
+    if unknown:
+        print("UNKNOWN (no history):")
+        for svc in unknown:
+            print(f"  {svc.rule.key}")
+        print()
+
+    if inactive:
+        print(f"INACTIVE ({len(inactive)} rules not applicable at current mileage)")
+
+    return 0
+
+
+# =============================================================================
+# History command
+# =============================================================================
+
+def make_history_table(entries: List[HistoryEntry]) -> List[List[str]]:
+    """Convert history entries to table rows."""
+    rows = []
+    for entry in entries:
+        rows.append(
+            [
+                entry.date,
+                format_miles(entry.mileage),
+                entry.rule_key,
+                entry.performed_by or "-",
+                format_cost(entry.cost),
+                truncate(entry.notes),
+            ]
+        )
+    return rows
+
+
+def cmd_history(args):
+    """View service history."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    # Get and sort history
+    entries = vehicle.get_history_sorted(sort_by=args.sort, reverse=not args.asc)
+
+    # Apply filters
+    if args.rule:
+        entries = [e for e in entries if args.rule.lower() in e.rule_key.lower()]
+
+    if args.since:
+        entries = [e for e in entries if e.date >= args.since]
+
+    # Calculate summary stats
+    total_cost = sum(e.cost for e in entries if e.cost is not None)
+
+    # Get last service info
+    last_svc = vehicle.last_service
+
+    # Header
+    print(f"Vehicle: {vehicle.car.name}")
+    print(f"Current mileage: {vehicle.current_miles:,.0f} (as of {vehicle.as_of_date})")
+    if last_svc:
+        last_info = f"{last_svc.date}"
+        if last_svc.mileage:
+            last_info += f" @ {last_svc.mileage:,.0f} mi"
+        print(f"Last service: {last_info}")
+    print(f"Total services: {len(vehicle.history)}")
+    if args.rule or args.since:
+        print(f"Showing: {len(entries)} (filtered)")
+    if total_cost > 0:
+        print(f"Total cost: ${total_cost:,.2f}")
+    print()
+
+    if not entries:
+        print("No history entries found.")
+        return 0
+
+    headers = ["Date", "Mileage", "Rule", "Performed By", "Cost", "Notes"]
+    print(tabulate(make_history_table(entries), headers=headers, tablefmt="simple"))
+
+    return 0
+
+
+# =============================================================================
+# Log command
+# =============================================================================
+
+def cmd_log(args):
+    """Add a new service entry."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    # Validate rule key exists
+    rule = vehicle.get_rule(args.rule_key)
+    if rule is None:
+        print(f"Error: Unknown rule key '{args.rule_key}'")
+        print("\nAvailable rules:")
+        for r in vehicle.rules:
+            print(f"  {r.key}")
+        return 1
+
+    # Build the entry
+    entry_date = args.date or date.today().isoformat()
+    entry = HistoryEntry(
+        rule_key=args.rule_key,
+        date=entry_date,
+        mileage=args.mileage,
+        performed_by=args.by,
+        notes=args.notes,
+        cost=args.cost,
+    )
+
+    # Show what will be added
+    print(f"Adding service entry to {args.vehicle_file}:")
+    print(f"  Rule:    {entry.rule_key}")
+    print(f"  Date:    {entry.date}")
+    if entry.mileage:
+        print(f"  Mileage: {entry.mileage:,.0f}")
+    if entry.performed_by:
+        print(f"  By:      {entry.performed_by}")
+    if entry.notes:
+        print(f"  Notes:   {entry.notes}")
+    if entry.cost:
+        print(f"  Cost:    ${entry.cost:.2f}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    # Save the entry
+    save_history_entry(args.vehicle_file, entry)
+    print("Entry saved.")
+
+    return 0
+
+
+# =============================================================================
+# Rules command
+# =============================================================================
+
+def cmd_rules(args):
+    """List available maintenance rules."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    print(f"Vehicle: {vehicle.car.name}")
+    print(f"Rules: {len(vehicle.rules)}")
+    print()
+
+    rows = []
+    for rule in vehicle.rules:
+        interval = []
+        if rule.interval_miles:
+            interval.append(f"{rule.interval_miles:,.0f} mi")
+        if rule.interval_months:
+            interval.append(f"{rule.interval_months} mo")
+        interval_str = " / ".join(interval) if interval else "-"
+
+        severe = []
+        if rule.severe_interval_miles:
+            severe.append(f"{rule.severe_interval_miles:,.0f} mi")
+        if rule.severe_interval_months:
+            severe.append(f"{rule.severe_interval_months} mo")
+        severe_str = " / ".join(severe) if severe else "-"
+
+        rows.append([rule.key, interval_str, severe_str])
+
+    headers = ["Rule Key", "Interval", "Severe Interval"]
+    print(tabulate(rows, headers=headers, tablefmt="simple"))
+
+    return 0
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Vehicle maintenance tracker",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s vehicles/brz.yaml status
+  %(prog)s vehicles/brz.yaml status --severe
+  %(prog)s vehicles/brz.yaml history --rule "oil"
+  %(prog)s vehicles/brz.yaml rules
+  %(prog)s vehicles/brz.yaml log "engine oil and filter/replace" --mileage 58000 --by self
+""",
+    )
+    parser.add_argument(
+        "vehicle_file",
+        type=Path,
+        help="Path to vehicle YAML file",
+    )
+
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Status subcommand
+    status_parser = subparsers.add_parser(
+        "status", help="Show what maintenance is due, overdue, or upcoming"
+    )
+    status_parser.add_argument(
+        "--severe",
+        action="store_true",
+        help="Use severe driving intervals (shorter intervals)",
+    )
+
+    # History subcommand
+    history_parser = subparsers.add_parser("history", help="View service history")
+    history_parser.add_argument(
+        "--rule",
+        type=str,
+        help="Filter to specific rule key (e.g., 'engine oil')",
+    )
+    history_parser.add_argument(
+        "--since",
+        type=str,
+        help="Show only entries since date (YYYY-MM-DD)",
+    )
+    history_parser.add_argument(
+        "--sort",
+        choices=["date", "miles", "rule"],
+        default="date",
+        help="Sort order (default: date)",
+    )
+    history_parser.add_argument(
+        "--asc",
+        action="store_true",
+        help="Sort ascending instead of descending",
+    )
+
+    # Log subcommand
+    log_parser = subparsers.add_parser("log", help="Add a new service entry")
+    log_parser.add_argument(
+        "rule_key",
+        type=str,
+        help="Rule key (e.g., 'engine oil and filter/replace')",
+    )
+    log_parser.add_argument(
+        "--date",
+        type=str,
+        help="Service date in YYYY-MM-DD format (default: today)",
+    )
+    log_parser.add_argument(
+        "--mileage",
+        type=float,
+        help="Mileage at time of service",
+    )
+    log_parser.add_argument(
+        "--by",
+        type=str,
+        help="Who performed the service (e.g., 'self', 'Dealer')",
+    )
+    log_parser.add_argument(
+        "--notes",
+        type=str,
+        help="Notes about the service",
+    )
+    log_parser.add_argument(
+        "--cost",
+        type=float,
+        help="Cost of service",
+    )
+    log_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be added without saving",
+    )
+
+    # Rules subcommand
+    subparsers.add_parser("rules", help="List available maintenance rules")
+
+    args = parser.parse_args()
+
+    # Validate vehicle file exists
+    if not args.vehicle_file.exists():
+        print(f"Error: File not found: {args.vehicle_file}")
+        return 1
+
+    # Dispatch to command handler
+    if args.command == "status":
+        return cmd_status(args)
+    elif args.command == "history":
+        return cmd_history(args)
+    elif args.command == "log":
+        return cmd_log(args)
+    elif args.command == "rules":
+        return cmd_rules(args)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)

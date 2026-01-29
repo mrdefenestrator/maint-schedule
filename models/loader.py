@@ -1,4 +1,4 @@
-"""YAML loading utilities for vehicle data."""
+"""YAML loading and saving utilities for vehicle data."""
 
 import json
 import yaml
@@ -68,3 +68,44 @@ def load_vehicle(filename: str) -> Vehicle:
     with open(filename, "rb") as fp:
         json_data = json.dumps(yaml.load(fp, Loader=yaml.FullLoader), indent=4)
         return json.loads(json_data, object_hook=_parse_object)
+
+
+def save_history_entry(filename: str, entry: HistoryEntry) -> None:
+    """
+    Append a history entry to a vehicle YAML file.
+
+    Loads the raw YAML, appends the entry to the history list,
+    and writes back to the file.
+    """
+    # Load the raw YAML data (not parsed into objects)
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.FullLoader)
+
+    # Ensure history list exists
+    if data.get("history") is None:
+        data["history"] = []
+
+    # Build the entry dict, omitting None values for cleaner YAML
+    entry_dict = {"ruleKey": entry.rule_key, "date": entry.date}
+    if entry.mileage is not None:
+        entry_dict["mileage"] = entry.mileage
+    if entry.performed_by is not None:
+        entry_dict["performedBy"] = entry.performed_by
+    if entry.notes is not None:
+        entry_dict["notes"] = entry.notes
+    if entry.cost is not None:
+        entry_dict["cost"] = entry.cost
+
+    # Append the new entry
+    data["history"].append(entry_dict)
+
+    # Write back to file
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
