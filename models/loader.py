@@ -112,3 +112,33 @@ def save_history_entry(filename: Union[str, Path], entry: HistoryEntry) -> None:
             sort_keys=False,
             width=120,
         )
+
+
+def save_current_miles(filename: Union[str, Path], miles: float) -> None:
+    """
+    Update the current mileage in the state section of a vehicle YAML file.
+
+    Loads the raw YAML, updates state.currentMiles,
+    and writes back to the file.
+    """
+    # Load the raw YAML data (not parsed into objects)
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    # Ensure state section exists
+    if data.get("state") is None:
+        data["state"] = {}
+
+    # Update the current miles
+    data["state"]["currentMiles"] = miles
+
+    # Write back to file
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )

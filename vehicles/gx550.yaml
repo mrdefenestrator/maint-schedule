@@ -1,4 +1,3 @@
----
 car:
   make: Lexus
   model: GX 550
@@ -6,364 +5,312 @@ car:
   year: 2024
   purchaseDate: '2025-08-13'
   purchaseMiles: 3
-
 state:
-  # currentMiles auto-computed from history if not set
-  # asOfDate defaults to today if not set
-
+  currentMiles: 5818.0
 history:
-  # 2025
-  - ruleKey: engine oil and filter/replace
-    date: '2026-01-13'
-    mileage: 5520
-    performedBy: Lexus Greenwood Village
-    notes: "First service - 6 month/5,000 mile service"
-    cost: 203.58
-  - ruleKey: tires/rotate
-    date: '2026-01-13'
-    mileage: 5520
-    performedBy: Lexus Greenwood Village
-    notes: "Complimentary tire rotation"
-    cost: 0
-  - ruleKey: brake pads and discs/inspect
-    date: '2026-01-13'
-    mileage: 5520
-    performedBy: Lexus Greenwood Village
-    notes: "Complimentary inspection of brakes, fluid levels, wipers, etc"
-    cost: 0
-
+- ruleKey: engine oil and filter/replace
+  date: '2026-01-13'
+  mileage: 5520
+  performedBy: Lexus Greenwood Village
+  notes: First service - 6 month/5,000 mile service
+  cost: 203.58
+- ruleKey: tires/rotate
+  date: '2026-01-13'
+  mileage: 5520
+  performedBy: Lexus Greenwood Village
+  notes: Complimentary tire rotation
+  cost: 0
+- ruleKey: brake pads and discs/inspect
+  date: '2026-01-13'
+  mileage: 5520
+  performedBy: Lexus Greenwood Village
+  notes: Complimentary inspection of brakes, fluid levels, wipers, etc
+  cost: 0
 rules:
-  # Engine Oil and Filter - Normal Conditions
-  - item: engine oil and filter
-    verb: replace
-    intervalMiles: 10000
-    intervalMonths: 12
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Replace every 12 months or 10,000 miles, or when oil maintenance reminder
-      appears, whichever comes first. Under special operating conditions (driving
-      on dirt/dusty roads, repeated trips less than 5 miles below 32°F, extensive
-      idling/low-speed driving), replace every 6 months or 5,000 miles.
+- item: engine oil and filter
+  verb: replace
+  intervalMiles: 10000
+  intervalMonths: 12
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Replace every 12 months or 10,000 miles, or when oil maintenance reminder appears, whichever comes first. Under
+    special operating conditions (driving on dirt/dusty roads, repeated trips less than 5 miles below 32°F, extensive idling/low-speed
+    driving), replace every 6 months or 5,000 miles.
 
-  # Tire Rotation
-  - item: tires
-    verb: rotate
-    intervalMiles: 5000
-    intervalMonths: 6
-    notes: >
-      Rotate tires every 6 months or 5,000 miles, whichever comes first.
+    '
+- item: tires
+  verb: rotate
+  intervalMiles: 5000
+  intervalMonths: 6
+  notes: 'Rotate tires every 6 months or 5,000 miles, whichever comes first.
 
-  # Brake Pads and Discs
-  - item: brake pads and discs
-    verb: inspect
-    intervalMiles: 5000
-    intervalMonths: 6
-    notes: >
-      Inspect brake pads and rotors for excessive wear. Check brake rotors for
-      runout. Check brake calipers for fluid leakage.
+    '
+- item: brake pads and discs
+  verb: inspect
+  intervalMiles: 5000
+  intervalMonths: 6
+  notes: 'Inspect brake pads and rotors for excessive wear. Check brake rotors for runout. Check brake calipers for fluid
+    leakage.
 
-  # Brake Fluid
-  - item: brake fluid
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Replace brake fluid every 36 months or 30,000 miles, whichever comes first.
+    '
+- item: brake fluid
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Replace brake fluid every 36 months or 30,000 miles, whichever comes first.
 
-  # Wiper Blades
-  - item: wiper blades
-    verb: inspect
-    intervalMiles: 5000
-    intervalMonths: 6
-    notes: >
-      Visually inspect wiper blades for wear and damage.
+    '
+- item: wiper blades
+  verb: inspect
+  intervalMiles: 5000
+  intervalMonths: 6
+  notes: 'Visually inspect wiper blades for wear and damage.
 
-  # Engine Air Filter
-  - item: engine air filter
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 36
-    severeIntervalMiles: 15000
-    severeIntervalMonths: 18
-    notes: >
-      Replace every 36 months or 30,000 miles. When driving in dusty conditions,
-      inspect and replace more frequently.
+    '
+- item: engine air filter
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 36
+  severeIntervalMiles: 15000
+  severeIntervalMonths: 18
+  notes: 'Replace every 36 months or 30,000 miles. When driving in dusty conditions, inspect and replace more frequently.
 
-  # Cabin Air Filter
-  - item: cabin air filter
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Replace every 36 months or 30,000 miles. More frequent replacement may be
-      required when driving in dusty conditions or heavy traffic areas.
+    '
+- item: cabin air filter
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Replace every 36 months or 30,000 miles. More frequent replacement may be required when driving in dusty conditions
+    or heavy traffic areas.
 
-  # Engine Coolant/Intercooler Coolant - Initial
-  - item: engine coolant
-    verb: replace
-    phase: initial
-    intervalMiles: 100000
-    intervalMonths: 120
-    stopMiles: 100000
-    stopMonths: 120
-    notes: >
-      Initial replacement at 120 months (10 years) or 100,000 miles, whichever
-      comes first. Use Genuine Toyota Super Long-Life Coolant or similar
-      high-quality non-silicate, non-amine, non-nitrate, non-borate
-      ethylene-glycol coolant with long-life hybrid organic acid technology.
+    '
+- item: engine coolant
+  verb: replace
+  phase: initial
+  intervalMiles: 100000
+  intervalMonths: 120
+  stopMiles: 100000
+  stopMonths: 120
+  notes: 'Initial replacement at 120 months (10 years) or 100,000 miles, whichever comes first. Use Genuine Toyota Super Long-Life
+    Coolant or similar high-quality non-silicate, non-amine, non-nitrate, non-borate ethylene-glycol coolant with long-life
+    hybrid organic acid technology.
 
-  # Engine Coolant/Intercooler Coolant - Ongoing
-  - item: engine coolant
-    verb: replace
-    phase: ongoing
-    intervalMiles: 50000
-    intervalMonths: 60
-    startMiles: 100000
-    startMonths: 120
-    notes: >
-      After initial replacement, replace every 60 months (5 years) or 50,000
-      miles, whichever comes first. Use Genuine Toyota Super Long-Life Coolant
-      or similar high-quality coolant.
+    '
+- item: engine coolant
+  verb: replace
+  phase: ongoing
+  intervalMiles: 50000
+  intervalMonths: 60
+  startMiles: 100000
+  startMonths: 120
+  notes: 'After initial replacement, replace every 60 months (5 years) or 50,000 miles, whichever comes first. Use Genuine
+    Toyota Super Long-Life Coolant or similar high-quality coolant.
 
-  # Engine Coolant - Inspection
-  - item: engine coolant
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Visually check engine coolant level on see-through reservoir. Add coolant
-      as necessary. Check radiator and condenser for blockage.
+    '
+- item: engine coolant
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Visually check engine coolant level on see-through reservoir. Add coolant as necessary. Check radiator and condenser
+    for blockage.
 
-  # Spark Plugs
-  - item: spark plugs
-    verb: replace
-    intervalMiles: 40000
-    intervalMonths: 48
-    notes: >
-      Replace spark plugs every 48 months or 40,000 miles, whichever comes first.
-      Required under the terms of the Emission Control Warranty.
+    '
+- item: spark plugs
+  verb: replace
+  intervalMiles: 40000
+  intervalMonths: 48
+  notes: 'Replace spark plugs every 48 months or 40,000 miles, whichever comes first. Required under the terms of the Emission
+    Control Warranty.
 
-  # Drive Belt
-  - item: drive belt
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Inspect for cracks, excessive wear and oiliness. Check belt tension and
-      adjust if necessary. Replace if damaged.
+    '
+- item: drive belt
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Inspect for cracks, excessive wear and oiliness. Check belt tension and adjust if necessary. Replace if damaged.
 
-  # Ball Joints and Dust Covers
-  - item: ball joints and dust covers
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Check suspension and steering linkage ball joints for looseness and damage.
-      Check all dust covers for deterioration and damage. For off-road or dusty
-      conditions, inspect every 5,000 miles or 6 months.
+    '
+- item: ball joints and dust covers
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Check suspension and steering linkage ball joints for looseness and damage. Check all dust covers for deterioration
+    and damage. For off-road or dusty conditions, inspect every 5,000 miles or 6 months.
 
-  # Drive Shaft Boots
-  - item: drive shaft boots
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Inspect drive shaft boots for damage and leakage. For off-road or dusty
-      conditions, inspect every 5,000 miles or 6 months.
+    '
+- item: drive shaft boots
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Inspect drive shaft boots for damage and leakage. For off-road or dusty conditions, inspect every 5,000 miles or
+    6 months.
 
-  # Propeller Shaft Boots
-  - item: propeller shaft boots
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Inspect propeller shaft boots for damage. For off-road or dusty conditions,
-      inspect every 5,000 miles or 6 months.
+    '
+- item: propeller shaft boots
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Inspect propeller shaft boots for damage. For off-road or dusty conditions, inspect every 5,000 miles or 6 months.
 
-  # Propeller Shaft
-  - item: propeller shaft
-    verb: lubricate
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Lubricate propeller shaft spiders and slide yokes with lithium-base chassis
-      grease and double cardan joint with molybdenum-disulfide lithium-base
-      chassis grease. Re-torque flange nuts and bolts. If vehicle is submerged,
-      lubricate within 24 hours regardless of maintenance interval.
+    '
+- item: propeller shaft
+  verb: lubricate
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Lubricate propeller shaft spiders and slide yokes with lithium-base chassis grease and double cardan joint with
+    molybdenum-disulfide lithium-base chassis grease. Re-torque flange nuts and bolts. If vehicle is submerged, lubricate
+    within 24 hours regardless of maintenance interval.
 
-  # Propeller Shaft
-  - item: propeller shaft
-    verb: tighten
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Tighten propeller shaft flange nuts and bolts to specified torque.
+    '
+- item: propeller shaft
+  verb: tighten
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Tighten propeller shaft flange nuts and bolts to specified torque.
 
-  # Brake Lines and Hoses
-  - item: brake lines and hoses
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Visually inspect for proper installation, chafing, cracks, deterioration
-      and signs of leakage. Replace any deteriorated or damaged parts.
+    '
+- item: brake lines and hoses
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Visually inspect for proper installation, chafing, cracks, deterioration and signs of leakage. Replace any deteriorated
+    or damaged parts.
 
-  # Brake Rotor Thickness and Runout
-  - item: brake rotor thickness and runout
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Check brake rotors for thickness and runout at major service intervals.
+    '
+- item: brake rotor thickness and runout
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Check brake rotors for thickness and runout at major service intervals.
 
-  # Exhaust Pipes and Mountings
-  - item: exhaust pipes and mountings
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Visually inspect exhaust pipes, muffler and hangers for cracks,
-      deterioration and damage. Listen for exhaust leakage.
+    '
+- item: exhaust pipes and mountings
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Visually inspect exhaust pipes, muffler and hangers for cracks, deterioration and damage. Listen for exhaust leakage.
 
-  # Front Differential Oil
-  - item: front differential oil
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Check for correct oil level and inspect for signs of leakage.
+    '
+- item: front differential oil
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Check for correct oil level and inspect for signs of leakage.
 
-  # Front Differential Oil
-  - item: front differential oil
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 72
-    severeIntervalMiles: 30000
-    severeIntervalMonths: 36
-    notes: >
-      Replace under severe conditions (towing, car-top carrier, heavy loading,
-      extensive idling/low-speed driving) every 30,000 miles or 36 months.
+    '
+- item: front differential oil
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 72
+  severeIntervalMiles: 30000
+  severeIntervalMonths: 36
+  notes: 'Replace under severe conditions (towing, car-top carrier, heavy loading, extensive idling/low-speed driving) every
+    30,000 miles or 36 months.
 
-  # Rear Differential Oil
-  - item: rear differential oil
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Check for correct oil level and inspect for signs of leakage.
+    '
+- item: rear differential oil
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Check for correct oil level and inspect for signs of leakage.
 
-  # Rear Differential Oil
-  - item: rear differential oil
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 72
-    severeIntervalMiles: 30000
-    severeIntervalMonths: 36
-    notes: >
-      Replace under severe conditions (towing, car-top carrier, heavy loading,
-      extensive idling/low-speed driving) every 30,000 miles or 36 months.
+    '
+- item: rear differential oil
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 72
+  severeIntervalMiles: 30000
+  severeIntervalMonths: 36
+  notes: 'Replace under severe conditions (towing, car-top carrier, heavy loading, extensive idling/low-speed driving) every
+    30,000 miles or 36 months.
 
-  # Transfer Case Oil
-  - item: transfer case oil
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Check transfer case oil level at specified intervals.
+    '
+- item: transfer case oil
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Check transfer case oil level at specified intervals.
 
-  # Transfer Case Oil
-  - item: transfer case oil
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 72
-    severeIntervalMiles: 30000
-    severeIntervalMonths: 36
-    notes: >
-      Replace under severe conditions (off-road, towing, heavy loading) every
-      30,000 miles or 36 months.
+    '
+- item: transfer case oil
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 72
+  severeIntervalMiles: 30000
+  severeIntervalMonths: 36
+  notes: 'Replace under severe conditions (off-road, towing, heavy loading) every 30,000 miles or 36 months.
 
-  # Transmission Fluid
-  - item: transmission fluid
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Inspect transmission for signs of leakage. Check transmission fluid cooler
-      hoses and connections.
+    '
+- item: transmission fluid
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Inspect transmission for signs of leakage. Check transmission fluid cooler hoses and connections.
 
-  # Transmission Fluid
-  - item: transmission fluid
-    verb: replace
-    intervalMiles: 60000
-    intervalMonths: 72
-    severeIntervalMiles: 60000
-    severeIntervalMonths: 72
-    notes: >
-      Replace under severe conditions (towing, car-top carrier, heavy loading,
-      extensive idling/low-speed driving) every 60,000 miles or 72 months.
+    '
+- item: transmission fluid
+  verb: replace
+  intervalMiles: 60000
+  intervalMonths: 72
+  severeIntervalMiles: 60000
+  severeIntervalMonths: 72
+  notes: 'Replace under severe conditions (towing, car-top carrier, heavy loading, extensive idling/low-speed driving) every
+    60,000 miles or 72 months.
 
-  # Fuel Lines and Connections
-  - item: fuel lines and connections
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Visually inspect fuel lines, connections, fuel tank band and fuel tank
-      vapor vent system hoses for corrosion, damage, cracks and loose or leaking
-      connections.
+    '
+- item: fuel lines and connections
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Visually inspect fuel lines, connections, fuel tank band and fuel tank vapor vent system hoses for corrosion, damage,
+    cracks and loose or leaking connections.
 
-  # Fuel Tank Cap Gasket
-  - item: fuel tank cap gasket
-    verb: inspect
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Visually inspect for cracks, deterioration and damage. Replace if necessary.
+    '
+- item: fuel tank cap gasket
+  verb: inspect
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Visually inspect for cracks, deterioration and damage. Replace if necessary.
 
-  # Rack-and-Pinion Assembly
-  - item: rack-and-pinion assembly
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Inspect for signs of leakage, damage and loose electrical connections. For
-      off-road or dusty conditions, inspect every 5,000 miles or 6 months.
+    '
+- item: rack-and-pinion assembly
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Inspect for signs of leakage, damage and loose electrical connections. For off-road or dusty conditions, inspect
+    every 5,000 miles or 6 months.
 
-  # Smart Key Battery
-  - item: Smart Key battery
-    verb: replace
-    intervalMiles: 30000
-    intervalMonths: 36
-    notes: >
-      Replace Smart Key battery every 36 months or 30,000 miles.
+    '
+- item: Smart Key battery
+  verb: replace
+  intervalMiles: 30000
+  intervalMonths: 36
+  notes: 'Replace Smart Key battery every 36 months or 30,000 miles.
 
-  # Body Inspection
-  - item: body
-    verb: inspect
-    intervalMiles: 15000
-    intervalMonths: 18
-    notes: >
-      Visually check for corrosion, scratches and other damage. Check outer body
-      panels, inner panels, hood, doors and underneath vehicle. Apply touch-up
-      paint to chips and scratches.
+    '
+- item: body
+  verb: inspect
+  intervalMiles: 15000
+  intervalMonths: 18
+  notes: 'Visually check for corrosion, scratches and other damage. Check outer body panels, inner panels, hood, doors and
+    underneath vehicle. Apply touch-up paint to chips and scratches.
 
-  # Nuts and Bolts on Chassis
-  - item: nuts and bolts on chassis
-    verb: tighten
-    intervalMiles: 30000
-    intervalMonths: 36
-    severeIntervalMiles: 5000
-    severeIntervalMonths: 6
-    notes: >
-      Check tightness of seat-mounting bolts and front/rear suspension-member
-      retaining bolts. For off-road, towing, or heavy loading conditions, tighten
-      every 5,000 miles or 6 months.
+    '
+- item: nuts and bolts on chassis
+  verb: tighten
+  intervalMiles: 30000
+  intervalMonths: 36
+  severeIntervalMiles: 5000
+  severeIntervalMonths: 6
+  notes: 'Check tightness of seat-mounting bolts and front/rear suspension-member retaining bolts. For off-road, towing, or
+    heavy loading conditions, tighten every 5,000 miles or 6 months.
+
+    '

@@ -1,4 +1,3 @@
----
 car:
   make: Honda
   model: CBR600RR
@@ -6,367 +5,321 @@ car:
   year: 2007
   purchaseDate: '2013-08-15'
   purchaseMiles: 14719
-
 state:
-  # currentMiles auto-computed from history if not set
-  # asOfDate defaults to today if not set
-
+  currentMiles: 23500.0
 history:
-  # 2013
-  - ruleKey: drive chain/lubricate
-    date: '2013-08-17'
-    mileage: 14785
-    performedBy: self
-    notes: "Cleaned chain and bike. Chain slack measured at 1.75\""
-    cost: 45.00
-  - ruleKey: drive chain/lubricate
-    date: '2013-08-22'
-    mileage: 14960
-    performedBy: self
-    notes: "Adjusted chain slack to 1.25\""
-    cost: 30.00
-  - ruleKey: air cleaner/inspect
-    date: '2013-08-24'
-    mileage: 14977
-    performedBy: self
-    notes: "Replaced Air Filter with Honda OEM"
-    cost: 56.00
-  - ruleKey: engine oil/replace/ongoing
-    date: '2013-08-25'
-    mileage: 15040
-    performedBy: self
-    notes: "Changed oil & filter (Honda filter & Honda GN4 10W-40 3.4qt)"
-    cost: 34.10
-  - ruleKey: drive chain/lubricate
-    date: '2013-09-22'
-    mileage: 15500
-    performedBy: self
-    notes: "Cleaned chain. Chain slack measured at 1.50\""
-  - ruleKey: drive chain/lubricate
-    date: '2013-10-11'
-    mileage: 15870
-    performedBy: self
-    notes: "Adjusted chain slack to 1 1/8\""
-
-  # 2014
-  - ruleKey: valve clearance/inspect
-    date: '2014-01-11'
-    mileage: 16078
-    performedBy: self
-    notes: "Adjusted valve shimming, all valves were just within tolerances but are now dead on. Replaced cylinder head cover seal, bolt seals."
-    cost: 14.68
-  - ruleKey: radiator coolant/replace
-    date: '2014-01-11'
-    mileage: 16078
-    performedBy: self
-    notes: "Replaced lower coolant hose from water pump, replaced radiator overflow and one other hose. Flushed cooling system with distilled water x2. Replaced coolant (Honda HP Coolant)"
-    cost: 31.37
-  - ruleKey: drive chain/lubricate
-    date: '2014-02-22'
-    mileage: 16225
-    performedBy: self
-    notes: "Cleaned & lubed chain, adjusted slack to 1 1/8\", Filled tires"
-  - ruleKey: brake fluid/replace
-    date: '2014-02-22'
-    mileage: 16225
-    performedBy: self
-    notes: "Flushed & bled brakes with Motul RBF600 DOT 4 Fluid"
-    cost: 28.16
-  - ruleKey: engine oil/replace/ongoing
-    date: '2014-07-13'
-    mileage: 17930
-    performedBy: self
-    notes: "Changed oil & filter (Honda filter & Honda GN4 10W-40 3.2qt)"
-  - ruleKey: drive chain/lubricate
-    date: '2014-07-28'
-    mileage: 18320
-    performedBy: self
-    notes: "Adjusted chain to 1.25\" Slack, Tightened rear axel to proper torque - 83 ft-lb (was low)"
-  - ruleKey: steering head bearings/inspect
-    date: '2014-07-28'
-    mileage: 18320
-    performedBy: self
-    notes: "Tightened head stem nut to proper torque - 75 ft-lb (was low)"
-  - ruleKey: drive chain/lubricate
-    date: '2014-10-23'
-    mileage: 18953
-    performedBy: self
-    notes: "Adjusted chain. Inspected front sprocket, found minor hooking, think that it is the cause of noise."
-  - ruleKey: brake fluid/replace
-    date: '2014-11-22'
-    mileage: 19090
-    performedBy: self
-    notes: "Installed speed bleeder valves on front & rear brakes. Flushed & bled front & rear brakes with Motul DOT 5.1"
-    cost: 15.00
-
-  # 2015
-  - ruleKey: engine oil/replace/ongoing
-    date: '2015-05-17'
-    mileage: 19328
-    performedBy: self
-    notes: "Changed oil & filter (Honda filter & Honda GN4 10W-40 3.1qt)"
-  - ruleKey: drive chain/lubricate
-    date: '2015-05-17'
-    mileage: 19652
-    performedBy: self
-    notes: "Cleaned & lubed chain, adjusted slack to 1 1/8\""
-
-  # 2016
-  - ruleKey: drive chain/lubricate
-    date: '2016-10-24'
-    mileage: 20800
-    performedBy: self
-    notes: "Adjusted chain slack"
-  - ruleKey: drive chain/lubricate
-    date: '2016-10-24'
-    mileage: 21018
-    performedBy: self
-    notes: "Chain maintenance during clutch cover re-seal"
-
-  # 2017
-  - ruleKey: drive chain/lubricate
-    date: '2017-03-06'
-    mileage: 21153
-    performedBy: self
-    notes: "Replaced chain, sprockets (DID 525VXGB-112, OEM front & rear sprockets)"
-  - ruleKey: engine oil/replace/ongoing
-    date: '2017-03-06'
-    mileage: 21153
-    performedBy: self
-    notes: "Changed oil & filter (Honda filter & Honda GN4 10W-40 3.1qt)"
-
-  # 2019
-  - ruleKey: brake fluid/replace
-    date: '2019-06-22'
-    mileage: 22185
-    performedBy: self
-    notes: "Flushed and bled brakes (Motul Dot 5.1)"
-
-  # 2020
-  - ruleKey: brake pads/inspect
-    date: '2020-04-11'
-    mileage: 22347
-    performedBy: self
-    notes: "Replaced rear brake disk and pads"
-  - ruleKey: brake fluid/replace
-    date: '2020-04-11'
-    mileage: 22347
-    performedBy: self
-    notes: "Flushed and bled brakes (Motul Dot 5.1)"
-
+- ruleKey: drive chain/lubricate
+  date: '2013-08-17'
+  mileage: 14785
+  performedBy: self
+  notes: Cleaned chain and bike. Chain slack measured at 1.75"
+  cost: 45.0
+- ruleKey: drive chain/lubricate
+  date: '2013-08-22'
+  mileage: 14960
+  performedBy: self
+  notes: Adjusted chain slack to 1.25"
+  cost: 30.0
+- ruleKey: air cleaner/inspect
+  date: '2013-08-24'
+  mileage: 14977
+  performedBy: self
+  notes: Replaced Air Filter with Honda OEM
+  cost: 56.0
+- ruleKey: engine oil/replace/ongoing
+  date: '2013-08-25'
+  mileage: 15040
+  performedBy: self
+  notes: Changed oil & filter (Honda filter & Honda GN4 10W-40 3.4qt)
+  cost: 34.1
+- ruleKey: drive chain/lubricate
+  date: '2013-09-22'
+  mileage: 15500
+  performedBy: self
+  notes: Cleaned chain. Chain slack measured at 1.50"
+- ruleKey: drive chain/lubricate
+  date: '2013-10-11'
+  mileage: 15870
+  performedBy: self
+  notes: Adjusted chain slack to 1 1/8"
+- ruleKey: valve clearance/inspect
+  date: '2014-01-11'
+  mileage: 16078
+  performedBy: self
+  notes: Adjusted valve shimming, all valves were just within tolerances but are now dead on. Replaced cylinder head cover
+    seal, bolt seals.
+  cost: 14.68
+- ruleKey: radiator coolant/replace
+  date: '2014-01-11'
+  mileage: 16078
+  performedBy: self
+  notes: Replaced lower coolant hose from water pump, replaced radiator overflow and one other hose. Flushed cooling system
+    with distilled water x2. Replaced coolant (Honda HP Coolant)
+  cost: 31.37
+- ruleKey: drive chain/lubricate
+  date: '2014-02-22'
+  mileage: 16225
+  performedBy: self
+  notes: Cleaned & lubed chain, adjusted slack to 1 1/8", Filled tires
+- ruleKey: brake fluid/replace
+  date: '2014-02-22'
+  mileage: 16225
+  performedBy: self
+  notes: Flushed & bled brakes with Motul RBF600 DOT 4 Fluid
+  cost: 28.16
+- ruleKey: engine oil/replace/ongoing
+  date: '2014-07-13'
+  mileage: 17930
+  performedBy: self
+  notes: Changed oil & filter (Honda filter & Honda GN4 10W-40 3.2qt)
+- ruleKey: drive chain/lubricate
+  date: '2014-07-28'
+  mileage: 18320
+  performedBy: self
+  notes: Adjusted chain to 1.25" Slack, Tightened rear axel to proper torque - 83 ft-lb (was low)
+- ruleKey: steering head bearings/inspect
+  date: '2014-07-28'
+  mileage: 18320
+  performedBy: self
+  notes: Tightened head stem nut to proper torque - 75 ft-lb (was low)
+- ruleKey: drive chain/lubricate
+  date: '2014-10-23'
+  mileage: 18953
+  performedBy: self
+  notes: Adjusted chain. Inspected front sprocket, found minor hooking, think that it is the cause of noise.
+- ruleKey: brake fluid/replace
+  date: '2014-11-22'
+  mileage: 19090
+  performedBy: self
+  notes: Installed speed bleeder valves on front & rear brakes. Flushed & bled front & rear brakes with Motul DOT 5.1
+  cost: 15.0
+- ruleKey: engine oil/replace/ongoing
+  date: '2015-05-17'
+  mileage: 19328
+  performedBy: self
+  notes: Changed oil & filter (Honda filter & Honda GN4 10W-40 3.1qt)
+- ruleKey: drive chain/lubricate
+  date: '2015-05-17'
+  mileage: 19652
+  performedBy: self
+  notes: Cleaned & lubed chain, adjusted slack to 1 1/8"
+- ruleKey: drive chain/lubricate
+  date: '2016-10-24'
+  mileage: 20800
+  performedBy: self
+  notes: Adjusted chain slack
+- ruleKey: drive chain/lubricate
+  date: '2016-10-24'
+  mileage: 21018
+  performedBy: self
+  notes: Chain maintenance during clutch cover re-seal
+- ruleKey: drive chain/lubricate
+  date: '2017-03-06'
+  mileage: 21153
+  performedBy: self
+  notes: Replaced chain, sprockets (DID 525VXGB-112, OEM front & rear sprockets)
+- ruleKey: engine oil/replace/ongoing
+  date: '2017-03-06'
+  mileage: 21153
+  performedBy: self
+  notes: Changed oil & filter (Honda filter & Honda GN4 10W-40 3.1qt)
+- ruleKey: brake fluid/replace
+  date: '2019-06-22'
+  mileage: 22185
+  performedBy: self
+  notes: Flushed and bled brakes (Motul Dot 5.1)
+- ruleKey: brake pads/inspect
+  date: '2020-04-11'
+  mileage: 22347
+  performedBy: self
+  notes: Replaced rear brake disk and pads
+- ruleKey: brake fluid/replace
+  date: '2020-04-11'
+  mileage: 22347
+  performedBy: self
+  notes: Flushed and bled brakes (Motul Dot 5.1)
 rules:
-  # Engine Oil - Initial Service
-  - item: engine oil
-    verb: replace
-    phase: initial
-    intervalMiles: 600
-    intervalMonths: 1
-    stopMiles: 600
-    stopMonths: 1
-    notes: >
-      Initial oil change at 600 miles (1,000 km) or 1 month, whichever comes first.
+- item: engine oil
+  verb: replace
+  phase: initial
+  intervalMiles: 600
+  intervalMonths: 1
+  stopMiles: 600
+  stopMonths: 1
+  notes: 'Initial oil change at 600 miles (1,000 km) or 1 month, whichever comes first.
 
-  # Engine Oil - Regular Service
-  - item: engine oil
-    verb: replace
-    phase: ongoing
-    intervalMiles: 8000
-    intervalMonths: 12
-    startMiles: 600
-    startMonths: 1
-    notes: >
-      Replace every 8,000 miles (12,800 km) or 12 months, whichever comes first.
+    '
+- item: engine oil
+  verb: replace
+  phase: ongoing
+  intervalMiles: 8000
+  intervalMonths: 12
+  startMiles: 600
+  startMonths: 1
+  notes: 'Replace every 8,000 miles (12,800 km) or 12 months, whichever comes first.
 
-  # Engine Oil Filter
-  - item: engine oil filter
-    verb: replace
-    intervalMiles: 4000
-    notes: >
-      Replace oil filter every other oil change (4,000 mile intervals).
+    '
+- item: engine oil filter
+  verb: replace
+  intervalMiles: 4000
+  notes: 'Replace oil filter every other oil change (4,000 mile intervals).
 
-  # Drive Chain
-  - item: drive chain
-    verb: lubricate
-    intervalMiles: 500
-    notes: >
-      Lubricate and adjust drive chain every 500 miles (800 km). Check more
-      frequently when riding in wet or dusty conditions.
+    '
+- item: drive chain
+  verb: lubricate
+  intervalMiles: 500
+  notes: 'Lubricate and adjust drive chain every 500 miles (800 km). Check more frequently when riding in wet or dusty conditions.
 
-  # Fuel Line
-  - item: fuel line
-    verb: inspect
-    intervalMiles: 1000
-    stopMiles: 1000
-    notes: >
-      Inspect fuel line at first service (1,000 miles), then every 4,000 miles.
+    '
+- item: fuel line
+  verb: inspect
+  intervalMiles: 1000
+  stopMiles: 1000
+  notes: 'Inspect fuel line at first service (1,000 miles), then every 4,000 miles.
 
-  # Fuel Line - Ongoing
-  - item: fuel line
-    verb: inspect
-    intervalMiles: 4000
-    startMiles: 1000
-    notes: >
-      Inspect fuel line for cracks, leaks, and loose connections.
+    '
+- item: fuel line
+  verb: inspect
+  intervalMiles: 4000
+  startMiles: 1000
+  notes: 'Inspect fuel line for cracks, leaks, and loose connections.
 
-  # Throttle Operation
-  - item: throttle operation
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect throttle operation for smooth operation and proper return.
+    '
+- item: throttle operation
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect throttle operation for smooth operation and proper return.
 
-  # Air Cleaner
-  - item: air cleaner
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect air cleaner element. Service more frequently when riding in
-      unusually wet or dusty areas.
+    '
+- item: air cleaner
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect air cleaner element. Service more frequently when riding in unusually wet or dusty areas.
 
-  # Spark Plug - Inspect
-  - item: spark plug
-    verb: inspect
-    intervalMiles: 16000
-    notes: >
-      Inspect spark plugs every 16,000 miles (25,600 km).
+    '
+- item: spark plug
+  verb: inspect
+  intervalMiles: 16000
+  notes: 'Inspect spark plugs every 16,000 miles (25,600 km).
 
-  # Spark Plug - Replace
-  - item: spark plug
-    verb: replace
-    intervalMiles: 32000
-    notes: >
-      Replace spark plugs every 32,000 miles (51,200 km).
+    '
+- item: spark plug
+  verb: replace
+  intervalMiles: 32000
+  notes: 'Replace spark plugs every 32,000 miles (51,200 km).
 
-  # Valve Clearance
-  - item: valve clearance
-    verb: inspect
-    intervalMiles: 16000
-    notes: >
-      Inspect and adjust valve clearance every 16,000 miles. Should be serviced
-      by an authorized Honda dealer unless owner has proper tools and service
-      data and is mechanically qualified.
+    '
+- item: valve clearance
+  verb: inspect
+  intervalMiles: 16000
+  notes: 'Inspect and adjust valve clearance every 16,000 miles. Should be serviced by an authorized Honda dealer unless owner
+    has proper tools and service data and is mechanically qualified.
 
-  # Radiator Coolant
-  - item: radiator coolant
-    verb: replace
-    intervalMiles: 8000
-    intervalMonths: 24
-    notes: >
-      Replace every 2 years or at indicated odometer interval (8,000 miles),
-      whichever comes first. Replacement requires mechanical skill.
+    '
+- item: radiator coolant
+  verb: replace
+  intervalMiles: 8000
+  intervalMonths: 24
+  notes: 'Replace every 2 years or at indicated odometer interval (8,000 miles), whichever comes first. Replacement requires
+    mechanical skill.
 
-  # Cooling System
-  - item: cooling system
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect cooling system hoses and connections for leaks and damage.
+    '
+- item: cooling system
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect cooling system hoses and connections for leaks and damage.
 
-  # Secondary Air Supply System
-  - item: secondary air supply system
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect secondary air supply system for proper operation.
+    '
+- item: secondary air supply system
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect secondary air supply system for proper operation.
 
-  # Evaporative Emission Control System
-  - item: evaporative emission control system
-    verb: inspect
-    intervalMiles: 12000
-    notes: >
-      Inspect evaporative emission control system (California type only).
+    '
+- item: evaporative emission control system
+  verb: inspect
+  intervalMiles: 12000
+  notes: 'Inspect evaporative emission control system (California type only).
 
-  # EGCV Cable
-  - item: EGCV cable
-    verb: inspect
-    intervalMiles: 16000
-    notes: >
-      Inspect EGCV (Exhaust Gas Control Valve) cable every 16,000 miles
-      (25,600 km).
+    '
+- item: EGCV cable
+  verb: inspect
+  intervalMiles: 16000
+  notes: 'Inspect EGCV (Exhaust Gas Control Valve) cable every 16,000 miles (25,600 km).
 
-  # Brake Fluid - Inspect
-  - item: brake fluid
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect brake fluid level and condition every 4,000 miles.
+    '
+- item: brake fluid
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect brake fluid level and condition every 4,000 miles.
 
-  # Brake Fluid - Replace
-  - item: brake fluid
-    verb: replace
-    intervalMiles: 8000
-    intervalMonths: 24
-    notes: >
-      Replace every 2 years or at indicated odometer interval (8,000 miles),
-      whichever comes first. Replacement requires mechanical skill.
+    '
+- item: brake fluid
+  verb: replace
+  intervalMiles: 8000
+  intervalMonths: 24
+  notes: 'Replace every 2 years or at indicated odometer interval (8,000 miles), whichever comes first. Replacement requires
+    mechanical skill.
 
-  # Brake Pads Wear
-  - item: brake pads
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect brake pads for wear and damage.
+    '
+- item: brake pads
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect brake pads for wear and damage.
 
-  # Brake System
-  - item: brake system
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect brake system operation, hoses, and connections.
+    '
+- item: brake system
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect brake system operation, hoses, and connections.
 
-  # Brake Light Switch
-  - item: brake light switch
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect brake light switch operation.
+    '
+- item: brake light switch
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect brake light switch operation.
 
-  # Headlight Aim
-  - item: headlight aim
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect and adjust headlight aim.
+    '
+- item: headlight aim
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect and adjust headlight aim.
 
-  # Clutch System
-  - item: clutch system
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect clutch system operation and adjustment.
+    '
+- item: clutch system
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect clutch system operation and adjustment.
 
-  # Sidestand
-  - item: sidestand
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect sidestand operation and return spring.
+    '
+- item: sidestand
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect sidestand operation and return spring.
 
-  # Suspension
-  - item: suspension
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect suspension for smooth operation, leaks, and damage.
+    '
+- item: suspension
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect suspension for smooth operation, leaks, and damage.
 
-  # Nuts, Bolts, Fasteners
-  - item: nuts, bolts, fasteners
-    verb: inspect
-    intervalMiles: 4000
-    notes: >
-      Inspect and tighten all nuts, bolts, and fasteners.
+    '
+- item: nuts, bolts, fasteners
+  verb: inspect
+  intervalMiles: 4000
+  notes: 'Inspect and tighten all nuts, bolts, and fasteners.
 
-  # Wheels/Tires
-  - item: wheels and tires
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect wheels and tires for damage, wear, and proper pressure.
+    '
+- item: wheels and tires
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect wheels and tires for damage, wear, and proper pressure.
 
-  # Steering Head Bearings
-  - item: steering head bearings
-    verb: inspect
-    intervalMiles: 8000
-    notes: >
-      Inspect steering head bearings for smooth operation and proper adjustment.
-      Should be serviced by an authorized Honda dealer.
+    '
+- item: steering head bearings
+  verb: inspect
+  intervalMiles: 8000
+  notes: 'Inspect steering head bearings for smooth operation and proper adjustment. Should be serviced by an authorized Honda
+    dealer.
+
+    '

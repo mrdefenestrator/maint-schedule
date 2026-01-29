@@ -75,9 +75,30 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
+## Testing
+
+Run the test suite with pytest:
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run a specific test file
+python -m pytest tests/test_vehicle.py -v
+
+# Run CI checks (lint, format, test, validate)
+./ci.sh
+```
+
+The project includes comprehensive tests for all models and calculations:
+- **Unit tests** for data models (`Car`, `Rule`, `HistoryEntry`, `Status`, `ServiceDue`)
+- **Integration tests** for service due calculations (mileage, time, lifecycle rules, severe mode)
+- **Calculation tests** for due date/mileage logic and status determination
+- All tests maintain 1:1 correspondence with model files in `models/`
+
 ## Usage
 
-The `maint.py` CLI provides four commands: `status`, `history`, `log`, and `rules`.
+The `maint.py` CLI provides five commands: `status`, `history`, `log`, `update-miles`, and `rules`.
 
 ### View Maintenance Status
 
@@ -128,6 +149,21 @@ python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.0
 - `--cost <number>` - Cost of service
 - `--dry-run` - Show what would be added without saving
 
+### Update Current Mileage
+
+```bash
+python maint.py <vehicle-file> update-miles <mileage> [options]
+
+# Examples:
+python maint.py vehicles/wrx.yaml update-miles 95000
+python maint.py vehicles/wrx.yaml update-miles 95000 --dry-run
+```
+
+This command updates the `currentMiles` field in the vehicle's `state` section. The mileage is used to calculate which services are due. The date is automatically set to today.
+
+**Options:**
+- `--dry-run` - Show what would be updated without saving
+
 ### List Maintenance Rules
 
 ```bash
@@ -157,11 +193,17 @@ car:
 
 ```yaml
 state:
-  # currentMiles auto-computed from history if not set
+  currentMiles: 95000
   # asOfDate defaults to today if not set
 ```
 
-The `currentMiles` is automatically computed as the maximum mileage from the history log. You can override it by setting an explicit value.
+The `currentMiles` field represents the current odometer reading and is used to calculate which services are due. If not explicitly set, it is automatically computed as the maximum mileage from the history log.
+
+To update the current mileage without logging a service, use the `update-miles` command:
+
+```bash
+python maint.py vehicles/wrx.yaml update-miles 95000
+```
 
 ### Maintenance History
 

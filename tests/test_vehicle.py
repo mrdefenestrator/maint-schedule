@@ -179,6 +179,7 @@ class TestServiceDueCalculation:
 
         assert result.status == Status.OVERDUE
         assert result.miles_remaining == 6500  # Still has miles remaining
+        assert result.time_remaining_days < 0  # Overdue by time
         # Due date was ~Aug 2024, now Jan 2025
 
     def test_due_soon_by_miles(self, car):
@@ -195,6 +196,41 @@ class TestServiceDueCalculation:
 
         assert result.status == Status.DUE_SOON
         assert result.miles_remaining == 700
+
+    def test_time_remaining_calculation(self, car):
+        """time_remaining_days is calculated correctly for time-based intervals."""
+        rule = Rule(item="oil", verb="replace", interval_miles=7500, interval_months=6)
+        vehicle = Vehicle(
+            car=car,
+            rules=[rule],
+            history=[HistoryEntry("oil/replace", "2025-01-15", mileage=90000)],
+            state_current_miles=91000,
+            state_as_of_date="2025-03-15",  # 2 months later
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        # Due date is 2025-07-15 (6 months after last service)
+        # Current date is 2025-03-15
+        # Remaining: ~4 months = ~120 days
+        assert result.time_remaining_days is not None
+        assert result.time_remaining_days > 100
+        assert result.time_remaining_days < 130
+
+    def test_time_remaining_none_for_miles_only_rule(self, car):
+        """time_remaining_days is None when rule has no time interval."""
+        rule = Rule(item="tires", verb="rotate", interval_miles=7500)
+        vehicle = Vehicle(
+            car=car,
+            rules=[rule],
+            history=[HistoryEntry("tires/rotate", "2025-01-15", mileage=90000)],
+            state_current_miles=91000,
+            state_as_of_date="2025-03-15",
+        )
+
+        result = vehicle.calculate_service_due(rule)
+
+        assert result.time_remaining_days is None
 
     def test_lifecycle_rule_initial_phase(self, car):
         """Initial phase rule active before threshold."""

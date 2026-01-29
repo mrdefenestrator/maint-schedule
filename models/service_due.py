@@ -22,6 +22,7 @@ class ServiceDue:
     severe_due_miles: Optional[float] = None
     severe_due_date: Optional[str] = None
     miles_remaining: Optional[float] = None
+    time_remaining_days: Optional[int] = None
 
     @property
     def is_due(self) -> bool:

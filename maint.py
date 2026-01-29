@@ -3,10 +3,11 @@
 Unified CLI for vehicle maintenance tracking.
 
 Commands:
-  status  - Show what maintenance is due, overdue, or upcoming
-  history - View service history
-  log     - Add a new service entry
-  rules   - List available maintenance rules
+  status       - Show what maintenance is due, overdue, or upcoming
+  history      - View service history
+  log          - Add a new service entry
+  update-miles - Update current vehicle mileage
+  rules        - List available maintenance rules
 """
 
 import argparse
@@ -16,7 +17,14 @@ from pathlib import Path
 from tabulate import tabulate
 from typing import List, Optional
 
-from models import Status, ServiceDue, HistoryEntry, load_vehicle, save_history_entry
+from models import (
+    Status,
+    ServiceDue,
+    HistoryEntry,
+    load_vehicle,
+    save_history_entry,
+    save_current_miles,
+)
 
 # =============================================================================
 # Formatting helpers
@@ -40,6 +48,29 @@ def format_remaining(svc: ServiceDue) -> str:
     if svc.miles_remaining < 0:
         return f"-{abs(svc.miles_remaining):,.0f}"
     return f"{svc.miles_remaining:,.0f}"
+
+
+def format_time_remaining(svc: ServiceDue) -> str:
+    """Format remaining time for display (e.g., '3mo 15d' or '-2mo 5d')."""
+    if svc.time_remaining_days is None:
+        return "-"
+
+    days = svc.time_remaining_days
+    if days < 0:
+        # Overdue - show as negative
+        days = abs(days)
+        months = days // 30
+        remaining_days = days % 30
+        if months > 0:
+            return f"-{months}mo {remaining_days}d"
+        return f"-{days}d"
+    else:
+        # Future - show as positive
+        months = days // 30
+        remaining_days = days % 30
+        if months > 0:
+            return f"{months}mo {remaining_days}d"
+        return f"{days}d"
 
 
 def truncate(text: Optional[str], max_len: int = 30) -> str:
@@ -76,6 +107,7 @@ def make_status_table(services: List[ServiceDue]) -> List[List[str]]:
                 format_miles(svc.due_miles),
                 svc.due_date or "-",
                 format_remaining(svc),
+                format_time_remaining(svc),
             ]
         )
     return rows
@@ -104,7 +136,14 @@ def cmd_status(args):
     inactive = [s for s in statuses if s.status == Status.INACTIVE]
     unknown = [s for s in statuses if s.status == Status.UNKNOWN]
 
-    headers = ["Rule", "Last Done", "Due (mi)", "Due (date)", "Remaining"]
+    headers = [
+        "Rule",
+        "Last Done",
+        "Due (mi)",
+        "Due (date)",
+        "Remaining (mi)",
+        "Remaining (time)",
+    ]
 
     if overdue:
         print("OVERDUE:")
@@ -258,6 +297,33 @@ def cmd_log(args):
 
 
 # =============================================================================
+# Update Miles command
+# =============================================================================
+
+
+def cmd_update_miles(args):
+    """Update current vehicle mileage."""
+    vehicle = load_vehicle(args.vehicle_file)
+    old_miles = vehicle.current_miles
+
+    # Show what will be updated
+    print(f"Vehicle: {vehicle.car.name}")
+    print(f"Current mileage: {old_miles:,.0f}")
+    print(f"New mileage:     {args.mileage:,.0f}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    # Save the new mileage
+    save_current_miles(args.vehicle_file, args.mileage)
+    print("Mileage updated.")
+
+    return 0
+
+
+# =============================================================================
 # Rules command
 # =============================================================================
 
@@ -310,6 +376,7 @@ Examples:
   %(prog)s vehicles/brz.yaml history --rule "oil"
   %(prog)s vehicles/brz.yaml rules
   %(prog)s vehicles/brz.yaml log "oil/replace" --mileage 58000 --by self
+  %(prog)s vehicles/brz.yaml update-miles 58000
 """,
     )
     parser.add_argument(
@@ -392,6 +459,21 @@ Examples:
         help="Show what would be added without saving",
     )
 
+    # Update Miles subcommand
+    update_miles_parser = subparsers.add_parser(
+        "update-miles", help="Update current vehicle mileage"
+    )
+    update_miles_parser.add_argument(
+        "mileage",
+        type=float,
+        help="Current mileage",
+    )
+    update_miles_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be updated without saving",
+    )
+
     # Rules subcommand
     subparsers.add_parser("rules", help="List available maintenance rules")
 
@@ -409,6 +491,8 @@ Examples:
         return cmd_history(args)
     elif args.command == "log":
         return cmd_log(args)
+    elif args.command == "update-miles":
+        return cmd_update_miles(args)
     elif args.command == "rules":
         return cmd_rules(args)
 

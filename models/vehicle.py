@@ -173,6 +173,7 @@ class Vehicle:
                     status = date_status
 
         miles_remaining = (due_miles - current_miles) if due_miles else None
+        time_remaining_days = (due_date - current_date).days if due_date else None
 
         return ServiceDue(
             rule=rule,
@@ -184,6 +185,7 @@ class Vehicle:
             severe_due_miles=None,
             severe_due_date=None,
             miles_remaining=miles_remaining,
+            time_remaining_days=time_remaining_days,
         )
 
     def get_all_service_status(
