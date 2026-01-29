@@ -1,6 +1,9 @@
 """YAML loading and saving utilities for vehicle data."""
 
 import json
+from pathlib import Path
+from typing import Any, Dict, Union
+
 import yaml
 
 from .car import Car
@@ -9,7 +12,7 @@ from .history_entry import HistoryEntry
 from .vehicle import Vehicle
 
 
-def _parse_object(dct):
+def _parse_object(dct: Dict[str, Any]) -> Union[Car, Rule, HistoryEntry, Vehicle, dict]:
     """Parse dictionary into appropriate object type."""
     # Car object (inside 'car' key)
     if "make" in dct and "model" in dct:
@@ -63,14 +66,14 @@ def _parse_object(dct):
         return dct
 
 
-def load_vehicle(filename: str) -> Vehicle:
+def load_vehicle(filename: Union[str, Path]) -> Vehicle:
     """Load a vehicle from a YAML file."""
     with open(filename, "rb") as fp:
         json_data = json.dumps(yaml.load(fp, Loader=yaml.SafeLoader), indent=4)
         return json.loads(json_data, object_hook=_parse_object)
 
 
-def save_history_entry(filename: str, entry: HistoryEntry) -> None:
+def save_history_entry(filename: Union[str, Path], entry: HistoryEntry) -> None:
     """
     Append a history entry to a vehicle YAML file.
 
