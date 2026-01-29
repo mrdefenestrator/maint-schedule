@@ -35,13 +35,16 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 │   ├── test_service_due.py
 │   ├── test_vehicle.py
 │   └── test_calculations.py
-├── schedule.py            # CLI: View maintenance schedule status
-├── history.py             # CLI: View maintenance history
-├── schema.yaml            # YAML schema definition for validation
-├── wrx-rules.yaml         # Vehicle file for a 2012 Subaru WRX
-├── brz-rules.yaml         # Vehicle file for a 2015 Subaru BRZ
-├── requirements.txt       # Python dependencies
+├── vehicles/              # Vehicle YAML files
+│   ├── wrx.yaml           # 2012 Subaru WRX
+│   └── brz.yaml           # 2015 Subaru BRZ
+├── maint.py               # Unified CLI for all commands
+├── validate_yaml.py       # Schema validation script
+├── schema.yaml            # YAML schema definition
+├── requirements.txt       # Runtime dependencies
+├── requirements-dev.txt   # Development/CI dependencies
 ├── setup.sh               # Environment setup script
+├── ci.sh                  # CI checks (lint, test, validate)
 └── .mise.toml             # mise configuration (Python + uv versions)
 ```
 
@@ -74,14 +77,16 @@ uv pip install -r requirements.txt
 
 ## Usage
 
-### View Maintenance Schedule
+The `maint.py` CLI provides four commands: `status`, `history`, `log`, and `rules`.
+
+### View Maintenance Status
 
 ```bash
-python schedule.py <vehicle-file> [--severe]
+python maint.py <vehicle-file> status [--severe]
 
 # Examples:
-python schedule.py wrx-rules.yaml           # Normal driving intervals
-python schedule.py wrx-rules.yaml --severe  # Severe driving intervals
+python maint.py vehicles/wrx.yaml status           # Normal driving intervals
+python maint.py vehicles/wrx.yaml status --severe  # Severe driving intervals
 ```
 
 The `--severe` flag switches to severe driving intervals (shorter intervals for demanding conditions like frequent short trips, dusty environments, towing, etc.). If a rule doesn't define a severe interval, it falls back to the normal interval.
@@ -89,14 +94,14 @@ The `--severe` flag switches to severe driving intervals (shorter intervals for 
 ### View Maintenance History
 
 ```bash
-python history.py <vehicle-file> [options]
+python maint.py <vehicle-file> history [options]
 
 # Examples:
-python history.py wrx-rules.yaml                    # All history
-python history.py wrx-rules.yaml --rule "oil"       # Filter by rule
-python history.py wrx-rules.yaml --since 2023-01-01 # Filter by date
-python history.py wrx-rules.yaml --sort miles       # Sort by mileage
-python history.py wrx-rules.yaml --asc              # Ascending order
+python maint.py vehicles/wrx.yaml history                    # All history
+python maint.py vehicles/wrx.yaml history --rule "oil"       # Filter by rule
+python maint.py vehicles/wrx.yaml history --since 2023-01-01 # Filter by date
+python maint.py vehicles/wrx.yaml history --sort miles       # Sort by mileage
+python maint.py vehicles/wrx.yaml history --asc              # Ascending order
 ```
 
 **Options:**
@@ -104,6 +109,33 @@ python history.py wrx-rules.yaml --asc              # Ascending order
 - `--since <YYYY-MM-DD>` - Show only entries since date
 - `--sort <date|miles|rule>` - Sort order (default: date)
 - `--asc` - Sort ascending instead of descending
+
+### Log a Service Entry
+
+```bash
+python maint.py <vehicle-file> log <rule-key> [options]
+
+# Examples:
+python maint.py vehicles/wrx.yaml log "engine oil and filter/replace" --mileage 95000 --by self
+python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.00 --dry-run
+```
+
+**Options:**
+- `--date <YYYY-MM-DD>` - Service date (default: today)
+- `--mileage <number>` - Odometer reading at time of service
+- `--by <text>` - Who performed the service (e.g., "self", "Dealer")
+- `--notes <text>` - Additional details
+- `--cost <number>` - Cost of service
+- `--dry-run` - Show what would be added without saving
+
+### List Maintenance Rules
+
+```bash
+python maint.py <vehicle-file> rules
+
+# Example:
+python maint.py vehicles/brz.yaml rules
+```
 
 ## Vehicle File Format
 
