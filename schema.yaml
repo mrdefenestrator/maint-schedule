@@ -24,6 +24,13 @@ properties:
           type: string
         verb:
           type: string
+        phase:
+          type: string
+          enum: [initial, ongoing]
+          description: >
+            Lifecycle phase for rules that have different intervals at different
+            stages of the vehicle's life. Used to disambiguate rules with the
+            same item/verb combination. Optional for rules that apply throughout.
         intervalMiles:
           type: number
         intervalMonths:
@@ -52,8 +59,7 @@ properties:
       required:
         - item
         - verb
-        - intervalMiles
-        - intervalMonths
+        # At least one of intervalMiles or intervalMonths should be provided
 required:
   - make
   - model

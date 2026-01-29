@@ -8,6 +8,7 @@ from types import SimpleNamespace
 class Rule:
     item: str
     verb: str
+    phase: str  # Optional: "initial" or "ongoing" for lifecycle rules
     interval_miles: float
     interval_months: float
     severe_interval_miles: float
@@ -28,6 +29,7 @@ class Rule:
             severe_interval_miles,
             severe_interval_months,
             notes,
+            phase=None,
             start_miles=0,
             stop_miles=999999999,
             start_months=0,
@@ -36,6 +38,7 @@ class Rule:
     ):
         self.item = item
         self.verb = verb
+        self.phase = phase
         self.interval_miles = interval_miles
         self.interval_months = interval_months
         self.severe_interval_miles = severe_interval_miles
@@ -46,6 +49,14 @@ class Rule:
         self.start_months = start_months
         self.stop_months = stop_months
         self.aftermarket = aftermarket
+
+    @property
+    def key(self):
+        """Generate natural key from item/verb/phase."""
+        base = f"{self.item}/{self.verb}"
+        if self.phase:
+            return f"{base}/{self.phase}"
+        return base
 
 
 class Car:
@@ -93,6 +104,7 @@ def as_car(dct):
             dct.get('severeIntervalMiles'),
             dct.get('severeIntervalMonths'),
             dct.get('notes'),
+            dct.get('phase'),
             dct.get('startMiles'),
             dct.get('stopMiles'),
             dct.get('startMonths'),
@@ -119,10 +131,7 @@ def main():
     car = load_yaml_file('wrx-rules.yaml')
 
     for rule in car.rules:
-        print(rule.verb, rule.item, rule.interval_miles)
-
-    for x in range(10):
-        print(car.rules[0].interval_miles * x)
+        print(f"{rule.key}: {rule.interval_miles} miles / {rule.interval_months} months")
 
 
 if __name__ == '__main__':

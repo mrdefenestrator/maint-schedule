@@ -30,6 +30,7 @@ rules:
       synthetic oil service done at least every 3,750 miles or 3 3/4 months
   - item: engine coolant
     verb: replace
+    phase: initial
     intervalMiles: 137500
     intervalMonths: 132
     severeIntervalMiles: 137500
@@ -43,6 +44,7 @@ rules:
       do not mix with other types or it will reduce protection
   - item: engine coolant
     verb: replace
+    phase: ongoing
     intervalMiles: 75000
     intervalMonths: 72
     severeIntervalMiles: 75000

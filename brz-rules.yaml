@@ -22,6 +22,7 @@ rules:
       whichever comes first
   - item: engine coolant
     verb: replace
+    phase: initial
     intervalMiles: 137500
     intervalMonths: 132
     severeIntervalMiles: 137500
@@ -35,6 +36,7 @@ rules:
       do not mix with other types or it will reduce protection
   - item: engine coolant
     verb: replace
+    phase: ongoing
     intervalMiles: 75000
     intervalMonths: 72
     severeIntervalMiles: 75000
@@ -63,8 +65,8 @@ rules:
     verb: replace
     intervalMiles: 72000
     intervalMonths: 72
-    intervalMiles: 60000
-    intervalMonths: 60
+    severeIntervalMiles: 60000
+    severeIntervalMonths: 60
     notes: >
       the filter is in the fuel tank, under extremely cold or hot weather
       replace the filter more often
