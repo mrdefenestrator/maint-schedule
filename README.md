@@ -23,20 +23,31 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 └── setup.sh           # Environment setup script
 ```
 
+## Prerequisites
+
+- [mise](https://mise.jdx.dev/) - Runtime version manager
+
 ## Setup
 
 ```bash
-# Create and activate virtual environment
+# Install mise if you haven't already
+# See https://mise.jdx.dev/getting-started.html
+
+# Run setup script (installs Python via mise, creates venv, installs deps with uv)
 ./setup.sh
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 Or manually:
 
 ```bash
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Install tools via mise
+mise install
+
+# Create venv and install dependencies
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 ## Usage
@@ -133,5 +144,6 @@ Some maintenance items have different intervals at different points in the vehic
 
 ## Requirements
 
-- Python 3.x
-- PyYAML 5.1.2
+- Python 3.12+ (managed via mise)
+- PyYAML 6.0+
+- [uv](https://github.com/astral-sh/uv) (installed via mise)
