@@ -101,12 +101,7 @@
         }
     });
 
-    // Close modal after successful form submission (when status table updates)
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-        if (event.detail.target.id === 'status-table') {
-            document.getElementById('modal').classList.add('hidden');
-        }
-    });
+    // Close modal after successful form submission (redirect handles navigation)
 </script>
 
 {% endblock %}

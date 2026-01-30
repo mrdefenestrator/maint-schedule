@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from glob import glob
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, make_response, render_template, request, redirect, url_for, flash
 
 # Add parent directory to path for model imports
 import sys
@@ -267,30 +267,13 @@ def log_service(vehicle_id: str):
     save_history_entry(path, entry)
     flash(f"Logged service: {rule_key}", "success")
 
-    # Return updated status table for HTMX
+    # HTMX: redirect to vehicle status so target (#modal-content or #status-table) always works
     if request.headers.get("HX-Request"):
-        vehicle = load_vehicle(path)
-        all_status = vehicle.get_all_service_status()
-        all_status.sort(key=lambda s: (s.status.value, s.rule.item))
-        status_counts = {
-            'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
-            'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
-            'ok': sum(1 for s in all_status if s.status == Status.OK),
-            'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
-            'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
-        }
-        return render_template(
-            "partials/status_table.html",
-            vehicle_id=vehicle_id,
-            vehicle=vehicle,
-            all_status=all_status,
-            status_counts=status_counts,
-            status_filter=None,
-            severe=False,
-            exclude_inspect=False,
-            Status=Status,
-            standalone=True,
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Service logged.")
         )
+        response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=vehicle_id)
+        return response
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
 
@@ -327,30 +310,13 @@ def update_mileage(vehicle_id: str):
     save_current_miles(path, miles)
     flash(f"Updated mileage to {miles:,.0f}", "success")
 
-    # Return updated status table for HTMX
+    # HTMX: redirect to vehicle status so target (#modal-content or #status-table) always works
     if request.headers.get("HX-Request"):
-        vehicle = load_vehicle(path)
-        all_status = vehicle.get_all_service_status()
-        all_status.sort(key=lambda s: (s.status.value, s.rule.item))
-        status_counts = {
-            'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
-            'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
-            'ok': sum(1 for s in all_status if s.status == Status.OK),
-            'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
-            'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
-        }
-        return render_template(
-            "partials/status_table.html",
-            vehicle_id=vehicle_id,
-            vehicle=vehicle,
-            all_status=all_status,
-            status_counts=status_counts,
-            status_filter=None,
-            severe=False,
-            exclude_inspect=False,
-            Status=Status,
-            standalone=True,
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Mileage updated.")
         )
+        response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=vehicle_id)
+        return response
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
 
