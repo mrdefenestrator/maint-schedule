@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Vehicles - Maintenance{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-900 mb-4">Your Vehicles</h1>
+
+<div class="space-y-3">
+    {% for v in vehicles %}
+    <a href="{{ url_for('vehicle_detail', vehicle_id=v.id) }}"
+       class="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 touch-target
+              hover:shadow-md hover:border-blue-300 transition-all active:bg-gray-50">
+        <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+                <h2 class="font-semibold text-gray-900 truncate">
+                    {{ v.vehicle.car.name }}
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ v.vehicle.current_miles | format_miles }} miles
+                </p>
+            </div>
+
+            <div class="flex items-center space-x-2 ml-4">
+                {% if v.overdue > 0 %}
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-500 text-white text-sm font-medium">
+                    {{ v.overdue }}
+                </span>
+                {% endif %}
+                {% if v.due_soon > 0 %}
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-500 text-white text-sm font-medium">
+                    {{ v.due_soon }}
+                </span>
+                {% endif %}
+                {% if v.overdue == 0 and v.due_soon == 0 %}
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </span>
+                {% endif %}
+
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="text-center py-12 text-gray-500">
+        <p>No vehicles found.</p>
+        <p class="text-sm mt-2">Add YAML files to the <code class="bg-gray-100 px-1 rounded">vehicles/</code> directory.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Legend -->
+<div class="mt-6 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+    <h3 class="text-sm font-medium text-gray-700 mb-2">Status Legend</h3>
+    <div class="flex flex-wrap gap-3 text-sm">
+        <span class="inline-flex items-center">
+            <span class="w-4 h-4 rounded-full bg-red-500 mr-2"></span>
+            Overdue
+        </span>
+        <span class="inline-flex items-center">
+            <span class="w-4 h-4 rounded-full bg-yellow-500 mr-2"></span>
+            Due Soon
+        </span>
+        <span class="inline-flex items-center">
+            <span class="w-4 h-4 rounded-full bg-green-500 mr-2"></span>
+            All Good
+        </span>
+    </div>
+</div>
+{% endblock %}

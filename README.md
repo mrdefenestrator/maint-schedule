@@ -39,6 +39,9 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 │   ├── wrx.yaml           # 2012 Subaru WRX
 │   └── brz.yaml           # 2015 Subaru BRZ
 ├── maint.py               # Unified CLI for all commands
+├── web/                   # Flask web application
+│   ├── app.py             # Flask app with routes
+│   └── templates/         # Jinja2 HTML templates
 ├── validate_yaml.py       # Schema validation script
 ├── schema.yaml            # YAML schema definition
 ├── requirements.txt       # Runtime dependencies
@@ -97,6 +100,41 @@ The project includes comprehensive tests for all models and calculations:
 - All tests maintain 1:1 correspondence with model files in `models/`
 
 ## Usage
+
+There are two ways to interact with the system: a **web GUI** (recommended for mobile) and a **CLI**.
+
+### Web GUI
+
+The web interface provides a mobile-friendly dashboard for viewing status and logging services.
+
+```bash
+# Start the web server
+python web/app.py
+
+# The app will be available at:
+# - http://localhost:5001 (on your computer)
+# - http://<your-ip>:5001 (from your phone on the same network)
+```
+
+To find your computer's IP address for mobile access:
+```bash
+# macOS
+ipconfig getifaddr en0
+
+# Linux
+hostname -I | awk '{print $1}'
+```
+
+**Features:**
+- Dashboard showing all vehicles with status indicators
+- Mobile-optimized responsive design
+- Log services with forms (no command-line needed)
+- Update current mileage
+- View service history
+- Toggle severe mode and hide inspections
+- Uses HTMX for dynamic updates without page reloads
+
+### CLI
 
 The `maint.py` CLI provides five commands: `status`, `history`, `log`, `update-miles`, and `rules`.
 

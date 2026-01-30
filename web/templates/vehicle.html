@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vehicle.car.name }} - Maintenance{% endblock %}
+
+{% block header_right %}
+<a href="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}"
+   class="text-blue-200 hover:text-white touch-target flex items-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Vehicle Header -->
+<div class="mb-4">
+    <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
+    <p class="text-gray-500">{{ vehicle.current_miles | format_miles }} miles</p>
+</div>
+
+<!-- Action Buttons -->
+<div class="flex gap-2 mb-4">
+    <button hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target
+                   hover:bg-blue-700 active:bg-blue-800 transition-colors">
+        Log Service
+    </button>
+    <button hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium touch-target
+                   hover:bg-gray-300 active:bg-gray-400 transition-colors">
+        Update Miles
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="flex flex-wrap gap-2 mb-4">
+    <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
+        <input type="checkbox"
+               id="severe-toggle"
+               {% if severe %}checked{% endif %}
+               hx-get="{{ url_for('vehicle_status_partial', vehicle_id=vehicle_id) }}"
+               hx-target="#status-table"
+               hx-swap="innerHTML"
+               hx-include="#exclude-inspect-toggle"
+               hx-vals='js:{"severe": document.getElementById("severe-toggle").checked}'
+               class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+        Severe mode
+    </label>
+    <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
+        <input type="checkbox"
+               id="exclude-inspect-toggle"
+               {% if exclude_inspect %}checked{% endif %}
+               hx-get="{{ url_for('vehicle_status_partial', vehicle_id=vehicle_id) }}"
+               hx-target="#status-table"
+               hx-swap="innerHTML"
+               hx-include="#severe-toggle"
+               hx-vals='js:{"exclude_inspect": document.getElementById("exclude-inspect-toggle").checked}'
+               class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+        Hide inspections
+    </label>
+</div>
+
+<!-- Status Table -->
+<div id="status-table">
+    {% include "partials/status_table.html" %}
+</div>
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="min-h-screen px-4 flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+             onclick="document.getElementById('modal').classList.add('hidden')"></div>
+
+        <!-- Modal Content -->
+        <div id="modal-content" class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+            <!-- Content loaded via HTMX -->
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="text-gray-500 mt-2">Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modal').classList.add('hidden');
+        }
+    });
+
+    // Close modal after successful form submission
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'status-table') {
+            document.getElementById('modal').classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

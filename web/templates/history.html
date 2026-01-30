@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}History - {{ vehicle.car.name }}{% endblock %}
+
+{% block header_right %}
+<a href="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}"
+   class="text-blue-200 hover:text-white touch-target flex items-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Vehicle Header -->
+<div class="mb-4">
+    <h1 class="text-xl font-bold text-gray-900">Service History</h1>
+    <p class="text-gray-500">{{ vehicle.car.name }}</p>
+</div>
+
+<!-- History List -->
+<div class="space-y-2">
+    {% for entry in history %}
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+                <h3 class="font-medium text-gray-900">{{ entry.rule_key }}</h3>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ entry.date }}
+                    {% if entry.mileage %} &middot; {{ entry.mileage | format_miles }} mi{% endif %}
+                </p>
+            </div>
+            {% if entry.cost %}
+            <span class="text-sm font-medium text-gray-700">${{ "%.2f" | format(entry.cost) }}</span>
+            {% endif %}
+        </div>
+
+        {% if entry.performed_by or entry.notes %}
+        <div class="mt-2 text-sm text-gray-600">
+            {% if entry.performed_by %}
+            <p><span class="text-gray-500">By:</span> {{ entry.performed_by }}</p>
+            {% endif %}
+            {% if entry.notes %}
+            <p class="mt-1">{{ entry.notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-500">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p>No service history yet.</p>
+        <p class="text-sm mt-2">Use "Log Service" to add entries.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if history %}
+<!-- Summary -->
+<div class="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+    <h3 class="text-sm font-medium text-gray-700 mb-2">Summary</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+            <p class="text-gray-500">Total entries</p>
+            <p class="font-medium text-lg">{{ history | length }}</p>
+        </div>
+        <div>
+            <p class="text-gray-500">Total cost</p>
+            <p class="font-medium text-lg">
+                ${{ "%.2f" | format(history | selectattr('cost') | map(attribute='cost') | sum) }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

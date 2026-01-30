@@ -1,0 +1,86 @@
+<!-- Status cards for mobile-friendly display -->
+<div class="space-y-2">
+    {% for service in all_status %}
+    <div class="bg-white rounded-lg border {{ service.status | status_color }} p-4">
+        <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }}">
+                        {{ service.status.name }}
+                    </span>
+                    {% if service.rule.aftermarket %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
+                        Aftermarket
+                    </span>
+                    {% endif %}
+                </div>
+                <h3 class="font-medium text-gray-900 mt-1">
+                    {{ service.rule.verb | capitalize }} {{ service.rule.item }}
+                </h3>
+                {% if service.rule.phase %}
+                <p class="text-xs text-gray-500">[{{ service.rule.phase }}]</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
+        <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div>
+                <p class="text-gray-500 text-xs">Due at</p>
+                <p class="font-medium">
+                    {% if service.due_miles %}{{ service.due_miles | format_miles }} mi{% else %}—{% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">Due date</p>
+                <p class="font-medium">{{ service.due_date | format_date }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">Remaining</p>
+                <p class="font-medium {% if service.miles_remaining and service.miles_remaining < 0 %}text-red-600{% endif %}">
+                    {% if service.miles_remaining is not none %}
+                        {% if service.miles_remaining < 0 %}
+                            {{ (service.miles_remaining | abs) | format_miles }} mi over
+                        {% else %}
+                            {{ service.miles_remaining | format_miles }} mi
+                        {% endif %}
+                    {% else %}—{% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">Last service</p>
+                <p class="font-medium">
+                    {% if service.last_service_miles %}
+                        {{ service.last_service_miles | format_miles }} mi
+                    {% elif service.last_service_date %}
+                        {{ service.last_service_date | format_date }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if service.rule.notes %}
+        <p class="mt-2 text-xs text-gray-500 line-clamp-2">{{ service.rule.notes }}</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-8 text-gray-500">
+        <p>No maintenance items found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Summary -->
+{% set overdue_count = all_status | selectattr('status', 'equalto', Status.OVERDUE) | list | length %}
+{% set due_soon_count = all_status | selectattr('status', 'equalto', Status.DUE_SOON) | list | length %}
+{% set ok_count = all_status | selectattr('status', 'equalto', Status.OK) | list | length %}
+
+<div class="mt-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+    <span class="font-medium">Summary:</span>
+    {% if overdue_count > 0 %}<span class="text-red-600">{{ overdue_count }} overdue</span>{% if due_soon_count > 0 or ok_count > 0 %}, {% endif %}{% endif %}
+    {% if due_soon_count > 0 %}<span class="text-yellow-600">{{ due_soon_count }} due soon</span>{% if ok_count > 0 %}, {% endif %}{% endif %}
+    {% if ok_count > 0 %}<span class="text-green-600">{{ ok_count }} OK</span>{% endif %}
+</div>
