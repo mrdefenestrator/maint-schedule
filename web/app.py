@@ -344,11 +344,96 @@ def vehicle_history(vehicle_id: str):
     vehicle = load_vehicle(path)
     history = vehicle.get_history_sorted(sort_by="date", reverse=True)
 
+    # Get all unique verbs from history entries (extracted from rule_key: item/verb/phase)
+    all_verbs = set()
+    for entry in history:
+        parts = entry.rule_key.split("/")
+        if len(parts) >= 2:
+            all_verbs.add(parts[1].lower())
+    all_verbs = sorted(all_verbs)
+
+    # Get excluded verbs from query string
+    exclude_verbs = request.args.getlist("exclude")
+    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else []
+
+    # Filter history based on exclude_verbs
+    if exclude_verbs:
+        filtered_history = []
+        for entry in history:
+            parts = entry.rule_key.split("/")
+            verb = parts[1].lower() if len(parts) >= 2 else ""
+            if verb not in exclude_verbs:
+                filtered_history.append(entry)
+        history = filtered_history
+
     return render_template(
         "history.html",
         vehicle_id=vehicle_id,
         vehicle=vehicle,
         history=history,
+        all_verbs=all_verbs,
+        exclude_verbs=exclude_verbs,
+    )
+
+
+@app.route("/vehicle/<vehicle_id>/rules")
+def vehicle_rules(vehicle_id: str):
+    """Vehicle maintenance rules/schedule page."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    current_miles = vehicle.current_miles or 0
+    status_filter = request.args.get("status", "").lower() or None
+
+    # Get all unique verbs from rules
+    all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
+
+    # Get excluded verbs from query string
+    exclude_verbs = request.args.getlist("exclude")
+    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else []
+
+    # Filter rules based on exclude_verbs
+    filtered_rules = vehicle.rules
+    if exclude_verbs:
+        filtered_rules = [r for r in filtered_rules if r.verb.lower() not in exclude_verbs]
+
+    # Count active vs inactive (before status filter, after verb filter)
+    active_count = sum(1 for r in filtered_rules if r.is_active_at(current_miles))
+    inactive_count = len(filtered_rules) - active_count
+
+    # Filter by status if requested
+    if status_filter == "active":
+        filtered_rules = [r for r in filtered_rules if r.is_active_at(current_miles)]
+    elif status_filter == "inactive":
+        filtered_rules = [r for r in filtered_rules if not r.is_active_at(current_miles)]
+
+    # Group filtered rules by item
+    rules_by_item = {}
+    for rule in filtered_rules:
+        if rule.item not in rules_by_item:
+            rules_by_item[rule.item] = []
+        rules_by_item[rule.item].append(rule)
+
+    # Sort items alphabetically, and rules within each item by verb
+    sorted_items = sorted(rules_by_item.keys())
+    for item in sorted_items:
+        rules_by_item[item].sort(key=lambda r: (r.verb, r.phase or ""))
+
+    return render_template(
+        "rules.html",
+        vehicle_id=vehicle_id,
+        vehicle=vehicle,
+        rules_by_item=rules_by_item,
+        sorted_items=sorted_items,
+        current_miles=current_miles,
+        active_count=active_count,
+        inactive_count=inactive_count,
+        status_filter=status_filter,
+        all_verbs=all_verbs,
+        exclude_verbs=exclude_verbs,
     )
 
 

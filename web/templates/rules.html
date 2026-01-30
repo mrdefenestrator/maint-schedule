@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Rules - {{ vehicle.car.name }}{% endblock %}
+
+{% block header_right %}
+<a href="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}"
+   class="text-blue-200 hover:text-white touch-target flex items-center">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Vehicle Header -->
+<div class="mb-4">
+    <h1 class="text-xl font-bold text-gray-900">Maintenance Schedule</h1>
+    <p class="text-gray-500">{{ vehicle.car.name }}</p>
+</div>
+
+<!-- Summary - clickable filters -->
+<div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 flex flex-wrap items-center gap-2">
+    <span class="font-medium">Show:</span>
+    <button type="button" onclick="filterStatus('all')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+            data-status="all">
+        All ({{ active_count + inactive_count }})
+    </button>
+    {% if active_count > 0 %}
+    <button type="button" onclick="filterStatus('active')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'active' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+            data-status="active">
+        {{ active_count }} active
+    </button>
+    {% endif %}
+    {% if inactive_count > 0 %}
+    <button type="button" onclick="filterStatus('inactive')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+            data-status="inactive">
+        {{ inactive_count }} inactive
+    </button>
+    {% endif %}
+    <span class="text-xs text-gray-400 ml-auto">at {{ current_miles | format_miles }} mi</span>
+</div>
+
+<script>
+function filterStatus(status) {
+    const url = new URL(window.location.href);
+    if (status === 'all') {
+        url.searchParams.delete('status');
+    } else {
+        url.searchParams.set('status', status);
+    }
+    window.location.href = url.toString();
+}
+</script>
+
+<!-- Filters -->
+{% if all_verbs %}
+<form id="filter-form" method="get" action="{{ url_for('vehicle_rules', vehicle_id=vehicle_id) }}" class="mb-4">
+    {% if status_filter %}
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    {% endif %}
+    <div class="flex flex-wrap gap-2">
+        <!-- Hide verbs dropdown -->
+        <div class="relative">
+            <button type="button"
+                    onclick="document.getElementById('verb-dropdown').classList.toggle('hidden')"
+                    class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target">
+                Hide verbs
+                {% if exclude_verbs %}<span class="ml-1.5 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{{ exclude_verbs | length }}</span>{% endif %}
+                <svg class="w-4 h-4 ml-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                {% for verb in all_verbs %}
+                <label class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox"
+                           name="exclude"
+                           value="{{ verb }}"
+                           {% if verb in exclude_verbs %}checked{% endif %}
+                           onchange="document.getElementById('filter-form').submit()"
+                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm">{{ verb }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        var dropdown = document.getElementById('verb-dropdown');
+        var button = dropdown.previousElementSibling;
+        if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+</script>
+{% endif %}
+
+<!-- Rules List - flat accordion style -->
+<div class="space-y-1.5">
+    {% for item in sorted_items %}
+    {% for rule in rules_by_item[item] %}
+    {% set is_active = rule.is_active_at(current_miles) %}
+    <div class="bg-white rounded-lg border {% if is_active %}border-green-200 bg-green-50/30{% else %}border-gray-200{% endif %} overflow-hidden">
+        <!-- Collapsed header - clickable -->
+        <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
+             onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap
+                    {% if is_active %}bg-green-500 text-white{% else %}bg-gray-400 text-white{% endif %}">
+                    {% if is_active %}ACTIVE{% else %}INACTIVE{% endif %}
+                </span>
+                <span class="font-medium text-gray-900 text-sm truncate">
+                    {{ rule.verb | capitalize }} {{ rule.item }}{% if rule.phase %} <span class="text-gray-400">[{{ rule.phase }}]</span>{% endif %}
+                </span>
+                {% if rule.aftermarket %}
+                <span class="text-xs text-purple-600">★</span>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-500 whitespace-nowrap">
+                    {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
+                    {% if rule.interval_miles and rule.interval_months %} / {% endif %}
+                    {% if rule.interval_months %}{{ rule.interval_months | int }} mo{% endif %}
+                </span>
+                <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Expanded details - hidden by default -->
+        <div class="hidden border-t border-gray-100 px-3 py-2 bg-gray-50">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                    <p class="text-gray-500 text-xs">Normal interval</p>
+                    <p class="font-medium">
+                        {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
+                        {% if rule.interval_miles and rule.interval_months %} / {% endif %}
+                        {% if rule.interval_months %}{{ rule.interval_months | int }} months{% endif %}
+                        {% if not rule.interval_miles and not rule.interval_months %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Severe interval</p>
+                    <p class="font-medium">
+                        {% if rule.severe_interval_miles %}{{ rule.severe_interval_miles | format_miles }} mi{% endif %}
+                        {% if rule.severe_interval_miles and rule.severe_interval_months %} / {% endif %}
+                        {% if rule.severe_interval_months %}{{ rule.severe_interval_months | int }} months{% endif %}
+                        {% if not rule.severe_interval_miles and not rule.severe_interval_months %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Active range</p>
+                    <p class="font-medium">
+                        {% if rule.start_miles > 0 or rule.stop_miles < 999999999 %}
+                            {{ rule.start_miles | format_miles }} – {% if rule.stop_miles >= 999999999 %}∞{% else %}{{ rule.stop_miles | format_miles }}{% endif %} mi
+                        {% else %}
+                            Always
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Key</p>
+                    <p class="font-medium text-xs font-mono text-gray-600">{{ rule.key }}</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-gray-500 text-xs">Notes</p>
+                    <p class="font-medium">{% if rule.notes %}{{ rule.notes }}{% else %}—{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-12 text-gray-500">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p>No maintenance rules defined.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
