@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block header_right %}
+<!-- Back to dashboard button in header -->
+<a href="{{ url_for('index') }}"
+   class="text-blue-200 hover:text-white touch-target flex items-center gap-1 text-sm">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+    <span class="hidden sm:inline">Dashboard</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Vehicle Header -->
+<div class="mb-2">
+    <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
+    <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+</div>
+
+<!-- Tab Navigation -->
+<div class="mb-4 border-b border-gray-200">
+    <nav class="flex -mb-px">
+        <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}"
+           class="flex-1 py-3 px-1 text-center text-sm font-medium border-b-2 transition-colors
+                  {% if active_tab == 'status' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            Status
+        </a>
+        <a href="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}"
+           class="flex-1 py-3 px-1 text-center text-sm font-medium border-b-2 transition-colors
+                  {% if active_tab == 'history' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            History
+        </a>
+        <a href="{{ url_for('vehicle_rules', vehicle_id=vehicle_id) }}"
+           class="flex-1 py-3 px-1 text-center text-sm font-medium border-b-2 transition-colors
+                  {% if active_tab == 'rules' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            Rules
+        </a>
+    </nav>
+</div>
+
+<!-- Tab Content -->
+{% block tab_content %}{% endblock %}
+
+<!-- Floating Action Buttons -->
+<div class="fixed bottom-6 right-6 flex flex-row gap-3 z-40">
+    <!-- Update Miles FAB -->
+    <button type="button"
+            id="fab-miles"
+            hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            title="Update Miles">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </button>
+
+    <!-- Log Service FAB -->
+    <button type="button"
+            id="fab-log"
+            hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            title="Log Service">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4v16m8-8H4"/>
+        </svg>
+    </button>
+</div>
+
+<!-- Modal for forms -->
+<div id="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="min-h-screen px-4 flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+             onclick="document.getElementById('modal').classList.add('hidden')"></div>
+
+        <!-- Modal content -->
+        <div id="modal-content" class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+            <!-- Content loaded via HTMX -->
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="text-gray-500 mt-2">Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modal').classList.add('hidden');
+        }
+    });
+
+    // Close modal after successful form submission (when status table updates)
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'status-table') {
+            document.getElementById('modal').classList.add('hidden');
+        }
+    });
+</script>
+
+{% endblock %}

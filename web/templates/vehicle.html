@@ -1,50 +1,8 @@
-{% extends "base.html" %}
+{% extends "vehicle_base.html" %}
 
-{% block title %}{{ vehicle.car.name }} - Maintenance{% endblock %}
+{% block title %}{{ vehicle.car.name }} - Status{% endblock %}
 
-{% block header_right %}{% endblock %}
-
-{% block content %}
-<!-- Vehicle Header -->
-<div class="mb-4">
-    <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
-    <p class="text-gray-500">{{ vehicle.current_miles | format_miles }} miles</p>
-</div>
-
-<!-- Action Buttons -->
-<div class="flex gap-2 mb-4">
-    <button type="button"
-            hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
-            hx-target="#modal-content"
-            hx-swap="innerHTML"
-            hx-trigger="click"
-            onclick="document.getElementById('modal').classList.remove('hidden')"
-            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target
-                   hover:bg-blue-700 active:bg-blue-800 transition-colors">
-        Log Service
-    </button>
-    <button type="button"
-            hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
-            hx-target="#modal-content"
-            hx-swap="innerHTML"
-            hx-trigger="click"
-            onclick="document.getElementById('modal').classList.remove('hidden')"
-            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target
-                   hover:bg-blue-700 active:bg-blue-800 transition-colors">
-        Update Miles
-    </button>
-    <a href="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}"
-       class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target text-center
-              hover:bg-blue-700 active:bg-blue-800 transition-colors">
-        History
-    </a>
-    <a href="{{ url_for('vehicle_rules', vehicle_id=vehicle_id) }}"
-       class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target text-center
-              hover:bg-blue-700 active:bg-blue-800 transition-colors">
-        Rules
-    </a>
-</div>
-
+{% block tab_content %}
 <!-- Filters -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}" class="mb-4">
     <div class="flex flex-wrap gap-2">
@@ -101,38 +59,4 @@
 <div id="status-table">
     {% include "partials/status_table.html" %}
 </div>
-
-<!-- Modal -->
-<div id="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-    <div class="min-h-screen px-4 flex items-center justify-center">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-             onclick="document.getElementById('modal').classList.add('hidden')"></div>
-
-        <!-- Modal Content -->
-        <div id="modal-content" class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-            <!-- Content loaded via HTMX -->
-            <div class="text-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p class="text-gray-500 mt-2">Loading...</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Close modal on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.getElementById('modal').classList.add('hidden');
-        }
-    });
-
-    // Close modal after successful form submission
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-        if (event.detail.target.id === 'status-table') {
-            document.getElementById('modal').classList.add('hidden');
-        }
-    });
-</script>
 {% endblock %}

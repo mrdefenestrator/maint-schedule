@@ -185,6 +185,7 @@ def vehicle_detail(vehicle_id: str):
         exclude_verbs=exclude_verbs or [],
         status_filter=status_filter,
         Status=Status,
+        active_tab='status',
     )
 
 
@@ -373,6 +374,7 @@ def vehicle_history(vehicle_id: str):
         history=history,
         all_verbs=all_verbs,
         exclude_verbs=exclude_verbs,
+        active_tab='history',
     )
 
 
@@ -434,6 +436,7 @@ def vehicle_rules(vehicle_id: str):
         status_filter=status_filter,
         all_verbs=all_verbs,
         exclude_verbs=exclude_verbs,
+        active_tab='rules',
     )
 
 
