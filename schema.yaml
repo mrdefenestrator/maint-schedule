@@ -20,7 +20,6 @@ properties:
     required:
       - make
       - model
-      - trim
       - year
       - purchaseDate
       - purchaseMiles
