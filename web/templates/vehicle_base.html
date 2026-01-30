@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
-{% block header_right %}
-<!-- Back to dashboard button in header -->
-<a href="{{ url_for('index') }}"
-   class="text-blue-200 hover:text-white touch-target flex items-center gap-1 text-sm">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-    </svg>
-    <span class="hidden sm:inline">Dashboard</span>
-</a>
-{% endblock %}
+{% block header %}{% endblock %}
 
 {% block content %}
-<!-- Vehicle Header + Tabs (sticky below global header) -->
-<div class="sticky top-14 z-40 -mx-4 px-4 pt-4 pb-0 bg-gray-50 border-b border-gray-200 mb-4">
-    <div class="mb-2">
-        <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
-        <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+<!-- Vehicle Header + Tabs (sticky at top; no global header on vehicle pages) -->
+<div class="sticky top-0 z-40 -mx-4 px-4 pt-4 pb-0 bg-gray-50 border-b border-gray-200 mb-4">
+    <div class="flex items-start gap-3 mb-2">
+        <a href="{{ url_for('index') }}"
+           class="flex-shrink-0 p-1.5 -m-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-200 touch-target flex items-center justify-center"
+           title="Back to dashboard">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
+            <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+        </div>
     </div>
     <nav class="flex -mb-px">
         <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}"

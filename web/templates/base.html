@@ -43,7 +43,8 @@
     </style>
 </head>
 <body class="h-full bg-gray-50">
-    <!-- Header -->
+    {% block header %}
+    <!-- Global header (main page only; vehicle pages override with empty) -->
     <header class="bg-blue-800 text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <a href="{{ url_for('index') }}" class="flex items-center space-x-2 touch-target">
@@ -56,6 +57,7 @@
             {% block header_right %}{% endblock %}
         </div>
     </header>
+    {% endblock %}
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
