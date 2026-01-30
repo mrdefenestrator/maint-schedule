@@ -1,5 +1,7 @@
 """Car class for vehicle identification."""
 
+from typing import Optional
+
 
 class Car:
     """Vehicle identification and purchase information."""
@@ -8,7 +10,7 @@ class Car:
         self,
         make: str,
         model: str,
-        trim: str,
+        trim: Optional[str],
         year: int,
         purchase_date: str,
         purchase_miles: float,

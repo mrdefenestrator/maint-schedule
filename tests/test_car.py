@@ -21,3 +21,10 @@ class TestCar:
         assert car.year == 2020
         assert car.purchase_date == "2020-06-15"
         assert car.purchase_miles == 15
+
+    def test_name_without_trim(self):
+        """Name omits trim when trim is None or empty."""
+        car_none = Car("Honda", "CBR600RR", None, 2024, "2024-01-01", 0)
+        assert car_none.name == "2024 Honda CBR600RR"
+        car_empty = Car("Honda", "CBR600RR", "", 2024, "2024-01-01", 0)
+        assert car_empty.name == "2024 Honda CBR600RR"

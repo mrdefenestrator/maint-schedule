@@ -19,7 +19,7 @@ def _parse_object(dct: Dict[str, Any]) -> Union[Car, Rule, HistoryEntry, Vehicle
         return Car(
             dct["make"],
             dct["model"],
-            dct["trim"],
+            dct.get("trim"),
             dct["year"],
             dct["purchaseDate"],
             dct["purchaseMiles"],
