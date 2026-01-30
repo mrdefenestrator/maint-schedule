@@ -116,6 +116,7 @@ def vehicle_detail(vehicle_id: str):
 
     vehicle = load_vehicle(path)
     severe = request.args.get("severe", "").lower() == "true"
+    status_filter = request.args.get("status", "").lower() or None
 
     # Get all unique verbs from vehicle rules
     all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
@@ -126,17 +127,41 @@ def vehicle_detail(vehicle_id: str):
 
     all_status = vehicle.get_all_service_status(severe=severe, exclude_verbs=exclude_verbs)
 
+    # Calculate counts before filtering for display
+    status_counts = {
+        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
+        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        'ok': sum(1 for s in all_status if s.status == Status.OK),
+        'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
+        'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
+    }
+
+    # Filter by status if requested
+    filtered_status = all_status
+    if status_filter:
+        status_map = {
+            'overdue': Status.OVERDUE,
+            'due_soon': Status.DUE_SOON,
+            'ok': Status.OK,
+            'inactive': Status.INACTIVE,
+            'unknown': Status.UNKNOWN,
+        }
+        if status_filter in status_map:
+            filtered_status = [s for s in all_status if s.status == status_map[status_filter]]
+
     # Sort by urgency (OVERDUE first, then DUE_SOON, etc.)
-    all_status.sort(key=lambda s: (s.status.value, s.rule.item))
+    filtered_status.sort(key=lambda s: (s.status.value, s.rule.item))
 
     return render_template(
         "vehicle.html",
         vehicle_id=vehicle_id,
         vehicle=vehicle,
-        all_status=all_status,
+        all_status=filtered_status,
+        status_counts=status_counts,
         severe=severe,
         all_verbs=all_verbs,
         exclude_verbs=exclude_verbs or [],
+        status_filter=status_filter,
         Status=Status,
     )
 

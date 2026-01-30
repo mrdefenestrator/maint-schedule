@@ -1,82 +1,208 @@
-<!-- Summary -->
-{% set overdue_count = all_status | selectattr('status', 'equalto', Status.OVERDUE) | list | length %}
-{% set due_soon_count = all_status | selectattr('status', 'equalto', Status.DUE_SOON) | list | length %}
-{% set ok_count = all_status | selectattr('status', 'equalto', Status.OK) | list | length %}
+<!-- Summary - clickable filters -->
+<div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 flex flex-wrap items-center gap-2">
+    <span class="font-medium">Show:</span>
+    <button type="button" onclick="filterStatus('all')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+            data-status="all">
+        All ({{ status_counts.overdue + status_counts.due_soon + status_counts.ok }})
+    </button>
+    {% if status_counts.overdue > 0 %}
+    <button type="button" onclick="filterStatus('overdue')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
+            data-status="overdue">
+        {{ status_counts.overdue }} overdue
+    </button>
+    {% endif %}
+    {% if status_counts.due_soon > 0 %}
+    <button type="button" onclick="filterStatus('due_soon')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}"
+            data-status="due_soon">
+        {{ status_counts.due_soon }} due soon
+    </button>
+    {% endif %}
+    {% if status_counts.ok > 0 %}
+    <button type="button" onclick="filterStatus('ok')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+            data-status="ok">
+        {{ status_counts.ok }} OK
+    </button>
+    {% endif %}
 
-<div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
-    <span class="font-medium">Summary:</span>
-    {% if overdue_count > 0 %}<span class="text-red-600">{{ overdue_count }} overdue</span>{% if due_soon_count > 0 or ok_count > 0 %}, {% endif %}{% endif %}
-    {% if due_soon_count > 0 %}<span class="text-yellow-600">{{ due_soon_count }} due soon</span>{% if ok_count > 0 %}, {% endif %}{% endif %}
-    {% if ok_count > 0 %}<span class="text-green-600">{{ ok_count }} OK</span>{% endif %}
+    <!-- Spacer to push inactive/unknown to the right -->
+    <div class="flex-grow"></div>
+
+    {% if status_counts.inactive > 0 %}
+    <button type="button" onclick="filterStatus('inactive')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+            data-status="inactive">
+        {{ status_counts.inactive }} inactive
+    </button>
+    {% endif %}
+    {% if status_counts.unknown > 0 %}
+    <button type="button" onclick="filterStatus('unknown')"
+            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                   {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200{% endif %}"
+            data-status="unknown">
+        {{ status_counts.unknown }} unknown
+    </button>
+    {% endif %}
 </div>
 
-<!-- Status cards for mobile-friendly display -->
-<div class="space-y-2">
+<script>
+function filterStatus(status) {
+    const url = new URL(window.location.href);
+    if (status === 'all') {
+        url.searchParams.delete('status');
+    } else {
+        url.searchParams.set('status', status);
+    }
+    window.location.href = url.toString();
+}
+</script>
+
+<!-- Status cards - accordion -->
+<div class="space-y-1.5">
     {% for service in all_status %}
-    <div class="bg-white rounded-lg border {{ service.status | status_color }} p-4">
-        <div class="flex items-start justify-between">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center space-x-2">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }}">
-                        {{ service.status.name }}
-                    </span>
-                    {% if service.rule.aftermarket %}
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-                        Aftermarket
-                    </span>
-                    {% endif %}
-                </div>
-                <h3 class="font-medium text-gray-900 mt-1">
-                    {{ service.rule.verb | capitalize }} {{ service.rule.item }}
-                </h3>
-                {% if service.rule.phase %}
-                <p class="text-xs text-gray-500">[{{ service.rule.phase }}]</p>
+    <div class="bg-white rounded-lg border {{ service.status | status_color }} overflow-hidden">
+        <!-- Compact header - clickable -->
+        <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
+             onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }} whitespace-nowrap">
+                    {{ service.status.name }}
+                </span>
+                <span class="font-medium text-gray-900 text-sm truncate">
+                    {{ service.rule.verb | capitalize }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
+                </span>
+                {% if service.rule.aftermarket %}
+                <span class="text-xs text-purple-600">★</span>
                 {% endif %}
             </div>
-        </div>
-
-        {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
-        <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div>
-                <p class="text-gray-500 text-xs">Due at</p>
-                <p class="font-medium">
-                    {% if service.due_miles %}{{ service.due_miles | format_miles }} mi{% else %}—{% endif %}
-                </p>
-            </div>
-            <div>
-                <p class="text-gray-500 text-xs">Due date</p>
-                <p class="font-medium">{{ service.due_date | format_date }}</p>
-            </div>
-            <div>
-                <p class="text-gray-500 text-xs">Remaining</p>
-                <p class="font-medium {% if service.miles_remaining and service.miles_remaining < 0 %}text-red-600{% endif %}">
+            <div class="flex items-center gap-3">
+                {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
+                {% if service.due_date %}
+                <span class="text-xs whitespace-nowrap hidden sm:inline
+                    {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 font-medium{% else %}text-gray-400{% endif %}">
+                    {{ service.due_date | format_date }}
+                </span>
+                {% endif %}
+                <span class="text-xs whitespace-nowrap min-w-[70px] text-right">
                     {% if service.miles_remaining is not none %}
                         {% if service.miles_remaining < 0 %}
-                            {{ (service.miles_remaining | abs) | format_miles }} mi over
+                            <span class="text-red-600 font-medium">{{ (service.miles_remaining | abs) | format_miles }} over</span>
                         {% else %}
-                            {{ service.miles_remaining | format_miles }} mi
+                            <span class="text-gray-600">{{ service.miles_remaining | format_miles }} left</span>
                         {% endif %}
-                    {% else %}—{% endif %}
-                </p>
-            </div>
-            <div>
-                <p class="text-gray-500 text-xs">Last service</p>
-                <p class="font-medium">
-                    {% if service.last_service_miles %}
-                        {{ service.last_service_miles | format_miles }} mi
-                    {% elif service.last_service_date %}
-                        {{ service.last_service_date | format_date }}
-                    {% else %}
-                        Never
+                    {% elif service.due_date %}
+                        <span class="sm:hidden {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 font-medium{% else %}text-gray-600{% endif %}">
+                            {{ service.due_date | format_date }}
+                        </span>
                     {% endif %}
-                </p>
+                </span>
+                {% endif %}
+                <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
             </div>
         </div>
-        {% endif %}
 
-        {% if service.rule.notes %}
-        <p class="mt-2 text-xs text-gray-500 line-clamp-2">{{ service.rule.notes }}</p>
-        {% endif %}
+        <!-- Expanded details - hidden by default -->
+        <div class="hidden border-t border-gray-100 px-3 py-2 bg-gray-50">
+            {% if service.status == Status.INACTIVE %}
+            <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                    <p class="text-gray-500 text-xs">Active range</p>
+                    <p class="font-medium">
+                        {{ service.rule.start_miles | format_miles }} – {{ service.rule.stop_miles | format_miles }} mi
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Interval</p>
+                    <p class="font-medium">
+                        {% if service.rule.interval_miles %}{{ service.rule.interval_miles | format_miles }} mi{% endif %}
+                        {% if service.rule.interval_miles and service.rule.interval_months %} / {% endif %}
+                        {% if service.rule.interval_months %}{{ service.rule.interval_months }} mo{% endif %}
+                        {% if not service.rule.interval_miles and not service.rule.interval_months %}—{% endif %}
+                    </p>
+                </div>
+            </div>
+            {% elif service.status == Status.UNKNOWN %}
+            <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                    <p class="text-gray-500 text-xs">Interval</p>
+                    <p class="font-medium">
+                        {% if service.rule.interval_miles %}{{ service.rule.interval_miles | format_miles }} mi{% endif %}
+                        {% if service.rule.interval_miles and service.rule.interval_months %} / {% endif %}
+                        {% if service.rule.interval_months %}{{ service.rule.interval_months }} mo{% endif %}
+                        {% if not service.rule.interval_miles and not service.rule.interval_months %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Last service</p>
+                    <p class="font-medium">
+                        {% if service.last_service_miles %}
+                            {{ service.last_service_miles | format_miles }} mi
+                        {% elif service.last_service_date %}
+                            {{ service.last_service_date | format_date }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-gray-500 text-xs">Why unknown</p>
+                    <p class="font-medium text-purple-600">Time-based rule with no service history</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                    <p class="text-gray-500 text-xs">Due at</p>
+                    <p class="font-medium">
+                        {% if service.due_miles %}{{ service.due_miles | format_miles }} mi{% else %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Due date</p>
+                    <p class="font-medium {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600{% endif %}">
+                        {{ service.due_date | format_date }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Remaining</p>
+                    <p class="font-medium {% if service.miles_remaining and service.miles_remaining < 0 %}text-red-600{% endif %}">
+                        {% if service.miles_remaining is not none %}
+                            {% if service.miles_remaining < 0 %}
+                                {{ (service.miles_remaining | abs) | format_miles }} mi over
+                            {% else %}
+                                {{ service.miles_remaining | format_miles }} mi
+                            {% endif %}
+                        {% else %}—{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Last service</p>
+                    <p class="font-medium">
+                        {% if service.last_service_miles %}
+                            {{ service.last_service_miles | format_miles }} mi
+                        {% elif service.last_service_date %}
+                            {{ service.last_service_date | format_date }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+            {% if service.rule.notes %}
+            <p class="mt-2 text-xs text-gray-500">{{ service.rule.notes }}</p>
+            {% endif %}
+        </div>
     </div>
     {% else %}
     <div class="text-center py-8 text-gray-500">
