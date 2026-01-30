@@ -3,64 +3,49 @@
 {% block title %}{{ vehicle.car.name }} - Rules{% endblock %}
 
 {% block tab_content %}
-<!-- Summary - clickable filters -->
-<div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 flex flex-wrap items-center gap-2">
-    <span class="font-medium">Show:</span>
-    <button type="button" onclick="filterStatus('all')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
-            data-status="all">
-        All ({{ active_count + inactive_count }})
-    </button>
-    {% if active_count > 0 %}
-    <button type="button" onclick="filterStatus('active')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'active' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
-            data-status="active">
-        {{ active_count }} active
-    </button>
-    {% endif %}
-    {% if inactive_count > 0 %}
-    <button type="button" onclick="filterStatus('inactive')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
-            data-status="inactive">
-        {{ inactive_count }} inactive
-    </button>
-    {% endif %}
-</div>
-
-<script>
-function filterStatus(status) {
-    const url = new URL(window.location.href);
-    if (status === 'all') {
-        url.searchParams.delete('status');
-    } else {
-        url.searchParams.set('status', status);
-    }
-    window.location.href = url.toString();
-}
-</script>
-
-<!-- Filters -->
-{% if all_verbs %}
+<!-- Summary + Hide verbs in one row -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_rules', vehicle_id=vehicle_id) }}" class="mb-4">
     {% if status_filter %}
     <input type="hidden" name="status" value="{{ status_filter }}">
     {% endif %}
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+        <!-- Summary - clickable filters -->
+        <button type="button" onclick="filterStatus('all')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+                data-status="all">
+            All ({{ active_count + inactive_count }})
+        </button>
+        {% if active_count > 0 %}
+        <button type="button" onclick="filterStatus('active')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'active' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+                data-status="active">
+            {{ active_count }} active
+        </button>
+        {% endif %}
+        {% if inactive_count > 0 %}
+        <button type="button" onclick="filterStatus('inactive')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+                data-status="inactive">
+            {{ inactive_count }} inactive
+        </button>
+        {% endif %}
+
         <!-- Hide verbs dropdown -->
-        <div class="relative">
+        {% if all_verbs %}
+        <div class="relative ml-auto">
             <button type="button"
                     onclick="document.getElementById('verb-dropdown').classList.toggle('hidden')"
-                    class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target">
+                    class="inline-flex items-center bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target hover:bg-gray-100">
                 Hide verbs
                 {% if exclude_verbs %}<span class="ml-1.5 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{{ exclude_verbs | length }}</span>{% endif %}
                 <svg class="w-4 h-4 ml-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 right-0">
                 {% for verb in all_verbs %}
                 <label class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
                     <input type="checkbox"
@@ -74,13 +59,26 @@ function filterStatus(status) {
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
     </div>
 </form>
 
 <script>
-    // Close dropdown when clicking outside
+function filterStatus(status) {
+    const url = new URL(window.location.href);
+    if (status === 'all') {
+        url.searchParams.delete('status');
+    } else {
+        url.searchParams.set('status', status);
+    }
+    window.location.href = url.toString();
+}
+</script>
+{% if all_verbs %}
+<script>
     document.addEventListener('click', function(e) {
         var dropdown = document.getElementById('verb-dropdown');
+        if (!dropdown) return;
         var button = dropdown.previousElementSibling;
         if (!dropdown.contains(e.target) && !button.contains(e.target)) {
             dropdown.classList.add('hidden');
@@ -94,7 +92,7 @@ function filterStatus(status) {
     {% for item in sorted_items %}
     {% for rule in rules_by_item[item] %}
     {% set is_active = rule.is_active_at(current_miles) %}
-    <div class="bg-white rounded-lg border {% if is_active %}border-green-200 bg-green-50/30{% else %}border-gray-200{% endif %} overflow-hidden">
+    <div class="rounded-lg border overflow-hidden {% if is_active %}bg-green-100 text-green-800 border-green-200{% else %}bg-gray-100 text-gray-500 border-gray-200{% endif %}">
         <!-- Collapsed header - clickable -->
         <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
@@ -111,7 +109,7 @@ function filterStatus(status) {
                 {% endif %}
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-500 whitespace-nowrap">
+                <span class="text-xs text-gray-600 whitespace-nowrap">
                     {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
                     {% if rule.interval_miles and rule.interval_months %} / {% endif %}
                     {% if rule.interval_months %}{{ rule.interval_months | int }} mo{% endif %}

@@ -3,31 +3,70 @@
 {% block title %}{{ vehicle.car.name }} - Status{% endblock %}
 
 {% block tab_content %}
-<!-- Filters -->
+<!-- Summary + Hide verbs + Severe mode in one row -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}" class="mb-4">
-    <div class="flex flex-wrap gap-2">
-        <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
-            <input type="checkbox"
-                   name="severe"
-                   value="true"
-                   {% if severe %}checked{% endif %}
-                   onchange="this.form.submit()"
-                   class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            Severe mode
-        </label>
+    <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+        <!-- Summary (from status_table partial) -->
+        <button type="button" onclick="filterStatus('all')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+                data-status="all">
+            All ({{ status_counts.overdue + status_counts.due_soon + status_counts.ok }})
+        </button>
+        {% if status_counts.overdue > 0 %}
+        <button type="button" onclick="filterStatus('overdue')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
+                data-status="overdue">
+            {{ status_counts.overdue }} overdue
+        </button>
+        {% endif %}
+        {% if status_counts.due_soon > 0 %}
+        <button type="button" onclick="filterStatus('due_soon')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}"
+                data-status="due_soon">
+            {{ status_counts.due_soon }} due soon
+        </button>
+        {% endif %}
+        {% if status_counts.ok > 0 %}
+        <button type="button" onclick="filterStatus('ok')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+                data-status="ok">
+            {{ status_counts.ok }} OK
+        </button>
+        {% endif %}
+        <div class="flex-grow"></div>
+        {% if status_counts.inactive > 0 %}
+        <button type="button" onclick="filterStatus('inactive')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+                data-status="inactive">
+            {{ status_counts.inactive }} inactive
+        </button>
+        {% endif %}
+        {% if status_counts.unknown > 0 %}
+        <button type="button" onclick="filterStatus('unknown')"
+                class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+                       {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200{% endif %}"
+                data-status="unknown">
+            {{ status_counts.unknown }} unknown
+        </button>
+        {% endif %}
 
         <!-- Hide verbs dropdown -->
         <div class="relative">
             <button type="button"
                     onclick="document.getElementById('verb-dropdown').classList.toggle('hidden')"
-                    class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target">
+                    class="inline-flex items-center bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target hover:bg-gray-100">
                 Hide verbs
                 {% if exclude_verbs %}<span class="ml-1.5 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{{ exclude_verbs | length }}</span>{% endif %}
                 <svg class="w-4 h-4 ml-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 right-0">
                 {% for verb in all_verbs %}
                 <label class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
                     <input type="checkbox"
@@ -41,13 +80,35 @@
                 {% endfor %}
             </div>
         </div>
+
+        <!-- Severe mode -->
+        <label class="inline-flex items-center bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer hover:bg-gray-100">
+            <input type="checkbox"
+                   name="severe"
+                   value="true"
+                   {% if severe %}checked{% endif %}
+                   onchange="this.form.submit()"
+                   class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            Severe mode
+        </label>
     </div>
 </form>
 
 <script>
-    // Close dropdown when clicking outside
+function filterStatus(status) {
+    const url = new URL(window.location.href);
+    if (status === 'all') {
+        url.searchParams.delete('status');
+    } else {
+        url.searchParams.set('status', status);
+    }
+    window.location.href = url.toString();
+}
+</script>
+<script>
     document.addEventListener('click', function(e) {
         var dropdown = document.getElementById('verb-dropdown');
+        if (!dropdown) return;
         var button = dropdown.previousElementSibling;
         if (!dropdown.contains(e.target) && !button.contains(e.target)) {
             dropdown.classList.add('hidden');
@@ -55,7 +116,7 @@
     });
 </script>
 
-<!-- Status Table -->
+<!-- Status cards (no summary row in partial) -->
 <div id="status-table">
     {% include "partials/status_table.html" %}
 </div>

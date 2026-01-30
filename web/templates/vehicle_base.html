@@ -12,14 +12,12 @@
 {% endblock %}
 
 {% block content %}
-<!-- Vehicle Header -->
-<div class="mb-2">
-    <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
-    <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
-</div>
-
-<!-- Tab Navigation -->
-<div class="mb-4 border-b border-gray-200">
+<!-- Vehicle Header + Tabs (sticky below global header) -->
+<div class="sticky top-14 z-40 -mx-4 px-4 pt-4 pb-0 bg-gray-50 border-b border-gray-200 mb-4">
+    <div class="mb-2">
+        <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
+        <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+    </div>
     <nav class="flex -mb-px">
         <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}"
            class="flex-1 py-3 px-1 text-center text-sm font-medium border-b-2 transition-colors

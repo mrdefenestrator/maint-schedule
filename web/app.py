@@ -186,6 +186,7 @@ def vehicle_detail(vehicle_id: str):
         status_filter=status_filter,
         Status=Status,
         active_tab='status',
+        standalone=False,
     )
 
 
@@ -271,14 +272,24 @@ def log_service(vehicle_id: str):
         vehicle = load_vehicle(path)
         all_status = vehicle.get_all_service_status()
         all_status.sort(key=lambda s: (s.status.value, s.rule.item))
+        status_counts = {
+            'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
+            'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
+            'ok': sum(1 for s in all_status if s.status == Status.OK),
+            'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
+            'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
+        }
         return render_template(
             "partials/status_table.html",
             vehicle_id=vehicle_id,
             vehicle=vehicle,
             all_status=all_status,
+            status_counts=status_counts,
+            status_filter=None,
             severe=False,
             exclude_inspect=False,
             Status=Status,
+            standalone=True,
         )
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
@@ -321,14 +332,24 @@ def update_mileage(vehicle_id: str):
         vehicle = load_vehicle(path)
         all_status = vehicle.get_all_service_status()
         all_status.sort(key=lambda s: (s.status.value, s.rule.item))
+        status_counts = {
+            'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
+            'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
+            'ok': sum(1 for s in all_status if s.status == Status.OK),
+            'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
+            'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
+        }
         return render_template(
             "partials/status_table.html",
             vehicle_id=vehicle_id,
             vehicle=vehicle,
             all_status=all_status,
+            status_counts=status_counts,
+            status_filter=None,
             severe=False,
             exclude_inspect=False,
             Status=Status,
+            standalone=True,
         )
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))

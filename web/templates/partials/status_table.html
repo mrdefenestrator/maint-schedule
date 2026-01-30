@@ -1,6 +1,6 @@
-<!-- Summary - clickable filters -->
+{% if standalone is not defined or standalone %}
+<!-- Summary - clickable filters (shown when partial is loaded via HTMX; on full page, summary is in vehicle.html row) -->
 <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 flex flex-wrap items-center gap-2">
-    <span class="font-medium">Show:</span>
     <button type="button" onclick="filterStatus('all')"
             class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
                    {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
@@ -31,10 +31,7 @@
         {{ status_counts.ok }} OK
     </button>
     {% endif %}
-
-    <!-- Spacer to push inactive/unknown to the right -->
     <div class="flex-grow"></div>
-
     {% if status_counts.inactive > 0 %}
     <button type="button" onclick="filterStatus('inactive')"
             class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
@@ -64,11 +61,12 @@ function filterStatus(status) {
     window.location.href = url.toString();
 }
 </script>
+{% endif %}
 
 <!-- Status cards - accordion -->
 <div class="space-y-1.5">
     {% for service in all_status %}
-    <div class="bg-white rounded-lg border {{ service.status | status_color }} overflow-hidden">
+    <div class="rounded-lg border {{ service.status | status_color }} overflow-hidden">
         <!-- Compact header - clickable -->
         <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
