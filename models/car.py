@@ -23,4 +23,5 @@ class Car:
     @property
     def name(self) -> str:
         """Human-readable vehicle name."""
-        return f"{self.year} {self.make} {self.model} {self.trim}"
+        base = f"{self.year} {self.make} {self.model}"
+        return f"{base} {self.trim}" if self.trim else base
