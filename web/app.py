@@ -93,11 +93,14 @@ def index():
         overdue = sum(1 for s in all_status if s.status == Status.OVERDUE)
         due_soon = sum(1 for s in all_status if s.status == Status.DUE_SOON)
 
+        ok = sum(1 for s in all_status if s.status == Status.OK)
+
         vehicles.append({
             "id": get_vehicle_id(path),
             "vehicle": vehicle,
             "overdue": overdue,
             "due_soon": due_soon,
+            "ok": ok,
         })
 
     return render_template("index.html", vehicles=vehicles)
@@ -113,9 +116,14 @@ def vehicle_detail(vehicle_id: str):
 
     vehicle = load_vehicle(path)
     severe = request.args.get("severe", "").lower() == "true"
-    exclude_inspect = request.args.get("exclude_inspect", "").lower() == "true"
 
-    exclude_verbs = ["inspect"] if exclude_inspect else None
+    # Get all unique verbs from vehicle rules
+    all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
+
+    # Get excluded verbs from query string (can be multiple)
+    exclude_verbs = request.args.getlist("exclude")
+    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else None
+
     all_status = vehicle.get_all_service_status(severe=severe, exclude_verbs=exclude_verbs)
 
     # Sort by urgency (OVERDUE first, then DUE_SOON, etc.)
@@ -127,7 +135,8 @@ def vehicle_detail(vehicle_id: str):
         vehicle=vehicle,
         all_status=all_status,
         severe=severe,
-        exclude_inspect=exclude_inspect,
+        all_verbs=all_verbs,
+        exclude_verbs=exclude_verbs or [],
         Status=Status,
     )
 

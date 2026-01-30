@@ -1,3 +1,15 @@
+<!-- Summary -->
+{% set overdue_count = all_status | selectattr('status', 'equalto', Status.OVERDUE) | list | length %}
+{% set due_soon_count = all_status | selectattr('status', 'equalto', Status.DUE_SOON) | list | length %}
+{% set ok_count = all_status | selectattr('status', 'equalto', Status.OK) | list | length %}
+
+<div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+    <span class="font-medium">Summary:</span>
+    {% if overdue_count > 0 %}<span class="text-red-600">{{ overdue_count }} overdue</span>{% if due_soon_count > 0 or ok_count > 0 %}, {% endif %}{% endif %}
+    {% if due_soon_count > 0 %}<span class="text-yellow-600">{{ due_soon_count }} due soon</span>{% if ok_count > 0 %}, {% endif %}{% endif %}
+    {% if ok_count > 0 %}<span class="text-green-600">{{ ok_count }} OK</span>{% endif %}
+</div>
+
 <!-- Status cards for mobile-friendly display -->
 <div class="space-y-2">
     {% for service in all_status %}
@@ -22,7 +34,7 @@
                 {% endif %}
             </div>
         </div>
-        
+
         {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
         <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
             <div>
@@ -61,7 +73,7 @@
             </div>
         </div>
         {% endif %}
-        
+
         {% if service.rule.notes %}
         <p class="mt-2 text-xs text-gray-500 line-clamp-2">{{ service.rule.notes }}</p>
         {% endif %}
@@ -71,16 +83,4 @@
         <p>No maintenance items found.</p>
     </div>
     {% endfor %}
-</div>
-
-<!-- Summary -->
-{% set overdue_count = all_status | selectattr('status', 'equalto', Status.OVERDUE) | list | length %}
-{% set due_soon_count = all_status | selectattr('status', 'equalto', Status.DUE_SOON) | list | length %}
-{% set ok_count = all_status | selectattr('status', 'equalto', Status.OK) | list | length %}
-
-<div class="mt-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
-    <span class="font-medium">Summary:</span>
-    {% if overdue_count > 0 %}<span class="text-red-600">{{ overdue_count }} overdue</span>{% if due_soon_count > 0 or ok_count > 0 %}, {% endif %}{% endif %}
-    {% if due_soon_count > 0 %}<span class="text-yellow-600">{{ due_soon_count }} due soon</span>{% if ok_count > 0 %}, {% endif %}{% endif %}
-    {% if ok_count > 0 %}<span class="text-green-600">{{ ok_count }} OK</span>{% endif %}
 </div>

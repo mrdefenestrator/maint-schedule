@@ -21,51 +21,79 @@
 
 <!-- Action Buttons -->
 <div class="flex gap-2 mb-4">
-    <button hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
+    <button type="button"
+            hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
             hx-target="#modal-content"
             hx-swap="innerHTML"
+            hx-trigger="click"
             onclick="document.getElementById('modal').classList.remove('hidden')"
             class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target
                    hover:bg-blue-700 active:bg-blue-800 transition-colors">
         Log Service
     </button>
-    <button hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
+    <button type="button"
+            hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
             hx-target="#modal-content"
             hx-swap="innerHTML"
+            hx-trigger="click"
             onclick="document.getElementById('modal').classList.remove('hidden')"
-            class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium touch-target
-                   hover:bg-gray-300 active:bg-gray-400 transition-colors">
+            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target
+                   hover:bg-blue-700 active:bg-blue-800 transition-colors">
         Update Miles
     </button>
 </div>
 
 <!-- Filters -->
-<div class="flex flex-wrap gap-2 mb-4">
-    <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
-        <input type="checkbox"
-               id="severe-toggle"
-               {% if severe %}checked{% endif %}
-               hx-get="{{ url_for('vehicle_status_partial', vehicle_id=vehicle_id) }}"
-               hx-target="#status-table"
-               hx-swap="innerHTML"
-               hx-include="#exclude-inspect-toggle"
-               hx-vals='js:{"severe": document.getElementById("severe-toggle").checked}'
-               class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-        Severe mode
-    </label>
-    <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
-        <input type="checkbox"
-               id="exclude-inspect-toggle"
-               {% if exclude_inspect %}checked{% endif %}
-               hx-get="{{ url_for('vehicle_status_partial', vehicle_id=vehicle_id) }}"
-               hx-target="#status-table"
-               hx-swap="innerHTML"
-               hx-include="#severe-toggle"
-               hx-vals='js:{"exclude_inspect": document.getElementById("exclude-inspect-toggle").checked}'
-               class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-        Hide inspections
-    </label>
-</div>
+<form id="filter-form" method="get" action="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}" class="mb-4">
+    <div class="flex flex-wrap gap-2">
+        <label class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer">
+            <input type="checkbox"
+                   name="severe"
+                   value="true"
+                   {% if severe %}checked{% endif %}
+                   onchange="this.form.submit()"
+                   class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            Severe mode
+        </label>
+
+        <!-- Hide verbs dropdown -->
+        <div class="relative">
+            <button type="button"
+                    onclick="document.getElementById('verb-dropdown').classList.toggle('hidden')"
+                    class="inline-flex items-center bg-white px-3 py-2 rounded-lg border border-gray-200 text-sm touch-target">
+                Hide verbs
+                {% if exclude_verbs %}<span class="ml-1.5 bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs">{{ exclude_verbs | length }}</span>{% endif %}
+                <svg class="w-4 h-4 ml-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="verb-dropdown" class="hidden absolute z-10 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                {% for verb in all_verbs %}
+                <label class="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox"
+                           name="exclude"
+                           value="{{ verb }}"
+                           {% if verb in exclude_verbs %}checked{% endif %}
+                           onchange="document.getElementById('filter-form').submit()"
+                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm">{{ verb }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        var dropdown = document.getElementById('verb-dropdown');
+        var button = dropdown.previousElementSibling;
+        if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+</script>
 
 <!-- Status Table -->
 <div id="status-table">
