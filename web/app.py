@@ -75,9 +75,26 @@ def status_badge_color(status: Status) -> str:
     return colors.get(status, "bg-gray-500 text-white")
 
 
+def format_rule_key(rule_key):
+    """Format rule_key as 'Verb Item [phase]' to match vehicle page display."""
+    if not rule_key:
+        return "—"
+    parts = rule_key.split("/")
+    if len(parts) >= 2:
+        item = parts[0]
+        verb = parts[1]
+        phase = parts[2] if len(parts) > 2 else None
+        result = f"{verb.capitalize()} {item}"
+        if phase:
+            result += f" [{phase}]"
+        return result
+    return rule_key
+
+
 # Register template filters
 app.jinja_env.filters["format_miles"] = format_miles
 app.jinja_env.filters["format_date"] = format_date
+app.jinja_env.filters["format_rule_key"] = format_rule_key
 app.jinja_env.filters["status_color"] = status_color
 app.jinja_env.filters["status_badge_color"] = status_badge_color
 
@@ -95,12 +112,17 @@ def index():
 
         ok = sum(1 for s in all_status if s.status == Status.OK)
 
+        # Get last service info
+        last_service = vehicle.last_service
+
         vehicles.append({
             "id": get_vehicle_id(path),
             "vehicle": vehicle,
             "overdue": overdue,
             "due_soon": due_soon,
             "ok": ok,
+            "last_service": last_service,
+            "total_rules": len(vehicle.rules),
         })
 
     return render_template("index.html", vehicles=vehicles)

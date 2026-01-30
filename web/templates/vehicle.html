@@ -2,15 +2,7 @@
 
 {% block title %}{{ vehicle.car.name }} - Maintenance{% endblock %}
 
-{% block header_right %}
-<a href="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}"
-   class="text-blue-200 hover:text-white touch-target flex items-center">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-</a>
-{% endblock %}
+{% block header_right %}{% endblock %}
 
 {% block content %}
 <!-- Vehicle Header -->
@@ -41,6 +33,11 @@
                    hover:bg-blue-700 active:bg-blue-800 transition-colors">
         Update Miles
     </button>
+    <a href="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}"
+       class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium touch-target text-center
+              hover:bg-blue-700 active:bg-blue-800 transition-colors">
+        History
+    </a>
 </div>
 
 <!-- Filters -->

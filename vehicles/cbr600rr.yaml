@@ -1,8 +1,8 @@
 car:
   make: Honda
   model: CBR600RR
-  trim: Standard
-  year: 2007
+  trim:
+  year: 2003
   purchaseDate: '2013-08-15'
   purchaseMiles: 14719
 state:

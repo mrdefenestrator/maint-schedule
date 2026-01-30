@@ -10,40 +10,53 @@
     <a href="{{ url_for('vehicle_detail', vehicle_id=v.id) }}"
        class="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 touch-target
               hover:shadow-md hover:border-blue-300 transition-all active:bg-gray-50">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4">
             <div class="flex-1 min-w-0">
                 <h2 class="font-semibold text-gray-900 truncate">
                     {{ v.vehicle.car.name }}
                 </h2>
-                <p class="text-sm text-gray-500 mt-1">
-                    {{ v.vehicle.current_miles | format_miles }} miles
-                </p>
+                <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-500">
+                    <span>{{ v.vehicle.current_miles | format_miles }} mi</span>
+                    {% if v.last_service %}
+                    <span class="hidden sm:inline">Last: {{ v.last_service.date }}</span>
+                    {% endif %}
+                </div>
             </div>
 
             {% set max_count = [v.overdue, v.due_soon, v.ok] | max %}
-            <div class="flex items-center space-x-3 ml-4">
-                <!-- Mini vertical bar chart -->
-                <div class="flex items-end space-x-1">
+            {% set total = v.overdue + v.due_soon + v.ok %}
+            <div class="flex items-center gap-3">
+                <!-- Vertical bar chart with labels above -->
+                <div class="flex items-end gap-1" style="height: 56px;">
                     {% if max_count > 0 %}
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs font-medium text-red-600 mb-0.5">{{ v.overdue }}</span>
-                        <div class="w-4 bg-red-500 rounded-t"
-                             style="height: {{ ((v.overdue / max_count * 24) | round) if v.overdue > 0 else 2 }}px; min-height: 2px;"></div>
+                    <!-- Red bar -->
+                    <div class="flex flex-col items-center justify-end w-7 h-full">
+                        {% if v.overdue > 0 %}
+                        <span class="text-xs font-bold text-red-600 mb-0.5">{{ v.overdue }}</span>
+                        <div class="w-full bg-red-500 rounded-t"
+                             style="height: {{ (v.overdue / max_count * 36) | round }}px;"></div>
+                        {% endif %}
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs font-medium text-yellow-600 mb-0.5">{{ v.due_soon }}</span>
-                        <div class="w-4 bg-yellow-500 rounded-t"
-                             style="height: {{ ((v.due_soon / max_count * 24) | round) if v.due_soon > 0 else 2 }}px; min-height: 2px;"></div>
+                    <!-- Yellow bar -->
+                    <div class="flex flex-col items-center justify-end w-7 h-full">
+                        {% if v.due_soon > 0 %}
+                        <span class="text-xs font-bold text-yellow-600 mb-0.5">{{ v.due_soon }}</span>
+                        <div class="w-full bg-yellow-500 rounded-t"
+                             style="height: {{ (v.due_soon / max_count * 36) | round }}px;"></div>
+                        {% endif %}
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs font-medium text-green-600 mb-0.5">{{ v.ok }}</span>
-                        <div class="w-4 bg-green-500 rounded-t"
-                             style="height: {{ ((v.ok / max_count * 24) | round) if v.ok > 0 else 2 }}px; min-height: 2px;"></div>
+                    <!-- Green bar -->
+                    <div class="flex flex-col items-center justify-end w-7 h-full">
+                        {% if v.ok > 0 %}
+                        <span class="text-xs font-bold text-green-600 mb-0.5">{{ v.ok }}</span>
+                        <div class="w-full bg-green-500 rounded-t"
+                             style="height: {{ (v.ok / max_count * 36) | round }}px;"></div>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
 
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </div>
