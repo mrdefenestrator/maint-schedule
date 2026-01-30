@@ -136,6 +136,16 @@ history:
   date: '2020-04-22'
   mileage: 54648
   performedBy: self
+- ruleKey: engine air filter/replace
+  date: '2018-07-08'
+  mileage: 40013.0
+  performedBy: self
+  notes: Installed Cosworth high flow air filter
+- ruleKey: cabin air filter/replace
+  date: '2020-04-22'
+  mileage: 54648.0
+  performedBy: self
+  notes: Replaced cabin air filter with Subaru OEM
 rules:
 - item: accessory drive belt
   verb: inspect
@@ -147,7 +157,7 @@ rules:
   intervalMonths: 6
   severeIntervalMiles: 3000
   severeIntervalMonths: 3
-  notes: 'under severe driving replace oil and filter every 3,000 miles or 3 months whichever comes first'
+  notes: under severe driving replace oil and filter every 3,000 miles or 3 months whichever comes first
 - item: engine coolant
   verb: replace
   phase: initial
@@ -157,9 +167,9 @@ rules:
   severeIntervalMonths: 132
   stopMiles: 137500
   stopMonths: 132
-  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+  notes: Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
     6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
-    other types or it will reduce protection'
+    other types or it will reduce protection
 - item: engine coolant
   verb: replace
   phase: ongoing
@@ -169,9 +179,9 @@ rules:
   severeIntervalMonths: 72
   startMiles: 137500
   startMonths: 132
-  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+  notes: Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
     6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
-    other types or it will reduce protection'
+    other types or it will reduce protection
 - item: cooling system hoses, radiator
   verb: inspect
   intervalMiles: 30000
@@ -182,22 +192,22 @@ rules:
   intervalMonths: 30
   severeIntervalMiles: 6000
   severeIntervalMonths: 6
-  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
-    comes first'
+  notes: under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first
 - item: fuel filter
   verb: replace
   intervalMiles: 72000
   intervalMonths: 72
   severeIntervalMiles: 60000
   severeIntervalMonths: 60
-  notes: 'the filter is in the fuel tank, under extremely cold or hot weather replace the filter more often'
+  notes: the filter is in the fuel tank, under extremely cold or hot weather replace the filter more often
 - item: engine air filter
   verb: replace
   intervalMiles: 30000
   intervalMonths: 30
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'when used in dusty conditions, the air filter should be replaced more often'
+  notes: when used in dusty conditions, the air filter should be replaced more often
 - item: spark plugs
   verb: replace
   intervalMiles: 60000
@@ -214,7 +224,7 @@ rules:
   intervalMonths: 60
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'under severe driving replace every 15,000 miles or 15 months whichever comes first'
+  notes: under severe driving replace every 15,000 miles or 15 months whichever comes first
 - item: rear differential fluid
   verb: inspect
   intervalMiles: 12000
@@ -225,39 +235,39 @@ rules:
   intervalMonths: 96
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'under severe driving replace every 15,000 miles or 15 months whichever comes first'
+  notes: under severe driving replace every 15,000 miles or 15 months whichever comes first
 - item: brake fluid
   verb: replace
   intervalMiles: 30000
   intervalMonths: 30
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
-    months whichever comes first'
+  notes: when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
+    months whichever comes first
 - item: clutch fluid
   verb: replace
   intervalMiles: 30000
   intervalMonths: 30
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
-    months whichever comes first'
+  notes: when used in high humidity or mountainous areas replace the brake fluid and clutch fluid every 15,000 miles or 15
+    months whichever comes first
 - item: brake pads, linings, parking brake
   verb: inspect
   intervalMiles: 12000
   intervalMonths: 12
   severeIntervalMiles: 6000
   severeIntervalMonths: 6
-  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
-    comes first'
+  notes: under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first
 - item: front / rear axle boots, cv joints, axle half shaft
   verb: inspect
   intervalMiles: 12000
   intervalMonths: 12
   severeIntervalMiles: 6000
   severeIntervalMonths: 6
-  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
-    comes first'
+  notes: under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first
 - item: clutch operation
   verb: inspect
   intervalMiles: 12000
@@ -268,8 +278,8 @@ rules:
   intervalMonths: 12
   severeIntervalMiles: 6000
   severeIntervalMonths: 6
-  notes: 'under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
-    comes first'
+  notes: under severe driving, brake and steering system inspection should be performed every 6000 miles or 6 months whichever
+    comes first
 - item: front / rear wheel bearing lubricant
   verb: inspect
   intervalMiles: 60000
@@ -284,4 +294,4 @@ rules:
   intervalMonths: 12
   severeIntervalMiles: 6000
   severeIntervalMonths: 6
-  notes: 'when used in dusty conditions, the air filter should be replaced more often'
+  notes: when used in dusty conditions, the air filter should be replaced more often

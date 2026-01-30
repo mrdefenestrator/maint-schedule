@@ -481,6 +481,16 @@ history:
   performedBy: self
   notes: Idemitsu GL-6 5W30, Subaru Filter
   cost: 0
+- ruleKey: cobb engine air filter/clean
+  date: '2026-01-30'
+  mileage: 104980.0
+  performedBy: self
+  notes: cleaned and reoiled
+- ruleKey: rotate tires/perform
+  date: '2026-01-22'
+  mileage: 104847.0
+  performedBy: self
+  notes: swapped to oem wheels with blizzaks, rotated
 rules:
 - item: accessory belt
   verb: inspect
@@ -500,8 +510,8 @@ rules:
   intervalMonths: 7.5
   severeIntervalMiles: 3750
   severeIntervalMonths: 3.75
-  notes: 'Under Severe driving replace every 3,750 miles. Turbos must have the synthetic oil service done at least every
-    3,750 miles or 3 3/4 months'
+  notes: Under Severe driving replace every 3,750 miles. Turbos must have the synthetic oil service done at least every 3,750
+    miles or 3 3/4 months
 - item: engine coolant
   verb: replace
   phase: initial
@@ -511,9 +521,9 @@ rules:
   severeIntervalMonths: 132
   stopMiles: 137500
   stopMonths: 132
-  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+  notes: Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
     6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
-    other types or it will reduce protection'
+    other types or it will reduce protection
 - item: engine coolant
   verb: replace
   phase: ongoing
@@ -523,28 +533,28 @@ rules:
   severeIntervalMonths: 72
   startMiles: 137500
   startMonths: 132
-  notes: 'Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
+  notes: Subaru Super Coolant. 1st replacement interval is 11years/137,500 miles (220,000 km). 2nd replacement interval is
     6 years/ 75,000 miles (120,000 km) after the 1st. If towing replace more often. Use Subaru coolant only, do not mix with
-    other types or it will reduce protection'
+    other types or it will reduce protection
 - item: fuel system lines, connections
   verb: inspect
   intervalMiles: 30000
   intervalMonths: 30
   severeIntervalMiles: 7500
   severeIntervalMonths: 7.5
-  notes: 'under severe driving inspect 7,500-15,000 miles'
+  notes: under severe driving inspect 7,500-15,000 miles
 - item: fuel filter
   verb: replace
   intervalMiles: 60000
   intervalMonths: 60
-  notes: 'the filter is in the fuel tank'
+  notes: the filter is in the fuel tank
 - item: engine air filter
   verb: replace
   intervalMiles: 30000
   intervalMonths: 30
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'under severe driving replace 7,500-15,000 miles'
+  notes: under severe driving replace 7,500-15,000 miles
 - item: spark plugs
   verb: replace
   intervalMiles: 60000
@@ -561,7 +571,7 @@ rules:
   intervalMonths: 60
   severeIntervalMiles: 30000
   severeIntervalMonths: 30
-  notes: 'under severe driving replace 30,000 miles'
+  notes: under severe driving replace 30,000 miles
 - item: rear differential fluid
   verb: inspect
   intervalMiles: 30000
@@ -572,7 +582,7 @@ rules:
   intervalMonths: 60
   severeIntervalMiles: 30000
   severeIntervalMonths: 30
-  notes: 'under severe driving replace 30,000 miles'
+  notes: under severe driving replace 30,000 miles
   stopMiles: 60000
   stopMonths: 60
 - item: brake fluid
@@ -581,19 +591,19 @@ rules:
   intervalMonths: 30
   severeIntervalMiles: 15000
   severeIntervalMonths: 15
-  notes: 'under severe driving replace 7,500-15,000 miles'
+  notes: under severe driving replace 7,500-15,000 miles
 - item: brake pads, linings, parking brake
   verb: inspect
   intervalMiles: 15000
   intervalMonths: 15
-  notes: 'under severe driving replace 7,500-15,000 miles'
+  notes: under severe driving replace 7,500-15,000 miles
 - item: front / rear axle boots, cv joints, axle half shaft
   verb: inspect
   intervalMiles: 15000
   intervalMonths: 15
   severeIntervalMiles: 7500
   severeIntervalMonths: 7.5
-  notes: 'under severe driving replace 7,500-15,000 miles'
+  notes: under severe driving replace 7,500-15,000 miles
 - item: clutch
   verb: inspect
   intervalMiles: 15000
@@ -604,7 +614,7 @@ rules:
   intervalMonths: 15
   severeIntervalMiles: 7500
   severeIntervalMonths: 7.5
-  notes: 'under severe driving replace 7,500-15,000 miles'
+  notes: under severe driving replace 7,500-15,000 miles
 - item: front / rear wheel bearing lubricant
   verb: inspect
   intervalMiles: 60000
