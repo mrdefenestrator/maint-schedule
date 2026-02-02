@@ -1,0 +1,27 @@
+{# Expects overdue, due_soon, ok in context (e.g. via {% with overdue=..., due_soon=..., ok=... %}) #}
+{% set max_count = [overdue, due_soon, ok] | max %}
+<div class="flex items-end gap-1" style="height: 56px;">
+    {% if max_count > 0 %}
+    <div class="flex flex-col items-center justify-end w-7 h-full">
+        {% if overdue > 0 %}
+        <span class="text-xs font-bold text-red-600 mb-0.5">{{ overdue }}</span>
+        <div class="w-full bg-red-500 rounded-t"
+             style="height: {{ (overdue / max_count * 36) | round }}px;"></div>
+        {% endif %}
+    </div>
+    <div class="flex flex-col items-center justify-end w-7 h-full">
+        {% if due_soon > 0 %}
+        <span class="text-xs font-bold text-yellow-600 mb-0.5">{{ due_soon }}</span>
+        <div class="w-full bg-yellow-500 rounded-t"
+             style="height: {{ (due_soon / max_count * 36) | round }}px;"></div>
+        {% endif %}
+    </div>
+    <div class="flex flex-col items-center justify-end w-7 h-full">
+        {% if ok > 0 %}
+        <span class="text-xs font-bold text-green-600 mb-0.5">{{ ok }}</span>
+        <div class="w-full bg-green-500 rounded-t"
+             style="height: {{ (ok / max_count * 36) | round }}px;"></div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

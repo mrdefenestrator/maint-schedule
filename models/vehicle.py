@@ -206,16 +206,24 @@ class Vehicle:
         miles_only: bool = False,
         time_only: bool = False,
         exclude_verbs: Optional[List[str]] = None,
+        include_verbs: Optional[List[str]] = None,
     ) -> List[ServiceDue]:
         """
         Calculate service status for all active rules.
 
         Args:
             exclude_verbs: List of verbs to exclude (e.g., ["inspect", "rotate"])
+            include_verbs: List of verbs to include; when set, only these verbs are shown.
+                          When None or empty, no verb filter (show all).
         """
-        # Filter rules if verbs to exclude are specified
+        # Filter rules by verb: include_verbs takes precedence over exclude_verbs when both present
         rules_to_check = self.rules
-        if exclude_verbs:
+        if include_verbs:
+            include_verbs_lower = [v.lower() for v in include_verbs]
+            rules_to_check = [
+                r for r in self.rules if r.verb.lower() in include_verbs_lower
+            ]
+        elif exclude_verbs:
             exclude_verbs_lower = [v.lower() for v in exclude_verbs]
             rules_to_check = [
                 r for r in self.rules if r.verb.lower() not in exclude_verbs_lower

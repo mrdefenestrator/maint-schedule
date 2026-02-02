@@ -17,7 +17,7 @@
                     {{ service.status | status_display_name }}
                 </span>
                 <span class="font-medium text-gray-900 text-sm truncate">
-                    {{ service.rule.verb | capitalize }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
+                    {{ service.rule.verb | title }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
                 </span>
                 {% if service.rule.aftermarket %}
                 <span class="text-xs text-purple-600">★</span>
@@ -185,7 +185,7 @@
     </div>
     {% else %}
     <div class="text-center py-8 text-gray-500">
-        <p>No maintenance items found.</p>
+        <p>No maintenance items.</p>
     </div>
     {% endfor %}
 </div>

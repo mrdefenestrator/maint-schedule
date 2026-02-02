@@ -3,7 +3,7 @@
 {% block title %}{{ vehicle.car.name }} - Rules{% endblock %}
 
 {% block tab_content %}
-<!-- Summary + Hide verbs in one row -->
+<!-- Summary + Show verbs in one row -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_rules', vehicle_id=vehicle_id) }}" class="mb-4">
     {% if status_filter %}
     <input type="hidden" name="status" value="{{ status_filter }}">
@@ -33,7 +33,7 @@
         </button>
         {% endif %}
 
-        <!-- Add rule + Hide verbs -->
+        <!-- Add rule + Show verbs -->
         <div class="ml-auto flex items-center gap-2">
             <button type="button"
                     hx-get="{{ url_for('add_rule_view', vehicle_id=vehicle_id) }}"
@@ -41,7 +41,10 @@
                     hx-swap="innerHTML"
                     hx-trigger="click"
                     onclick="document.getElementById('modal').classList.remove('hidden')"
-                    class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg border border-transparent text-sm font-medium touch-target">
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg border border-transparent text-sm font-medium touch-target">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
                 Add rule
             </button>
         {% include "partials/verb_filter_dropdown.html" %}
@@ -64,7 +67,7 @@
                     {% if is_active %}Active{% else %}Inactive{% endif %}
                 </span>
                 <span class="font-medium text-gray-900 text-sm truncate">
-                    {{ rule.verb | capitalize }} {{ rule.item }}{% if rule.phase %} <span class="text-gray-400">[{{ rule.phase }}]</span>{% endif %}
+                    {{ rule.verb | title }} {{ rule.item }}{% if rule.phase %} <span class="text-gray-400">[{{ rule.phase }}]</span>{% endif %}
                 </span>
                 {% if rule.aftermarket %}
                 <span class="text-xs text-purple-600">★</span>
@@ -129,7 +132,7 @@
     </div>
     {% endfor %}
     {% else %}
-    {% with message="No maintenance rules defined." %}
+    {% with message="No maintenance rules yet.", submessage="Use Add rule to create a schedule." %}
     {% include "partials/empty_state.html" %}
     {% endwith %}
     {% endfor %}

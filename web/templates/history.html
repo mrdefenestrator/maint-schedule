@@ -3,7 +3,7 @@
 {% block title %}{{ vehicle.car.name }} - History{% endblock %}
 
 {% block tab_content %}
-<!-- Summary + Add entry + Hide verbs in one row -->
+<!-- Summary + Add entry + Show verbs in one row -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_history', vehicle_id=vehicle_id) }}" class="mb-4">
     <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
         <!-- Summary -->
@@ -12,7 +12,7 @@
         <span class="font-medium ml-2">Total cost:</span>
         <span class="font-medium text-lg">${{ "%.2f" | format(total_cost) }}</span>
 
-        <!-- Add entry + Hide verbs -->
+        <!-- Add entry + Show verbs -->
         <div class="ml-auto flex items-center gap-2">
             <button type="button"
                     hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
@@ -20,7 +20,10 @@
                     hx-swap="innerHTML"
                     hx-trigger="click"
                     onclick="document.getElementById('modal').classList.remove('hidden')"
-                    class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg border border-transparent text-sm font-medium touch-target">
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg border border-transparent text-sm font-medium touch-target">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
                 Add entry
             </button>
         {% include "partials/verb_filter_dropdown.html" %}
@@ -48,7 +51,7 @@
             <div class="flex-1 min-w-0 overflow-hidden">
                 {% set rk_parts = entry.rule_key.split("/") %}
                 <span class="block font-medium text-gray-900 text-sm truncate min-w-0">
-                    {% if rk_parts | length > 1 %}{{ rk_parts[1] | capitalize }} {{ rk_parts[0] }}{% if rk_parts | length > 2 %} <span class="text-gray-400">[{{ rk_parts[2] }}]</span>{% endif %}{% else %}{{ entry.rule_key }}{% endif %}
+                    {% if rk_parts | length > 1 %}{{ rk_parts[1] | title }} {{ rk_parts[0] }}{% if rk_parts | length > 2 %} <span class="text-gray-400">[{{ rk_parts[2] }}]</span>{% endif %}{% else %}{{ entry.rule_key }}{% endif %}
                 </span>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -95,10 +98,33 @@
         </div>
     </div>
     {% else %}
-    {% with message="No service history yet.", submessage="Tap the + button to log a service." %}
+    {% with message="No service history yet.", submessage="Use Add entry to log a service." %}
     {% include "partials/empty_state.html" %}
     {% endwith %}
     {% endfor %}
+
+    {# Synthetic "Purchased" placeholder at beginning of timeline (chronologically first = bottom of list) #}
+    {% set purchase_year = vehicle.car.purchase_date[:4] %}
+    {% if purchase_year != ns.current_year %}
+    <div class="flex items-center gap-2 py-2 {% if not history_with_index %}mt-0{% else %}mt-3{% endif %}">
+        <div class="h-px bg-gray-300 flex-1"></div>
+        <span class="text-sm font-semibold text-gray-500 px-2">{{ purchase_year }}</span>
+        <div class="h-px bg-gray-300 flex-1"></div>
+    </div>
+    {% endif %}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-3 py-2 flex items-center justify-between gap-2">
+            <div class="flex-1 min-w-0 overflow-hidden">
+                <span class="block font-medium text-gray-500 text-sm">Purchased</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-gray-500 whitespace-nowrap w-[7rem] text-right tabular-nums">{{ vehicle.car.purchase_date }}</span>
+                <span class="text-xs text-gray-600 whitespace-nowrap w-[5.5rem] text-right tabular-nums">{{ vehicle.car.purchase_miles | format_miles }} mi</span>
+                <span class="text-xs font-medium text-green-600 whitespace-nowrap w-[4.5rem] text-right tabular-nums">—</span>
+                <span class="w-4 flex-shrink-0" aria-hidden="true"></span>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

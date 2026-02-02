@@ -115,7 +115,7 @@ def format_rule_key(rule_key):
         item = parts[0]
         verb = parts[1]
         phase = parts[2] if len(parts) > 2 else None
-        result = f"{verb.capitalize()} {item}"
+        result = f"{verb.title()} {item}"
         if phase:
             result += f" [{phase}]"
         return result
@@ -176,11 +176,11 @@ def vehicle_detail(vehicle_id: str):
     # Get all unique verbs from vehicle rules
     all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
 
-    # Get excluded verbs from query string (can be multiple)
-    exclude_verbs = request.args.getlist("exclude")
-    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else None
+    # Show verbs: when "show" params present, only those verbs; when empty, show all
+    include_verbs = request.args.getlist("show")
+    include_verbs = [v.lower() for v in include_verbs] if include_verbs else None
 
-    all_status = vehicle.get_all_service_status(severe=severe, exclude_verbs=exclude_verbs)
+    all_status = vehicle.get_all_service_status(severe=severe, include_verbs=include_verbs)
 
     # Calculate counts before filtering for display
     status_counts = {
@@ -215,7 +215,7 @@ def vehicle_detail(vehicle_id: str):
         status_counts=status_counts,
         severe=severe,
         all_verbs=all_verbs,
-        exclude_verbs=exclude_verbs or [],
+        include_verbs=include_verbs or [],
         status_filter=status_filter,
         Status=Status,
         active_tab='status',
@@ -378,21 +378,28 @@ def vehicle_history(vehicle_id: str):
             all_verbs.add(parts[1].lower())
     all_verbs = sorted(all_verbs)
 
-    # Get excluded verbs from query string
-    exclude_verbs = request.args.getlist("exclude")
-    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else []
+    # Show verbs: when "show" params present, only those verbs; when empty, show all
+    include_verbs = request.args.getlist("show")
+    include_verbs = [v.lower() for v in include_verbs] if include_verbs else []
 
-    # Filter history based on exclude_verbs
-    if exclude_verbs:
+    # Filter history based on include_verbs
+    if include_verbs:
         filtered = []
         for idx, entry in entries_with_index:
             parts = entry.rule_key.split("/")
             verb = parts[1].lower() if len(parts) >= 2 else ""
-            if verb not in exclude_verbs:
+            if verb in include_verbs:
                 filtered.append((idx, entry))
         entries_with_index = filtered
 
     total_cost = sum(e.cost for _, e in entries_with_index if e.cost is not None)
+
+    all_status = vehicle.get_all_service_status(severe=False)
+    status_counts = {
+        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
+        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        'ok': sum(1 for s in all_status if s.status == Status.OK),
+    }
 
     return render_template(
         "history.html",
@@ -401,7 +408,8 @@ def vehicle_history(vehicle_id: str):
         history_with_index=entries_with_index,
         total_cost=total_cost,
         all_verbs=all_verbs,
-        exclude_verbs=exclude_verbs,
+        include_verbs=include_verbs,
+        status_counts=status_counts,
         active_tab='history',
     )
 
@@ -746,16 +754,16 @@ def vehicle_rules(vehicle_id: str):
     # Get all unique verbs from rules
     all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
 
-    # Get excluded verbs from query string
-    exclude_verbs = request.args.getlist("exclude")
-    exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else []
+    # Show verbs: when "show" params present, only those verbs; when empty, show all
+    include_verbs = request.args.getlist("show")
+    include_verbs = [v.lower() for v in include_verbs] if include_verbs else []
 
     # Build (raw_index, rule) and filter
     rules_with_index = list(enumerate(vehicle.rules))
-    if exclude_verbs:
+    if include_verbs:
         rules_with_index = [
             (i, r) for i, r in rules_with_index
-            if r.verb.lower() not in exclude_verbs
+            if r.verb.lower() in include_verbs
         ]
 
     # Count active vs inactive (before status filter, after verb filter)
@@ -780,6 +788,13 @@ def vehicle_rules(vehicle_id: str):
     for item in sorted_items:
         rules_by_item[item].sort(key=lambda ir: (ir[1].verb, ir[1].phase or ""))
 
+    all_status = vehicle.get_all_service_status(severe=False)
+    status_counts = {
+        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
+        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        'ok': sum(1 for s in all_status if s.status == Status.OK),
+    }
+
     return render_template(
         "rules.html",
         vehicle_id=vehicle_id,
@@ -791,7 +806,8 @@ def vehicle_rules(vehicle_id: str):
         inactive_count=inactive_count,
         status_filter=status_filter,
         all_verbs=all_verbs,
-        exclude_verbs=exclude_verbs,
+        include_verbs=include_verbs,
+        status_counts=status_counts,
         active_tab='rules',
     )
 

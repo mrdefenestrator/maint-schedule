@@ -51,8 +51,8 @@ class Rule:
 
     @property
     def display_name(self) -> str:
-        """Generate human-readable display name: VERB - item [phase]."""
-        name = f"{self.verb.capitalize()} - {self.item}"
+        """Generate human-readable display name: Verb - item [phase] (title case)."""
+        name = f"{self.verb.title()} - {self.item}"
         if self.phase:
             name += f" [{self.phase}]"
         return name

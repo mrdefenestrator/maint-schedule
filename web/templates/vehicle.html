@@ -3,12 +3,13 @@
 {% block title %}{{ vehicle.car.name }} - Status{% endblock %}
 
 {% block tab_content %}
-<!-- Summary + Hide verbs + Severe mode in one row -->
+<!-- Summary + Show verbs + Severe mode in one row -->
 <form id="filter-form" method="get" action="{{ url_for('vehicle_detail', vehicle_id=vehicle_id) }}" class="mb-4">
+    {% if status_filter %}
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    {% endif %}
     <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
         {% include "partials/status_filter_chips.html" %}
-
-        {% include "partials/verb_filter_dropdown.html" %}
 
         <!-- Severe mode -->
         <label class="inline-flex items-center bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer hover:bg-gray-100">
@@ -20,6 +21,8 @@
                    class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
             Severe mode
         </label>
+
+        {% include "partials/verb_filter_dropdown.html" %}
     </div>
 </form>
 
