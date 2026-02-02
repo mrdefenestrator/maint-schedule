@@ -184,11 +184,13 @@ rules:
   notes: Lubricate and adjust drive chain every 500 miles (800 km). Check more frequently when riding in wet or dusty conditions.
 - item: fuel line
   verb: inspect
+  phase: initial
   intervalMiles: 1000
   stopMiles: 1000
   notes: Inspect fuel line at first service (1,000 miles), then every 4,000 miles.
 - item: fuel line
   verb: inspect
+  phase: ongoing
   intervalMiles: 4000
   startMiles: 1000
   notes: Inspect fuel line for cracks, leaks, and loose connections.
