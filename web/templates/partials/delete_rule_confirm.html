@@ -1,0 +1,44 @@
+<!-- Delete Rule - Confirmation dialog -->
+<div>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Delete rule?</h2>
+        <button type="button"
+                onclick="document.getElementById('modal').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600 touch-target">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <p class="text-gray-600 text-sm mb-4">
+        This will permanently remove this maintenance rule. History entries that reference this rule will keep their rule key but the rule will no longer appear in the schedule.
+    </p>
+
+    <div class="bg-gray-50 rounded-lg border border-gray-200 p-3 mb-6 text-sm">
+        <p class="font-medium text-gray-900">{{ rule.display_name }}</p>
+        <p class="text-gray-500 font-mono text-xs mt-1">{{ rule.key }}</p>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="button"
+                onclick="document.getElementById('modal').classList.add('hidden')"
+                class="flex-1 py-3 px-4 rounded-lg border border-gray-300 text-gray-700 font-medium touch-target
+                       hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            Cancel
+        </button>
+        <form method="post"
+              action="{{ url_for('delete_rule_view', vehicle_id=vehicle_id, index=index) }}"
+              class="flex-1"
+              hx-post="{{ url_for('delete_rule_view', vehicle_id=vehicle_id, index=index) }}"
+              hx-target="body"
+              hx-swap="none"
+              hx-headers='{"HX-Request": "true"}'>
+            <button type="submit"
+                    class="w-full py-3 px-4 rounded-lg bg-red-600 text-white font-medium touch-target
+                           hover:bg-red-700 active:bg-red-800 transition-colors">
+                Delete
+            </button>
+        </form>
+    </div>
+</div>

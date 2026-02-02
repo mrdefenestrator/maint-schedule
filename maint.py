@@ -4,12 +4,9 @@ Unified CLI for vehicle maintenance tracking.
 
 Commands:
   status       - Show what maintenance is due, overdue, or upcoming
-  history      - View service history (use --show-index to get indices for edit/delete)
-  log          - Add a new service entry
-  edit         - Edit an existing history entry by index
-  delete       - Delete a history entry by index
+  history      - View service history (default); subcommands: add, edit, delete
   update-miles - Update current vehicle mileage
-  rules        - List available maintenance rules
+  rules        - List maintenance rules (default); subcommands: add, edit, delete
 """
 
 import argparse
@@ -23,11 +20,15 @@ from models import (
     Status,
     ServiceDue,
     HistoryEntry,
+    Rule,
     load_vehicle,
     save_history_entry,
     save_current_miles,
     update_history_entry,
     delete_history_entry,
+    add_rule,
+    update_rule,
+    delete_rule,
 )
 
 # =============================================================================
@@ -319,7 +320,7 @@ def cmd_history(args):
     if total_cost > 0:
         print(f"Total cost: ${total_cost:,.2f}")
     if args.show_index:
-        print("Index column is for: maint edit/delete <file> <index> ...")
+        print("Index column is for: maint history edit/delete <index> ...")
     print()
 
     if not entries:
@@ -522,6 +523,155 @@ def cmd_delete(args):
 
 
 # =============================================================================
+# Edit-rule command
+# =============================================================================
+
+
+def cmd_edit_rule(args):
+    """Edit an existing rule by index."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    if args.index < 0 or args.index >= len(vehicle.rules):
+        print(f"Error: Index {args.index} out of range (0..{len(vehicle.rules) - 1})")
+        return 1
+
+    existing = vehicle.rules[args.index]
+
+    def _ov(name, val):
+        return val if val is not None else getattr(existing, name)
+
+    # aftermarket: only override if explicitly set (--set-aftermarket true/false)
+    aftermarket = existing.aftermarket
+    if args.set_aftermarket is not None:
+        aftermarket = args.set_aftermarket.lower() == "true"
+
+    rule = Rule(
+        item=_ov("item", args.item),
+        verb=_ov("verb", args.verb),
+        interval_miles=_ov("interval_miles", args.interval_miles),
+        interval_months=_ov("interval_months", args.interval_months),
+        severe_interval_miles=_ov("severe_interval_miles", args.severe_interval_miles),
+        severe_interval_months=_ov("severe_interval_months", args.severe_interval_months),
+        notes=_ov("notes", args.notes),
+        phase=_ov("phase", args.phase),
+        start_miles=_ov("start_miles", args.start_miles),
+        stop_miles=_ov("stop_miles", args.stop_miles),
+        start_months=_ov("start_months", args.start_months),
+        stop_months=_ov("stop_months", args.stop_months),
+        aftermarket=aftermarket,
+    )
+
+    print(f"Updating rule {args.index} in {args.vehicle_file}:")
+    print(f"  {rule.display_name}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    try:
+        update_rule(args.vehicle_file, args.index, rule)
+    except IndexError as e:
+        print(f"Error: {e}")
+        return 1
+    print("Rule updated.")
+    return 0
+
+
+# =============================================================================
+# Delete-rule command
+# =============================================================================
+
+
+def cmd_delete_rule(args):
+    """Delete a rule by index."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    if args.index < 0 or args.index >= len(vehicle.rules):
+        print(f"Error: Index {args.index} out of range (0..{len(vehicle.rules) - 1})")
+        return 1
+
+    rule = vehicle.rules[args.index]
+
+    print(f"Deleting rule {args.index} from {args.vehicle_file}:")
+    print(f"  {rule.display_name}")
+    print(f"  Key: {rule.key}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    try:
+        delete_rule(args.vehicle_file, args.index)
+    except IndexError as e:
+        print(f"Error: {e}")
+        return 1
+    print("Rule deleted.")
+    return 0
+
+
+# =============================================================================
+# Rules add command
+# =============================================================================
+
+
+def cmd_rules_add(args):
+    """Add a new rule."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    # Validate item/verb
+    item = args.item.strip()
+    verb = args.verb.strip()
+    if not item or not verb:
+        print("Error: --item and --verb are required")
+        return 1
+
+    aftermarket = False
+    if args.set_aftermarket is not None:
+        aftermarket = args.set_aftermarket.lower() == "true"
+
+    rule = Rule(
+        item=item,
+        verb=verb,
+        phase=args.phase or None,
+        interval_miles=args.interval_miles,
+        interval_months=args.interval_months,
+        severe_interval_miles=args.severe_interval_miles,
+        severe_interval_months=args.severe_interval_months,
+        notes=args.notes or None,
+        start_miles=args.start_miles if args.start_miles is not None else 0,
+        stop_miles=args.stop_miles if args.stop_miles is not None else 999999999,
+        start_months=args.start_months if args.start_months is not None else 0,
+        stop_months=args.stop_months if args.stop_months is not None else 9999,
+        aftermarket=aftermarket,
+    )
+
+    print(f"Adding rule to {args.vehicle_file}:")
+    print(f"  {rule.display_name}")
+    if rule.interval_miles or rule.interval_months:
+        parts = []
+        if rule.interval_miles:
+            parts.append(f"{rule.interval_miles:,.0f} mi")
+        if rule.interval_months:
+            parts.append(f"{rule.interval_months:.0f} mo")
+        print(f"  Interval: {' / '.join(parts)}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    try:
+        add_rule(args.vehicle_file, rule)
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
+    print("Rule added.")
+    return 0
+
+
+# =============================================================================
 # Update Miles command
 # =============================================================================
 
@@ -559,49 +709,38 @@ def cmd_rules(args):
 
     print(f"Vehicle: {vehicle.car.name}")
     print(f"Rules: {len(vehicle.rules)}")
+    if args.show_index:
+        print("Index column is for: maint rules edit/delete <index> ...")
     print()
 
-    # Sort rules by item, then verb, then phase for logical grouping
-    sorted_rules = sorted(vehicle.rules, key=lambda r: (r.item, r.verb, r.phase or ""))
+    # Sort rules by item, then verb, then phase; keep (raw_index, rule)
+    indexed = list(enumerate(vehicle.rules))
+    sorted_indexed = sorted(
+        indexed, key=lambda ir: (ir[1].item, ir[1].verb, ir[1].phase or "")
+    )
+    indices = [ir[0] for ir in sorted_indexed]
+    sorted_rules = [ir[1] for ir in sorted_indexed]
 
     rows = []
     for rule in sorted_rules:
-        # Format interval miles
         interval_miles = f"{rule.interval_miles:,.0f}" if rule.interval_miles else "-"
-
-        # Format interval time
         interval_time = f"{rule.interval_months} mo" if rule.interval_months else "-"
-
-        # Format severe interval miles
         severe_miles = (
             f"{rule.severe_interval_miles:,.0f}" if rule.severe_interval_miles else "-"
         )
-
-        # Format severe interval time
         severe_time = (
             f"{rule.severe_interval_months} mo" if rule.severe_interval_months else "-"
         )
+        row = [rule.display_name, interval_miles, interval_time, severe_miles, severe_time]
+        if args.show_index:
+            row.insert(0, str(indices[len(rows)]))
+        rows.append(row)
 
-        rows.append(
-            [
-                rule.display_name,
-                interval_miles,
-                interval_time,
-                severe_miles,
-                severe_time,
-            ]
-        )
-
-    headers = [
-        "Rule",
-        "Interval (mi)",
-        "Interval (time)",
-        "Severe (mi)",
-        "Severe (time)",
-    ]
-
-    # Column alignment: left, right, right, right, right
+    headers = ["Rule", "Interval (mi)", "Interval (time)", "Severe (mi)", "Severe (time)"]
     colalign = ("left", "right", "right", "right", "right")
+    if args.show_index:
+        headers.insert(0, "Index")
+        colalign = ("right",) + colalign
 
     print(tabulate(rows, headers=headers, tablefmt="simple", colalign=colalign))
 
@@ -626,12 +765,16 @@ Examples:
   %(prog)s vehicles/brz.yaml history --rule "oil"
   %(prog)s vehicles/brz.yaml history --since 2024-01-01
   %(prog)s vehicles/brz.yaml rules
-  %(prog)s vehicles/brz.yaml log "engine oil and filter/replace" \\
+  %(prog)s vehicles/brz.yaml history add "engine oil and filter/replace" \\
       --mileage 58000 --by self
   %(prog)s vehicles/brz.yaml update-miles 58000
   %(prog)s vehicles/brz.yaml history --show-index
-  %(prog)s vehicles/brz.yaml edit 0 --date 2024-01-15 --notes "Corrected date"
-  %(prog)s vehicles/brz.yaml delete 0 --dry-run
+  %(prog)s vehicles/brz.yaml history edit 0 --date 2024-01-15 --notes "Corrected date"
+  %(prog)s vehicles/brz.yaml history delete 0 --dry-run
+  %(prog)s vehicles/brz.yaml rules --show-index
+  %(prog)s vehicles/brz.yaml rules add --item "cabin air filter" --verb replace --interval-miles 15000
+  %(prog)s vehicles/brz.yaml rules edit 0 --interval-miles 7500
+  %(prog)s vehicles/brz.yaml rules delete 0 --dry-run
 """,
     )
     parser.add_argument(
@@ -670,8 +813,8 @@ Examples:
         ),
     )
 
-    # History subcommand
-    history_parser = subparsers.add_parser("history", help="View service history")
+    # History subcommand (with nested edit/delete)
+    history_parser = subparsers.add_parser("history", help="View or modify service history")
     history_parser.add_argument(
         "--rule",
         type=str,
@@ -696,98 +839,93 @@ Examples:
     history_parser.add_argument(
         "--show-index",
         action="store_true",
-        help="Show index column for use with: maint edit/delete <file> <index> ...",
+        help="Show index column for use with: maint history edit/delete <index> ...",
     )
-
-    # Log subcommand
-    log_parser = subparsers.add_parser("log", help="Add a new service entry")
-    log_parser.add_argument(
+    history_sub = history_parser.add_subparsers(dest="history_command", required=False)
+    history_add_parser = history_sub.add_parser("add", help="Add a new service entry")
+    history_add_parser.add_argument(
         "rule_key",
         type=str,
         help="Rule key (e.g., 'engine oil and filter/replace')",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--date",
         type=str,
         help="Service date in YYYY-MM-DD format (default: today)",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--mileage",
         type=float,
         help="Mileage at time of service",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--by",
         type=str,
         help="Who performed the service (e.g., 'self', 'Dealer')",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--notes",
         type=str,
         help="Notes about the service",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--cost",
         type=float,
         help="Cost of service",
     )
-    log_parser.add_argument(
+    history_add_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be added without saving",
     )
-
-    # Edit subcommand
-    edit_parser = subparsers.add_parser("edit", help="Edit an existing history entry by index")
-    edit_parser.add_argument(
+    history_edit_parser = history_sub.add_parser("edit", help="Edit a history entry by index")
+    history_edit_parser.add_argument(
         "index",
         type=int,
         help="History entry index (from: maint history --show-index)",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--rule-key",
         type=str,
         help="Rule key (e.g., 'engine oil and filter/replace')",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--date",
         type=str,
         help="Service date in YYYY-MM-DD format",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--mileage",
         type=float,
         help="Mileage at time of service",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--by",
         type=str,
         help="Who performed the service (e.g., 'self', 'Dealer')",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--notes",
         type=str,
         help="Notes about the service",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--cost",
         type=float,
         help="Cost of service",
     )
-    edit_parser.add_argument(
+    history_edit_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be updated without saving",
     )
-
-    # Delete subcommand
-    delete_parser = subparsers.add_parser("delete", help="Delete a history entry by index")
-    delete_parser.add_argument(
+    history_delete_parser = history_sub.add_parser("delete", help="Delete a history entry by index")
+    history_delete_parser.add_argument(
         "index",
         type=int,
         help="History entry index (from: maint history --show-index)",
     )
-    delete_parser.add_argument(
+    history_delete_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be deleted without saving",
@@ -808,8 +946,142 @@ Examples:
         help="Show what would be updated without saving",
     )
 
-    # Rules subcommand
-    subparsers.add_parser("rules", help="List available maintenance rules")
+    # Rules subcommand (with nested edit/delete)
+    rules_parser = subparsers.add_parser("rules", help="List or modify maintenance rules")
+    rules_parser.add_argument(
+        "--show-index",
+        action="store_true",
+        help="Show index column for use with: maint rules edit/delete <index> ...",
+    )
+    rules_sub = rules_parser.add_subparsers(dest="rules_command", required=False)
+    rules_add_parser = rules_sub.add_parser("add", help="Add a new rule")
+    rules_add_parser.add_argument("--item", type=str, required=True, help="Item name (e.g., engine oil and filter)")
+    rules_add_parser.add_argument("--verb", type=str, required=True, help="Verb (e.g., replace, inspect)")
+    rules_add_parser.add_argument("--phase", type=str, help="Phase (e.g., initial, ongoing)")
+    rules_add_parser.add_argument(
+        "--interval-miles",
+        type=float,
+        help="Normal interval in miles",
+    )
+    rules_add_parser.add_argument(
+        "--interval-months",
+        type=float,
+        help="Normal interval in months",
+    )
+    rules_add_parser.add_argument(
+        "--severe-interval-miles",
+        type=float,
+        help="Severe interval in miles",
+    )
+    rules_add_parser.add_argument(
+        "--severe-interval-months",
+        type=float,
+        help="Severe interval in months",
+    )
+    rules_add_parser.add_argument("--notes", type=str, help="Notes")
+    rules_add_parser.add_argument(
+        "--start-miles",
+        type=float,
+        help="Rule active from this mileage",
+    )
+    rules_add_parser.add_argument(
+        "--stop-miles",
+        type=float,
+        help="Rule active until this mileage",
+    )
+    rules_add_parser.add_argument(
+        "--start-months",
+        type=float,
+        help="Rule active from this month",
+    )
+    rules_add_parser.add_argument(
+        "--stop-months",
+        type=float,
+        help="Rule active until this month",
+    )
+    rules_add_parser.add_argument(
+        "--set-aftermarket",
+        type=str,
+        metavar="true|false",
+        help="Set aftermarket flag (true/false)",
+    )
+    rules_add_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be added without saving",
+    )
+    rules_edit_parser = rules_sub.add_parser("edit", help="Edit a rule by index")
+    rules_edit_parser.add_argument(
+        "index",
+        type=int,
+        help="Rule index (from: maint rules --show-index)",
+    )
+    rules_edit_parser.add_argument("--item", type=str, help="Item name (e.g., engine oil and filter)")
+    rules_edit_parser.add_argument("--verb", type=str, help="Verb (e.g., replace, inspect)")
+    rules_edit_parser.add_argument("--phase", type=str, help="Phase (e.g., initial, ongoing)")
+    rules_edit_parser.add_argument(
+        "--interval-miles",
+        type=float,
+        help="Normal interval in miles",
+    )
+    rules_edit_parser.add_argument(
+        "--interval-months",
+        type=float,
+        help="Normal interval in months",
+    )
+    rules_edit_parser.add_argument(
+        "--severe-interval-miles",
+        type=float,
+        help="Severe interval in miles",
+    )
+    rules_edit_parser.add_argument(
+        "--severe-interval-months",
+        type=float,
+        help="Severe interval in months",
+    )
+    rules_edit_parser.add_argument("--notes", type=str, help="Notes")
+    rules_edit_parser.add_argument(
+        "--start-miles",
+        type=float,
+        help="Rule active from this mileage",
+    )
+    rules_edit_parser.add_argument(
+        "--stop-miles",
+        type=float,
+        help="Rule active until this mileage",
+    )
+    rules_edit_parser.add_argument(
+        "--start-months",
+        type=float,
+        help="Rule active from this month",
+    )
+    rules_edit_parser.add_argument(
+        "--stop-months",
+        type=float,
+        help="Rule active until this month",
+    )
+    rules_edit_parser.add_argument(
+        "--set-aftermarket",
+        type=str,
+        metavar="true|false",
+        help="Set aftermarket flag (true/false)",
+    )
+    rules_edit_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be updated without saving",
+    )
+    rules_delete_parser = rules_sub.add_parser("delete", help="Delete a rule by index")
+    rules_delete_parser.add_argument(
+        "index",
+        type=int,
+        help="Rule index (from: maint rules --show-index)",
+    )
+    rules_delete_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be deleted without saving",
+    )
 
     args = parser.parse_args()
 
@@ -822,16 +1094,22 @@ Examples:
     if args.command == "status":
         return cmd_status(args)
     elif args.command == "history":
+        if getattr(args, "history_command", None) == "add":
+            return cmd_log(args)
+        if getattr(args, "history_command", None) == "edit":
+            return cmd_edit(args)
+        if getattr(args, "history_command", None) == "delete":
+            return cmd_delete(args)
         return cmd_history(args)
-    elif args.command == "log":
-        return cmd_log(args)
-    elif args.command == "edit":
-        return cmd_edit(args)
-    elif args.command == "delete":
-        return cmd_delete(args)
     elif args.command == "update-miles":
         return cmd_update_miles(args)
     elif args.command == "rules":
+        if getattr(args, "rules_command", None) == "add":
+            return cmd_rules_add(args)
+        if getattr(args, "rules_command", None) == "edit":
+            return cmd_edit_rule(args)
+        if getattr(args, "rules_command", None) == "delete":
+            return cmd_delete_rule(args)
         return cmd_rules(args)
 
     return 0

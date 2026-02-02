@@ -15,7 +15,21 @@
         </a>
         <div class="min-w-0 flex-1">
             <h1 class="text-xl font-bold text-gray-900">{{ vehicle.car.name }}</h1>
-            <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+            <div class="flex items-center gap-1.5">
+                <p class="text-gray-500 text-sm">{{ vehicle.current_miles | format_miles }} miles</p>
+                <button type="button"
+                        hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
+                        hx-target="#modal-content"
+                        hx-swap="innerHTML"
+                        hx-trigger="click"
+                        onclick="document.getElementById('modal').classList.remove('hidden')"
+                        class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-200 touch-target transition-colors"
+                        title="Update miles">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
     <nav class="flex -mb-px">
@@ -39,41 +53,6 @@
 
 <!-- Tab Content -->
 {% block tab_content %}{% endblock %}
-
-<!-- Floating Action Buttons -->
-<div class="fixed bottom-6 right-6 flex flex-row gap-3 z-40">
-    <!-- Update Miles FAB -->
-    <button type="button"
-            id="fab-miles"
-            hx-get="{{ url_for('update_mileage_form', vehicle_id=vehicle_id) }}"
-            hx-target="#modal-content"
-            hx-swap="innerHTML"
-            hx-trigger="click"
-            onclick="document.getElementById('modal').classList.remove('hidden')"
-            class="w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            title="Update Miles">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-    </button>
-
-    <!-- Log Service FAB -->
-    <button type="button"
-            id="fab-log"
-            hx-get="{{ url_for('log_service_form', vehicle_id=vehicle_id) }}"
-            hx-target="#modal-content"
-            hx-swap="innerHTML"
-            hx-trigger="click"
-            onclick="document.getElementById('modal').classList.remove('hidden')"
-            class="w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            title="Log Service">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 4v16m8-8H4"/>
-        </svg>
-    </button>
-</div>
 
 <!-- Modal for forms -->
 <div id="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">

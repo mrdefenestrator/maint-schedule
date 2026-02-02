@@ -23,6 +23,9 @@ from .loader import (
     save_current_miles,
     update_history_entry,
     delete_history_entry,
+    add_rule,
+    update_rule,
+    delete_rule,
 )
 
 __all__ = [
@@ -40,4 +43,7 @@ __all__ = [
     "save_current_miles",
     "update_history_entry",
     "delete_history_entry",
+    "add_rule",
+    "update_rule",
+    "delete_rule",
 ]

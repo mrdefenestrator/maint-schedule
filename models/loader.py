@@ -153,6 +153,114 @@ def update_history_entry(
         )
 
 
+def _rule_to_dict(rule: Rule) -> Dict[str, Any]:
+    """Serialize a Rule to the YAML dict format (camelCase keys)."""
+    d: Dict[str, Any] = {"item": rule.item, "verb": rule.verb}
+    if rule.phase is not None:
+        d["phase"] = rule.phase
+    if rule.interval_miles is not None:
+        d["intervalMiles"] = rule.interval_miles
+    if rule.interval_months is not None:
+        d["intervalMonths"] = rule.interval_months
+    if rule.severe_interval_miles is not None:
+        d["severeIntervalMiles"] = rule.severe_interval_miles
+    if rule.severe_interval_months is not None:
+        d["severeIntervalMonths"] = rule.severe_interval_months
+    if rule.notes is not None:
+        d["notes"] = rule.notes
+    if rule.start_miles is not None and rule.start_miles != 0:
+        d["startMiles"] = rule.start_miles
+    if rule.stop_miles is not None and rule.stop_miles != 999999999:
+        d["stopMiles"] = rule.stop_miles
+    if rule.start_months is not None and rule.start_months != 0:
+        d["startMonths"] = rule.start_months
+    if rule.stop_months is not None and rule.stop_months != 9999:
+        d["stopMonths"] = rule.stop_months
+    if rule.aftermarket:
+        d["aftermarket"] = rule.aftermarket
+    return d
+
+
+def add_rule(filename: Union[str, Path], rule: Rule) -> None:
+    """
+    Append a rule to a vehicle YAML file.
+
+    Loads the raw YAML, appends the rule to the rules list,
+    and writes back to the file.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    if data.get("rules") is None:
+        data["rules"] = []
+
+    data["rules"].append(_rule_to_dict(rule))
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
+def update_rule(filename: Union[str, Path], index: int, rule: Rule) -> None:
+    """
+    Replace a rule at the given index in a vehicle YAML file.
+
+    Loads the raw YAML, replaces the rule at rules[index],
+    and writes back to the file.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    rules = data.get("rules") or []
+    if index < 0 or index >= len(rules):
+        raise IndexError(f"Rule index {index} out of range (0..{len(rules) - 1})")
+
+    rules[index] = _rule_to_dict(rule)
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
+def delete_rule(filename: Union[str, Path], index: int) -> None:
+    """
+    Remove a rule at the given index in a vehicle YAML file.
+
+    Loads the raw YAML, removes the rule at rules[index],
+    and writes back to the file.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    rules = data.get("rules") or []
+    if index < 0 or index >= len(rules):
+        raise IndexError(f"Rule index {index} out of range (0..{len(rules) - 1})")
+
+    del rules[index]
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
 def delete_history_entry(filename: Union[str, Path], index: int) -> None:
     """
     Remove a history entry at the given index in a vehicle YAML file.

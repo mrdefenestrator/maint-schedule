@@ -17,8 +17,12 @@ from models.loader import (
     save_current_miles,
     update_history_entry,
     delete_history_entry,
+    add_rule,
+    update_rule,
+    delete_rule,
 )
 from models.history_entry import HistoryEntry
+from models.rule import Rule
 from models.status import Status
 
 app = Flask(__name__)
@@ -508,6 +512,212 @@ def delete_history(vehicle_id: str, index: int):
     return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
 
 
+@app.route("/vehicle/<vehicle_id>/rules/add", methods=["GET", "POST"])
+def add_rule_view(vehicle_id: str):
+    """GET: show add rule form. POST: create the rule."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+
+    if request.method == "GET":
+        return render_template(
+            "partials/add_rule_form.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+        )
+
+    # POST: parse form and add rule
+    item = request.form.get("item", "").strip()
+    verb = request.form.get("verb", "").strip()
+    phase = request.form.get("phase", "").strip() or None
+    notes = request.form.get("notes", "").strip() or None
+
+    def _float_or_none(s):
+        if s is None or (isinstance(s, str) and not s.strip()):
+            return None
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    interval_miles = _float_or_none(request.form.get("interval_miles"))
+    interval_months = _float_or_none(request.form.get("interval_months"))
+    severe_interval_miles = _float_or_none(request.form.get("severe_interval_miles"))
+    severe_interval_months = _float_or_none(request.form.get("severe_interval_months"))
+    start_miles = _float_or_none(request.form.get("start_miles"))
+    stop_miles = _float_or_none(request.form.get("stop_miles"))
+    start_months = _float_or_none(request.form.get("start_months"))
+    stop_months = _float_or_none(request.form.get("stop_months"))
+    aftermarket = request.form.get("aftermarket") == "true"
+
+    if not item or not verb:
+        flash("Item and verb are required", "error")
+        return redirect(url_for("add_rule_view", vehicle_id=vehicle_id))
+
+    rule = Rule(
+        item=item,
+        verb=verb,
+        phase=phase,
+        interval_miles=interval_miles,
+        interval_months=interval_months,
+        severe_interval_miles=severe_interval_miles,
+        severe_interval_months=severe_interval_months,
+        notes=notes,
+        start_miles=start_miles if start_miles is not None else 0,
+        stop_miles=stop_miles if stop_miles is not None else 999999999,
+        start_months=start_months if start_months is not None else 0,
+        stop_months=stop_months if stop_months is not None else 9999,
+        aftermarket=aftermarket,
+    )
+
+    try:
+        add_rule(path, rule)
+    except Exception:
+        flash("Failed to add rule", "error")
+        return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+    flash("Rule added.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Rule added.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        return response
+
+    return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+
+@app.route("/vehicle/<vehicle_id>/rules/<int:index>/edit", methods=["GET", "POST"])
+def edit_rule(vehicle_id: str, index: int):
+    """GET: show edit rule form. POST: update the rule."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    if index < 0 or index >= len(vehicle.rules):
+        flash("Rule not found", "error")
+        return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+    rule = vehicle.rules[index]
+
+    if request.method == "GET":
+        return render_template(
+            "partials/edit_rule_form.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+            rule=rule,
+            index=index,
+        )
+
+    # POST: parse form and update
+    item = request.form.get("item", "").strip()
+    verb = request.form.get("verb", "").strip()
+    phase = request.form.get("phase", "").strip() or None
+    notes = request.form.get("notes", "").strip() or None
+
+    def _float_or_none(s):
+        if s is None or (isinstance(s, str) and not s.strip()):
+            return None
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    interval_miles = _float_or_none(request.form.get("interval_miles"))
+    interval_months = _float_or_none(request.form.get("interval_months"))
+    severe_interval_miles = _float_or_none(request.form.get("severe_interval_miles"))
+    severe_interval_months = _float_or_none(request.form.get("severe_interval_months"))
+    start_miles = _float_or_none(request.form.get("start_miles"))
+    stop_miles = _float_or_none(request.form.get("stop_miles"))
+    start_months = _float_or_none(request.form.get("start_months"))
+    stop_months = _float_or_none(request.form.get("stop_months"))
+    aftermarket = request.form.get("aftermarket") == "true"
+
+    if not item or not verb:
+        flash("Item and verb are required", "error")
+        return redirect(url_for("edit_rule", vehicle_id=vehicle_id, index=index))
+
+    updated = Rule(
+        item=item,
+        verb=verb,
+        phase=phase,
+        interval_miles=interval_miles,
+        interval_months=interval_months,
+        severe_interval_miles=severe_interval_miles,
+        severe_interval_months=severe_interval_months,
+        notes=notes,
+        start_miles=start_miles if start_miles is not None else 0,
+        stop_miles=stop_miles if stop_miles is not None else 999999999,
+        start_months=start_months if start_months is not None else 0,
+        stop_months=stop_months if stop_months is not None else 9999,
+        aftermarket=aftermarket,
+    )
+
+    try:
+        update_rule(path, index, updated)
+    except IndexError:
+        flash("Rule not found", "error")
+        return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+    flash("Rule updated.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Rule updated.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        return response
+
+    return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+
+@app.route("/vehicle/<vehicle_id>/rules/<int:index>/delete", methods=["GET", "POST"])
+def delete_rule_view(vehicle_id: str, index: int):
+    """GET: show delete confirmation modal. POST: delete the rule."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    if index < 0 or index >= len(vehicle.rules):
+        flash("Rule not found", "error")
+        return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+    if request.method == "GET":
+        rule = vehicle.rules[index]
+        return render_template(
+            "partials/delete_rule_confirm.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+            rule=rule,
+            index=index,
+        )
+
+    try:
+        delete_rule(path, index)
+    except IndexError:
+        flash("Rule not found", "error")
+        return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+    flash("Rule deleted.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Rule deleted.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        return response
+
+    return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
+
+
 @app.route("/vehicle/<vehicle_id>/rules")
 def vehicle_rules(vehicle_id: str):
     """Vehicle maintenance rules/schedule page."""
@@ -527,32 +737,35 @@ def vehicle_rules(vehicle_id: str):
     exclude_verbs = request.args.getlist("exclude")
     exclude_verbs = [v.lower() for v in exclude_verbs] if exclude_verbs else []
 
-    # Filter rules based on exclude_verbs
-    filtered_rules = vehicle.rules
+    # Build (raw_index, rule) and filter
+    rules_with_index = list(enumerate(vehicle.rules))
     if exclude_verbs:
-        filtered_rules = [r for r in filtered_rules if r.verb.lower() not in exclude_verbs]
+        rules_with_index = [
+            (i, r) for i, r in rules_with_index
+            if r.verb.lower() not in exclude_verbs
+        ]
 
     # Count active vs inactive (before status filter, after verb filter)
-    active_count = sum(1 for r in filtered_rules if r.is_active_at(current_miles))
-    inactive_count = len(filtered_rules) - active_count
+    active_count = sum(1 for _, r in rules_with_index if r.is_active_at(current_miles))
+    inactive_count = len(rules_with_index) - active_count
 
     # Filter by status if requested
     if status_filter == "active":
-        filtered_rules = [r for r in filtered_rules if r.is_active_at(current_miles)]
+        rules_with_index = [(i, r) for i, r in rules_with_index if r.is_active_at(current_miles)]
     elif status_filter == "inactive":
-        filtered_rules = [r for r in filtered_rules if not r.is_active_at(current_miles)]
+        rules_with_index = [(i, r) for i, r in rules_with_index if not r.is_active_at(current_miles)]
 
-    # Group filtered rules by item
+    # Group by item: rules_by_item[item] = [(index, rule), ...]
     rules_by_item = {}
-    for rule in filtered_rules:
+    for index, rule in rules_with_index:
         if rule.item not in rules_by_item:
             rules_by_item[rule.item] = []
-        rules_by_item[rule.item].append(rule)
+        rules_by_item[rule.item].append((index, rule))
 
     # Sort items alphabetically, and rules within each item by verb
     sorted_items = sorted(rules_by_item.keys())
     for item in sorted_items:
-        rules_by_item[item].sort(key=lambda r: (r.verb, r.phase or ""))
+        rules_by_item[item].sort(key=lambda ir: (ir[1].verb, ir[1].phase or ""))
 
     return render_template(
         "rules.html",

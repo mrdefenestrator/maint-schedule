@@ -12,6 +12,9 @@ from models import (
     save_current_miles,
     update_history_entry,
     delete_history_entry,
+    add_rule,
+    update_rule,
+    delete_rule,
     Car,
     Rule,
     HistoryEntry,
@@ -491,6 +494,169 @@ history:
 
         with pytest.raises(IndexError, match="History index 3 out of range"):
             delete_history_entry(yaml_file, 3)
+
+
+# =============================================================================
+# add_rule tests
+# =============================================================================
+
+
+class TestAddRule:
+    """Tests for add_rule function."""
+
+    def test_appends_rule_to_empty_rules(self, tmp_path):
+        """Append rule to vehicle with no rules."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules: []
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        rule = Rule(
+            item="cabin air filter",
+            verb="replace",
+            interval_miles=15000,
+            interval_months=12,
+        )
+
+        add_rule(yaml_file, rule)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["rules"]) == 1
+        assert data["rules"][0]["item"] == "cabin air filter"
+        assert data["rules"][0]["verb"] == "replace"
+        assert data["rules"][0]["intervalMiles"] == 15000
+        assert data["rules"][0]["intervalMonths"] == 12
+
+    def test_appends_rule_to_existing_rules(self, tmp_path):
+        """Append rule to vehicle with existing rules."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules:
+  - item: oil
+    verb: replace
+    intervalMiles: 5000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        rule = Rule(item="brake fluid", verb="replace", interval_miles=30000)
+
+        add_rule(yaml_file, rule)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["rules"]) == 2
+        assert data["rules"][0]["item"] == "oil"
+        assert data["rules"][1]["item"] == "brake fluid"
+
+
+# =============================================================================
+# update_rule tests
+# =============================================================================
+
+
+class TestUpdateRule:
+    """Tests for update_rule function."""
+
+    def test_replaces_rule_at_index(self, tmp_path):
+        """Replace rule at given index."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules:
+  - item: oil
+    verb: replace
+    intervalMiles: 5000
+  - item: brake fluid
+    verb: replace
+    intervalMiles: 30000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        rule = Rule(
+            item="brake fluid",
+            verb="replace",
+            interval_miles=25000,
+            interval_months=24,
+            notes="Updated interval",
+        )
+
+        update_rule(yaml_file, 1, rule)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["rules"]) == 2
+        assert data["rules"][0]["item"] == "oil"
+        assert data["rules"][1]["item"] == "brake fluid"
+        assert data["rules"][1]["intervalMiles"] == 25000
+        assert data["rules"][1]["intervalMonths"] == 24
+        assert data["rules"][1]["notes"] == "Updated interval"
+
+
+# =============================================================================
+# delete_rule tests
+# =============================================================================
+
+
+class TestDeleteRule:
+    """Tests for delete_rule function."""
+
+    def test_removes_rule_at_index(self, tmp_path):
+        """Remove rule at given index."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules:
+  - item: oil
+    verb: replace
+    intervalMiles: 5000
+  - item: brake fluid
+    verb: replace
+    intervalMiles: 30000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        delete_rule(yaml_file, 0)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["rules"]) == 1
+        assert data["rules"][0]["item"] == "brake fluid"
 
 
 # =============================================================================
