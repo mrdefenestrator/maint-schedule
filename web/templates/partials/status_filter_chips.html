@@ -1,0 +1,47 @@
+<button type="button" onclick="filterStatus('all')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+        data-status="all">
+    All ({{ status_counts.overdue + status_counts.due_soon + status_counts.ok }})
+</button>
+{% if status_counts.overdue > 0 %}
+<button type="button" onclick="filterStatus('overdue')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
+        data-status="overdue">
+    {{ status_counts.overdue }} Overdue
+</button>
+{% endif %}
+{% if status_counts.due_soon > 0 %}
+<button type="button" onclick="filterStatus('due_soon')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}"
+        data-status="due_soon">
+    {{ status_counts.due_soon }} Due Soon
+</button>
+{% endif %}
+{% if status_counts.ok > 0 %}
+<button type="button" onclick="filterStatus('ok')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+        data-status="ok">
+    {{ status_counts.ok }} OK
+</button>
+{% endif %}
+<div class="flex-grow"></div>
+{% if status_counts.inactive > 0 %}
+<button type="button" onclick="filterStatus('inactive')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+        data-status="inactive">
+    {{ status_counts.inactive }} Inactive
+</button>
+{% endif %}
+{% if status_counts.unknown > 0 %}
+<button type="button" onclick="filterStatus('unknown')"
+        class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
+               {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200{% endif %}"
+        data-status="unknown">
+    {{ status_counts.unknown }} Unknown
+</button>
+{% endif %}

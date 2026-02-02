@@ -1,15 +1,8 @@
 <!-- Edit Rule Form -->
 <div>
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900">Edit Rule</h2>
-        <button type="button"
-                onclick="document.getElementById('modal').classList.add('hidden')"
-                class="text-gray-400 hover:text-gray-600 touch-target">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    </div>
+    {% with modal_title="Edit Rule" %}
+    {% include "partials/modal_header.html" %}
+    {% endwith %}
 
     <form hx-post="{{ url_for('edit_rule', vehicle_id=vehicle_id, index=index) }}"
           hx-target="#modal-content"

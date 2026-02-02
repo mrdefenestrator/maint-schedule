@@ -80,7 +80,27 @@
         }
     });
 
-    // Close modal after successful form submission (redirect handles navigation)
+    // filterStatus: used by Status and Rules filter chips
+    function filterStatus(status) {
+        var url = new URL(window.location.href);
+        if (status === 'all') {
+            url.searchParams.delete('status');
+        } else {
+            url.searchParams.set('status', status);
+        }
+        window.location.href = url.toString();
+    }
+
+    // Close verb dropdown on outside click (no-op if dropdown not on page)
+    document.addEventListener('click', function(e) {
+        var dropdown = document.getElementById('verb-dropdown');
+        if (!dropdown) return;
+        var button = dropdown.previousElementSibling;
+        if (!button) return;
+        if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
 </script>
 
 {% endblock %}

@@ -1,0 +1,20 @@
+<div class="mt-2 pt-2 border-t border-gray-200 flex flex-wrap items-center gap-3">
+    <button type="button"
+            hx-get="{{ edit_url }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="text-sm font-medium text-blue-600 hover:text-blue-800 touch-target">
+        {{ edit_label }}
+    </button>
+    <button type="button"
+            hx-get="{{ delete_url }}"
+            hx-target="#modal-content"
+            hx-swap="innerHTML"
+            hx-trigger="click"
+            onclick="document.getElementById('modal').classList.remove('hidden')"
+            class="text-sm font-medium text-red-600 hover:text-red-800 touch-target">
+        {{ delete_label }}
+    </button>
+</div>

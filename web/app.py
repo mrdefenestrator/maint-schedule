@@ -94,6 +94,18 @@ def status_badge_color(status: Status) -> str:
     return colors.get(status, "bg-gray-500 text-white")
 
 
+def status_display_name(status: Status) -> str:
+    """Display label for status (Title Case: Overdue, Due Soon, OK, etc.)."""
+    labels = {
+        Status.OVERDUE: "Overdue",
+        Status.DUE_SOON: "Due Soon",
+        Status.OK: "OK",
+        Status.INACTIVE: "Inactive",
+        Status.UNKNOWN: "Unknown",
+    }
+    return labels.get(status, status.name.replace("_", " ").title())
+
+
 def format_rule_key(rule_key):
     """Format rule_key as 'Verb Item [phase]' to match vehicle page display."""
     if not rule_key:
@@ -117,6 +129,7 @@ app.jinja_env.filters["format_time_remaining"] = format_time_remaining
 app.jinja_env.filters["format_rule_key"] = format_rule_key
 app.jinja_env.filters["status_color"] = status_color
 app.jinja_env.filters["status_badge_color"] = status_badge_color
+app.jinja_env.filters["status_display_name"] = status_display_name
 
 
 @app.route("/")

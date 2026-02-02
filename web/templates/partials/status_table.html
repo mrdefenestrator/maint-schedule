@@ -1,66 +1,8 @@
 {% if standalone is not defined or standalone %}
 <!-- Summary - clickable filters (shown when partial is loaded via HTMX; on full page, summary is in vehicle.html row) -->
 <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 flex flex-wrap items-center gap-2">
-    <button type="button" onclick="filterStatus('all')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
-            data-status="all">
-        All ({{ status_counts.overdue + status_counts.due_soon + status_counts.ok }})
-    </button>
-    {% if status_counts.overdue > 0 %}
-    <button type="button" onclick="filterStatus('overdue')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
-            data-status="overdue">
-        {{ status_counts.overdue }} overdue
-    </button>
-    {% endif %}
-    {% if status_counts.due_soon > 0 %}
-    <button type="button" onclick="filterStatus('due_soon')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}"
-            data-status="due_soon">
-        {{ status_counts.due_soon }} due soon
-    </button>
-    {% endif %}
-    {% if status_counts.ok > 0 %}
-    <button type="button" onclick="filterStatus('ok')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
-            data-status="ok">
-        {{ status_counts.ok }} OK
-    </button>
-    {% endif %}
-    <div class="flex-grow"></div>
-    {% if status_counts.inactive > 0 %}
-    <button type="button" onclick="filterStatus('inactive')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
-            data-status="inactive">
-        {{ status_counts.inactive }} inactive
-    </button>
-    {% endif %}
-    {% if status_counts.unknown > 0 %}
-    <button type="button" onclick="filterStatus('unknown')"
-            class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                   {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200{% endif %}"
-            data-status="unknown">
-        {{ status_counts.unknown }} unknown
-    </button>
-    {% endif %}
+    {% include "partials/status_filter_chips.html" %}
 </div>
-
-<script>
-function filterStatus(status) {
-    const url = new URL(window.location.href);
-    if (status === 'all') {
-        url.searchParams.delete('status');
-    } else {
-        url.searchParams.set('status', status);
-    }
-    window.location.href = url.toString();
-}
-</script>
 {% endif %}
 
 <!-- Status cards - accordion -->
@@ -72,7 +14,7 @@ function filterStatus(status) {
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
             <div class="flex items-center gap-2 min-w-0">
                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }} whitespace-nowrap">
-                    {{ service.status.name }}
+                    {{ service.status | status_display_name }}
                 </span>
                 <span class="font-medium text-gray-900 text-sm truncate">
                     {{ service.rule.verb | capitalize }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
