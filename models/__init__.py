@@ -17,7 +17,13 @@ from .history_entry import HistoryEntry
 from .service_due import ServiceDue
 from .vehicle import Vehicle
 from .calculations import calc_due_miles, calc_due_date, check_status
-from .loader import load_vehicle, save_history_entry, save_current_miles
+from .loader import (
+    load_vehicle,
+    save_history_entry,
+    save_current_miles,
+    update_history_entry,
+    delete_history_entry,
+)
 
 __all__ = [
     "Status",
@@ -32,4 +38,6 @@ __all__ = [
     "load_vehicle",
     "save_history_entry",
     "save_current_miles",
+    "update_history_entry",
+    "delete_history_entry",
 ]

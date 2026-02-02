@@ -4,8 +4,10 @@ Unified CLI for vehicle maintenance tracking.
 
 Commands:
   status       - Show what maintenance is due, overdue, or upcoming
-  history      - View service history
+  history      - View service history (use --show-index to get indices for edit/delete)
   log          - Add a new service entry
+  edit         - Edit an existing history entry by index
+  delete       - Delete a history entry by index
   update-miles - Update current vehicle mileage
   rules        - List available maintenance rules
 """
@@ -24,6 +26,8 @@ from models import (
     load_vehicle,
     save_history_entry,
     save_current_miles,
+    update_history_entry,
+    delete_history_entry,
 )
 
 # =============================================================================
@@ -240,24 +244,27 @@ def cmd_status(args):
 # =============================================================================
 
 
-def make_history_table(entries: List[HistoryEntry], vehicle) -> List[List[str]]:
-    """Convert history entries to table rows."""
+def make_history_table(
+    entries: List[HistoryEntry], vehicle, show_index: bool = False, indices=None
+) -> List[List[str]]:
+    """Convert history entries to table rows. If show_index, first column is index (indices required)."""
     rows = []
-    for entry in entries:
+    for i, entry in enumerate(entries):
         # Find the rule to get display name, fallback to key if not found
         rule = vehicle.get_rule(entry.rule_key)
         display_name = rule.display_name if rule else entry.rule_key
 
-        rows.append(
-            [
-                entry.date,
-                format_miles(entry.mileage),
-                display_name,
-                entry.performed_by or "-",
-                format_cost(entry.cost),
-                truncate(entry.notes),
-            ]
-        )
+        row = [
+            entry.date,
+            format_miles(entry.mileage),
+            display_name,
+            entry.performed_by or "-",
+            format_cost(entry.cost),
+            truncate(entry.notes),
+        ]
+        if show_index and indices is not None:
+            row.insert(0, str(indices[i]))
+        rows.append(row)
     return rows
 
 
@@ -265,15 +272,32 @@ def cmd_history(args):
     """View service history."""
     vehicle = load_vehicle(args.vehicle_file)
 
-    # Get and sort history
-    entries = vehicle.get_history_sorted(sort_by=args.sort, reverse=not args.asc)
+    # Build (raw_index, entry) and sort like get_history_sorted for consistent order
+    if args.sort == "date":
+        key_fn = lambda ie: ie[1].date
+    elif args.sort == "miles":
+        key_fn = lambda ie: ie[1].mileage or 0
+    else:
+        key_fn = lambda ie: (ie[1].rule_key, ie[1].date)
+
+    entries_with_index = sorted(
+        enumerate(vehicle.history), key=key_fn, reverse=not args.asc
+    )
+    indices = [ie[0] for ie in entries_with_index]
+    entries = [ie[1] for ie in entries_with_index]
 
     # Apply filters
     if args.rule:
-        entries = [e for e in entries if args.rule.lower() in e.rule_key.lower()]
+        filtered = [
+            (i, e) for i, e in zip(indices, entries) if args.rule.lower() in e.rule_key.lower()
+        ]
+        indices = [f[0] for f in filtered]
+        entries = [f[1] for f in filtered]
 
     if args.since:
-        entries = [e for e in entries if e.date >= args.since]
+        filtered = [(i, e) for i, e in zip(indices, entries) if e.date >= args.since]
+        indices = [f[0] for f in filtered]
+        entries = [f[1] for f in filtered]
 
     # Calculate summary stats
     total_cost = sum(e.cost for e in entries if e.cost is not None)
@@ -294,6 +318,8 @@ def cmd_history(args):
         print(f"Showing: {len(entries)} (filtered)")
     if total_cost > 0:
         print(f"Total cost: ${total_cost:,.2f}")
+    if args.show_index:
+        print("Index column is for: maint edit/delete <file> <index> ...")
     print()
 
     if not entries:
@@ -301,13 +327,14 @@ def cmd_history(args):
         return 0
 
     headers = ["Date", "Mileage", "Rule", "Performed By", "Cost", "Notes"]
-
-    # Column alignment: left, right, left, left, right, left
     colalign = ("left", "right", "left", "left", "right", "left")
+    if args.show_index:
+        headers.insert(0, "Index")
+        colalign = ("right",) + colalign
 
     print(
         tabulate(
-            make_history_table(entries, vehicle),
+            make_history_table(entries, vehicle, show_index=args.show_index, indices=indices),
             headers=headers,
             tablefmt="simple",
             colalign=colalign,
@@ -381,6 +408,116 @@ def cmd_log(args):
     save_history_entry(args.vehicle_file, entry)
     print("Entry saved.")
 
+    return 0
+
+
+# =============================================================================
+# Edit command
+# =============================================================================
+
+
+def cmd_edit(args):
+    """Edit an existing history entry by index."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    if args.index < 0 or args.index >= len(vehicle.history):
+        print(f"Error: Index {args.index} out of range (0..{len(vehicle.history) - 1})")
+        return 1
+
+    existing = vehicle.history[args.index]
+
+    # Build updated entry: only override fields that were explicitly passed
+    if args.rule_key is not None:
+        normalized_key = args.rule_key.lower()
+        rule = None
+        for r in vehicle.rules:
+            if r.key.lower() == normalized_key:
+                rule = r
+                break
+        if rule is None:
+            print(f"Error: Unknown rule key '{args.rule_key}'")
+            return 1
+        rule_key = rule.key
+        rule_display = rule.display_name
+    else:
+        rule_key = existing.rule_key
+        rule = vehicle.get_rule(existing.rule_key)
+        rule_display = rule.display_name if rule else existing.rule_key
+
+    entry_date = args.date if args.date is not None else existing.date
+    mileage = args.mileage if args.mileage is not None else existing.mileage
+    performed_by = args.by if args.by is not None else existing.performed_by
+    notes = args.notes if args.notes is not None else existing.notes
+    cost = args.cost if args.cost is not None else existing.cost
+
+    entry = HistoryEntry(
+        rule_key=rule.key,
+        date=entry_date,
+        mileage=mileage,
+        performed_by=performed_by,
+        notes=notes,
+        cost=cost,
+    )
+
+    print(f"Updating history entry {args.index} in {args.vehicle_file}:")
+    print(f"  Rule:    {rule_display}")
+    print(f"  Date:    {entry.date}")
+    if entry.mileage is not None:
+        print(f"  Mileage: {entry.mileage:,.0f}")
+    if entry.performed_by:
+        print(f"  By:      {entry.performed_by}")
+    if entry.notes:
+        print(f"  Notes:   {entry.notes}")
+    if entry.cost is not None:
+        print(f"  Cost:    ${entry.cost:.2f}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    try:
+        update_history_entry(args.vehicle_file, args.index, entry)
+    except IndexError as e:
+        print(f"Error: {e}")
+        return 1
+    print("Entry updated.")
+    return 0
+
+
+# =============================================================================
+# Delete command
+# =============================================================================
+
+
+def cmd_delete(args):
+    """Delete a history entry by index."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    if args.index < 0 or args.index >= len(vehicle.history):
+        print(f"Error: Index {args.index} out of range (0..{len(vehicle.history) - 1})")
+        return 1
+
+    entry = vehicle.history[args.index]
+    rule = vehicle.get_rule(entry.rule_key)
+    display_name = rule.display_name if rule else entry.rule_key
+
+    print(f"Deleting history entry {args.index} from {args.vehicle_file}:")
+    print(f"  {entry.date}  {display_name}")
+    if entry.mileage:
+        print(f"  Mileage: {entry.mileage:,.0f}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    try:
+        delete_history_entry(args.vehicle_file, args.index)
+    except IndexError as e:
+        print(f"Error: {e}")
+        return 1
+    print("Entry deleted.")
     return 0
 
 
@@ -492,6 +629,9 @@ Examples:
   %(prog)s vehicles/brz.yaml log "engine oil and filter/replace" \\
       --mileage 58000 --by self
   %(prog)s vehicles/brz.yaml update-miles 58000
+  %(prog)s vehicles/brz.yaml history --show-index
+  %(prog)s vehicles/brz.yaml edit 0 --date 2024-01-15 --notes "Corrected date"
+  %(prog)s vehicles/brz.yaml delete 0 --dry-run
 """,
     )
     parser.add_argument(
@@ -553,6 +693,11 @@ Examples:
         action="store_true",
         help="Sort ascending instead of descending",
     )
+    history_parser.add_argument(
+        "--show-index",
+        action="store_true",
+        help="Show index column for use with: maint edit/delete <file> <index> ...",
+    )
 
     # Log subcommand
     log_parser = subparsers.add_parser("log", help="Add a new service entry")
@@ -592,6 +737,62 @@ Examples:
         help="Show what would be added without saving",
     )
 
+    # Edit subcommand
+    edit_parser = subparsers.add_parser("edit", help="Edit an existing history entry by index")
+    edit_parser.add_argument(
+        "index",
+        type=int,
+        help="History entry index (from: maint history --show-index)",
+    )
+    edit_parser.add_argument(
+        "--rule-key",
+        type=str,
+        help="Rule key (e.g., 'engine oil and filter/replace')",
+    )
+    edit_parser.add_argument(
+        "--date",
+        type=str,
+        help="Service date in YYYY-MM-DD format",
+    )
+    edit_parser.add_argument(
+        "--mileage",
+        type=float,
+        help="Mileage at time of service",
+    )
+    edit_parser.add_argument(
+        "--by",
+        type=str,
+        help="Who performed the service (e.g., 'self', 'Dealer')",
+    )
+    edit_parser.add_argument(
+        "--notes",
+        type=str,
+        help="Notes about the service",
+    )
+    edit_parser.add_argument(
+        "--cost",
+        type=float,
+        help="Cost of service",
+    )
+    edit_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be updated without saving",
+    )
+
+    # Delete subcommand
+    delete_parser = subparsers.add_parser("delete", help="Delete a history entry by index")
+    delete_parser.add_argument(
+        "index",
+        type=int,
+        help="History entry index (from: maint history --show-index)",
+    )
+    delete_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be deleted without saving",
+    )
+
     # Update Miles subcommand
     update_miles_parser = subparsers.add_parser(
         "update-miles", help="Update current vehicle mileage"
@@ -624,6 +825,10 @@ Examples:
         return cmd_history(args)
     elif args.command == "log":
         return cmd_log(args)
+    elif args.command == "edit":
+        return cmd_edit(args)
+    elif args.command == "delete":
+        return cmd_delete(args)
     elif args.command == "update-miles":
         return cmd_update_miles(args)
     elif args.command == "rules":

@@ -11,7 +11,13 @@ from flask import Flask, make_response, render_template, request, redirect, url_
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from models.loader import load_vehicle, save_history_entry, save_current_miles
+from models.loader import (
+    load_vehicle,
+    save_history_entry,
+    save_current_miles,
+    update_history_entry,
+    delete_history_entry,
+)
 from models.history_entry import HistoryEntry
 from models.status import Status
 
@@ -49,6 +55,15 @@ def format_date(date_str):
     if date_str is None:
         return "—"
     return date_str
+
+
+def format_time_remaining(days):
+    """Format time remaining as 'X days' or 'X days over' (delta)."""
+    if days is None:
+        return "—"
+    if days < 0:
+        return f"{abs(days):,} days over"
+    return f"{days:,} days"
 
 
 def status_color(status: Status) -> str:
@@ -94,6 +109,7 @@ def format_rule_key(rule_key):
 # Register template filters
 app.jinja_env.filters["format_miles"] = format_miles
 app.jinja_env.filters["format_date"] = format_date
+app.jinja_env.filters["format_time_remaining"] = format_time_remaining
 app.jinja_env.filters["format_rule_key"] = format_rule_key
 app.jinja_env.filters["status_color"] = status_color
 app.jinja_env.filters["status_badge_color"] = status_badge_color
@@ -330,11 +346,16 @@ def vehicle_history(vehicle_id: str):
         return redirect(url_for("index"))
 
     vehicle = load_vehicle(path)
-    history = vehicle.get_history_sorted(sort_by="date", reverse=True)
+    # (raw_index, entry) sorted by date descending for stable edit indices
+    entries_with_index = sorted(
+        enumerate(vehicle.history),
+        key=lambda ie: ie[1].date,
+        reverse=True,
+    )
 
     # Get all unique verbs from history entries (extracted from rule_key: item/verb/phase)
     all_verbs = set()
-    for entry in history:
+    for _, entry in entries_with_index:
         parts = entry.rule_key.split("/")
         if len(parts) >= 2:
             all_verbs.add(parts[1].lower())
@@ -346,23 +367,145 @@ def vehicle_history(vehicle_id: str):
 
     # Filter history based on exclude_verbs
     if exclude_verbs:
-        filtered_history = []
-        for entry in history:
+        filtered = []
+        for idx, entry in entries_with_index:
             parts = entry.rule_key.split("/")
             verb = parts[1].lower() if len(parts) >= 2 else ""
             if verb not in exclude_verbs:
-                filtered_history.append(entry)
-        history = filtered_history
+                filtered.append((idx, entry))
+        entries_with_index = filtered
+
+    total_cost = sum(e.cost for _, e in entries_with_index if e.cost is not None)
 
     return render_template(
         "history.html",
         vehicle_id=vehicle_id,
         vehicle=vehicle,
-        history=history,
+        history_with_index=entries_with_index,
+        total_cost=total_cost,
         all_verbs=all_verbs,
         exclude_verbs=exclude_verbs,
         active_tab='history',
     )
+
+
+@app.route("/vehicle/<vehicle_id>/history/<int:index>/edit", methods=["GET"])
+def edit_history_form(vehicle_id: str, index: int):
+    """HTMX partial: edit history entry form."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        return "Vehicle not found", 404
+
+    vehicle = load_vehicle(path)
+    if index < 0 or index >= len(vehicle.history):
+        return "History entry not found", 404
+
+    entry = vehicle.history[index]
+    rules = sorted(vehicle.rules, key=lambda r: r.key)
+
+    return render_template(
+        "partials/edit_history_form.html",
+        vehicle_id=vehicle_id,
+        vehicle=vehicle,
+        entry=entry,
+        index=index,
+        rules=rules,
+    )
+
+
+@app.route("/vehicle/<vehicle_id>/history/<int:index>/edit", methods=["POST"])
+def edit_history(vehicle_id: str, index: int):
+    """Handle edit history form submission."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    if index < 0 or index >= len(vehicle.history):
+        flash("History entry not found", "error")
+        return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+    rule_key = request.form.get("rule_key")
+    service_date = request.form.get("date")
+    mileage = request.form.get("mileage")
+    performed_by = request.form.get("performed_by") or None
+    notes = request.form.get("notes") or None
+    cost = request.form.get("cost")
+
+    if not rule_key:
+        flash("Please select a service", "error")
+        return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+    mileage_val = float(mileage) if mileage else None
+    cost_val = float(cost) if cost else None
+
+    entry = HistoryEntry(
+        rule_key=rule_key,
+        date=service_date,
+        mileage=mileage_val,
+        performed_by=performed_by,
+        notes=notes,
+        cost=cost_val,
+    )
+
+    try:
+        update_history_entry(path, index, entry)
+    except IndexError:
+        flash("History entry not found", "error")
+        return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+    flash("History entry updated.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Entry updated.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_history", vehicle_id=vehicle_id)
+        return response
+
+    return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+
+@app.route("/vehicle/<vehicle_id>/history/<int:index>/delete", methods=["GET", "POST"])
+def delete_history(vehicle_id: str, index: int):
+    """GET: show delete confirmation modal. POST: delete the history entry."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    if index < 0 or index >= len(vehicle.history):
+        flash("History entry not found", "error")
+        return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+    if request.method == "GET":
+        entry = vehicle.history[index]
+        return render_template(
+            "partials/delete_history_confirm.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+            entry=entry,
+            index=index,
+        )
+
+    try:
+        delete_history_entry(path, index)
+    except IndexError:
+        flash("History entry not found", "error")
+        return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
+
+    flash("History entry deleted.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Entry deleted.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_history", vehicle_id=vehicle_id)
+        return response
+
+    return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
 
 
 @app.route("/vehicle/<vehicle_id>/rules")

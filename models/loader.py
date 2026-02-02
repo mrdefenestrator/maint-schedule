@@ -114,6 +114,72 @@ def save_history_entry(filename: Union[str, Path], entry: HistoryEntry) -> None:
         )
 
 
+def update_history_entry(
+    filename: Union[str, Path], index: int, entry: HistoryEntry
+) -> None:
+    """
+    Replace a history entry at the given index in a vehicle YAML file.
+
+    Loads the raw YAML, replaces the entry at history[index],
+    and writes back to the file.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    history = data.get("history") or []
+    if index < 0 or index >= len(history):
+        raise IndexError(f"History index {index} out of range (0..{len(history) - 1})")
+
+    entry_dict = {"ruleKey": entry.rule_key, "date": entry.date}
+    if entry.mileage is not None:
+        entry_dict["mileage"] = entry.mileage
+    if entry.performed_by is not None:
+        entry_dict["performedBy"] = entry.performed_by
+    if entry.notes is not None:
+        entry_dict["notes"] = entry.notes
+    if entry.cost is not None:
+        entry_dict["cost"] = entry.cost
+
+    history[index] = entry_dict
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
+def delete_history_entry(filename: Union[str, Path], index: int) -> None:
+    """
+    Remove a history entry at the given index in a vehicle YAML file.
+
+    Loads the raw YAML, removes the entry at history[index],
+    and writes back to the file.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    history = data.get("history") or []
+    if index < 0 or index >= len(history):
+        raise IndexError(f"History index {index} out of range (0..{len(history) - 1})")
+
+    del history[index]
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
 def save_current_miles(filename: Union[str, Path], miles: float) -> None:
     """
     Update the current mileage in the state section of a vehicle YAML file.

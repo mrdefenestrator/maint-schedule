@@ -3,12 +3,15 @@
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from models import (
     load_vehicle,
     save_history_entry,
     save_current_miles,
+    update_history_entry,
+    delete_history_entry,
     Car,
     Rule,
     HistoryEntry,
@@ -339,6 +342,155 @@ rules: []
         assert entry_data["performedBy"] == "Dealer"
         assert entry_data["notes"] == "Full synthetic"
         assert entry_data["cost"] == 89.99
+
+
+# =============================================================================
+# update_history_entry tests
+# =============================================================================
+
+
+class TestUpdateHistoryEntry:
+    """Tests for update_history_entry function."""
+
+    def test_replaces_entry_at_index(self, tmp_path):
+        """Replace history entry at given index."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules: []
+
+history:
+  - ruleKey: oil/replace
+    date: '2024-06-15'
+    mileage: 40000
+  - ruleKey: oil/replace
+    date: '2025-01-15'
+    mileage: 50000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        entry = HistoryEntry(
+            rule_key="oil/replace",
+            date="2025-02-01",
+            mileage=51000,
+            performed_by="Dealer",
+            notes="Updated entry",
+        )
+
+        update_history_entry(yaml_file, 1, entry)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["history"]) == 2
+        assert data["history"][0]["mileage"] == 40000
+        assert data["history"][1]["date"] == "2025-02-01"
+        assert data["history"][1]["mileage"] == 51000
+        assert data["history"][1]["performedBy"] == "Dealer"
+        assert data["history"][1]["notes"] == "Updated entry"
+
+    def test_raises_index_error_for_invalid_index(self, tmp_path):
+        """Raise IndexError when index is out of range."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules: []
+
+history:
+  - ruleKey: oil/replace
+    date: '2024-06-15'
+    mileage: 40000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        entry = HistoryEntry(rule_key="oil/replace", date="2025-01-15")
+
+        with pytest.raises(IndexError, match="History index 5 out of range"):
+            update_history_entry(yaml_file, 5, entry)
+
+
+# =============================================================================
+# delete_history_entry tests
+# =============================================================================
+
+
+class TestDeleteHistoryEntry:
+    """Tests for delete_history_entry function."""
+
+    def test_removes_entry_at_index(self, tmp_path):
+        """Remove history entry at given index."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules: []
+
+history:
+  - ruleKey: oil/replace
+    date: '2024-06-15'
+    mileage: 40000
+  - ruleKey: oil/replace
+    date: '2025-01-15'
+    mileage: 50000
+  - ruleKey: brake fluid/replace
+    date: '2025-02-01'
+    mileage: 51000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        delete_history_entry(yaml_file, 1)
+
+        with open(yaml_file) as f:
+            data = yaml.safe_load(f)
+
+        assert len(data["history"]) == 2
+        assert data["history"][0]["mileage"] == 40000
+        assert data["history"][1]["ruleKey"] == "brake fluid/replace"
+        assert data["history"][1]["mileage"] == 51000
+
+    def test_raises_index_error_for_invalid_index(self, tmp_path):
+        """Raise IndexError when index is out of range."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+
+rules: []
+
+history:
+  - ruleKey: oil/replace
+    date: '2024-06-15'
+    mileage: 40000
+"""
+        yaml_file = tmp_path / "test_vehicle.yaml"
+        yaml_file.write_text(yaml_content)
+
+        with pytest.raises(IndexError, match="History index 3 out of range"):
+            delete_history_entry(yaml_file, 3)
 
 
 # =============================================================================

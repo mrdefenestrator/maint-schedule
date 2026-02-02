@@ -132,10 +132,6 @@ history:
   performedBy: self
   notes: Subaru Synthetic 0W20 6qt, OEM Filter, Crush Washer
   cost: 0
-- ruleKey: cabin air filter/replace
-  date: '2020-04-22'
-  mileage: 54648
-  performedBy: self
 - ruleKey: engine air filter/replace
   date: '2018-07-08'
   mileage: 40013.0
