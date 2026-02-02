@@ -839,28 +839,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="Vehicle maintenance tracker",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s vehicles/brz.yaml status
-  %(prog)s vehicles/brz.yaml status --severe
-  %(prog)s vehicles/brz.yaml status --miles-only
-  %(prog)s vehicles/brz.yaml status --exclude-verbs inspect
-  %(prog)s vehicles/brz.yaml history --rule "oil"
-  %(prog)s vehicles/brz.yaml history --since 2024-01-01
-  %(prog)s vehicles/brz.yaml rules
-  %(prog)s vehicles/brz.yaml history add "engine oil and filter/replace" \\
-      --mileage 58000 --by self
-  %(prog)s vehicles/brz.yaml edit --current-miles 58000
-  %(prog)s vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216
-  %(prog)s vehicles/brz.yaml delete --force
-  %(prog)s vehicles/brz.yaml history --show-index
-  %(prog)s vehicles/brz.yaml history edit 0 --date 2024-01-15 --notes "Corrected date"
-  %(prog)s vehicles/brz.yaml history delete 0 --dry-run
-  %(prog)s vehicles/brz.yaml rules --show-index
-  %(prog)s vehicles/brz.yaml rules add --item "cabin air filter" --verb replace --interval-miles 15000
-  %(prog)s vehicles/brz.yaml rules edit 0 --interval-miles 7500
-  %(prog)s vehicles/brz.yaml rules delete 0 --dry-run
-""",
     )
     parser.add_argument(
         "vehicle_file",
@@ -872,7 +850,16 @@ Examples:
 
     # Status subcommand
     status_parser = subparsers.add_parser(
-        "status", help="Show what maintenance is due, overdue, or upcoming"
+        "status",
+        help="Show what maintenance is due, overdue, or upcoming",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml status
+  %(prog)s vehicles/brz.yaml status --severe
+  %(prog)s vehicles/brz.yaml status --miles-only
+  %(prog)s vehicles/brz.yaml status --exclude-verbs inspect
+""",
     )
     status_parser.add_argument(
         "--severe",
@@ -899,7 +886,18 @@ Examples:
     )
 
     # History subcommand (with nested edit/delete)
-    history_parser = subparsers.add_parser("history", help="View or modify service history")
+    history_parser = subparsers.add_parser(
+        "history",
+        help="View or modify service history",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml history
+  %(prog)s vehicles/brz.yaml history --rule "oil"
+  %(prog)s vehicles/brz.yaml history --since 2024-01-01
+  %(prog)s vehicles/brz.yaml history --show-index
+""",
+    )
     history_parser.add_argument(
         "--rule",
         type=str,
@@ -927,7 +925,16 @@ Examples:
         help="Show index column for use with: maint history edit/delete <index> ...",
     )
     history_sub = history_parser.add_subparsers(dest="history_command", required=False)
-    history_add_parser = history_sub.add_parser("add", help="Add a new service entry")
+    history_add_parser = history_sub.add_parser(
+        "add",
+        help="Add a new service entry",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml history add "engine oil and filter/replace" --mileage 58000 --by self
+  %(prog)s vehicles/brz.yaml history add "tires/rotate" --mileage 95000 --cost 25.00 --dry-run
+""",
+    )
     history_add_parser.add_argument(
         "rule_key",
         type=str,
@@ -963,7 +970,16 @@ Examples:
         action="store_true",
         help="Show what would be added without saving",
     )
-    history_edit_parser = history_sub.add_parser("edit", help="Edit a history entry by index")
+    history_edit_parser = history_sub.add_parser(
+        "edit",
+        help="Edit a history entry by index",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml history edit 0 --date 2024-01-15 --notes "Corrected date"
+  %(prog)s vehicles/brz.yaml history edit 0 --mileage 58100 --dry-run
+""",
+    )
     history_edit_parser.add_argument(
         "index",
         type=int,
@@ -1004,7 +1020,16 @@ Examples:
         action="store_true",
         help="Show what would be updated without saving",
     )
-    history_delete_parser = history_sub.add_parser("delete", help="Delete a history entry by index")
+    history_delete_parser = history_sub.add_parser(
+        "delete",
+        help="Delete a history entry by index",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml history delete 0
+  %(prog)s vehicles/brz.yaml history delete 0 --dry-run
+""",
+    )
     history_delete_parser.add_argument(
         "index",
         type=int,
@@ -1017,7 +1042,16 @@ Examples:
     )
 
     # Add (create vehicle file)
-    add_parser = subparsers.add_parser("add", help="Create a new vehicle file")
+    add_parser = subparsers.add_parser(
+        "add",
+        help="Create a new vehicle file",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216
+  %(prog)s vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216 --current-miles 60000 --dry-run
+""",
+    )
     add_parser.add_argument("--make", type=str, required=True, help="Make (e.g., Subaru)")
     add_parser.add_argument("--model", type=str, required=True, help="Model (e.g., BRZ)")
     add_parser.add_argument("--trim", type=str, help="Trim (optional)")
@@ -1051,7 +1085,17 @@ Examples:
     )
 
     # Edit (vehicle info and/or current mileage)
-    edit_parser = subparsers.add_parser("edit", help="Edit vehicle info and/or current mileage")
+    edit_parser = subparsers.add_parser(
+        "edit",
+        help="Edit vehicle info and/or current mileage",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml edit --current-miles 58000
+  %(prog)s vehicles/brz.yaml edit --current-miles 58000 --as-of-date 2025-01-15
+  %(prog)s vehicles/brz.yaml edit --make Subaru --model Impreza --trim "WRX Limited" --dry-run
+""",
+    )
     edit_parser.add_argument("--make", type=str, help="Make")
     edit_parser.add_argument("--model", type=str, help="Model")
     edit_parser.add_argument("--trim", type=str, help="Trim")
@@ -1075,7 +1119,16 @@ Examples:
     )
 
     # Delete (vehicle file)
-    delete_parser = subparsers.add_parser("delete", help="Delete the vehicle file")
+    delete_parser = subparsers.add_parser(
+        "delete",
+        help="Delete the vehicle file",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml delete --force
+  %(prog)s vehicles/brz.yaml delete --dry-run
+""",
+    )
     delete_parser.add_argument(
         "--force",
         action="store_true",
@@ -1088,14 +1141,32 @@ Examples:
     )
 
     # Rules subcommand (with nested edit/delete)
-    rules_parser = subparsers.add_parser("rules", help="List or modify maintenance rules")
+    rules_parser = subparsers.add_parser(
+        "rules",
+        help="List or modify maintenance rules",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml rules
+  %(prog)s vehicles/brz.yaml rules --show-index
+""",
+    )
     rules_parser.add_argument(
         "--show-index",
         action="store_true",
         help="Show index column for use with: maint rules edit/delete <index> ...",
     )
     rules_sub = rules_parser.add_subparsers(dest="rules_command", required=False)
-    rules_add_parser = rules_sub.add_parser("add", help="Add a new rule")
+    rules_add_parser = rules_sub.add_parser(
+        "add",
+        help="Add a new rule",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml rules add --item "cabin air filter" --verb replace --interval-miles 15000
+  %(prog)s vehicles/brz.yaml rules add --item "engine oil and filter" --verb replace --interval-miles 7500 --dry-run
+""",
+    )
     rules_add_parser.add_argument("--item", type=str, required=True, help="Item name (e.g., engine oil and filter)")
     rules_add_parser.add_argument("--verb", type=str, required=True, help="Verb (e.g., replace, inspect)")
     rules_add_parser.add_argument("--phase", type=str, help="Phase (e.g., initial, ongoing)")
@@ -1151,7 +1222,16 @@ Examples:
         action="store_true",
         help="Show what would be added without saving",
     )
-    rules_edit_parser = rules_sub.add_parser("edit", help="Edit a rule by index")
+    rules_edit_parser = rules_sub.add_parser(
+        "edit",
+        help="Edit a rule by index",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml rules edit 0 --interval-miles 7500
+  %(prog)s vehicles/brz.yaml rules edit 0 --interval-miles 5000 --dry-run
+""",
+    )
     rules_edit_parser.add_argument(
         "index",
         type=int,
@@ -1212,7 +1292,16 @@ Examples:
         action="store_true",
         help="Show what would be updated without saving",
     )
-    rules_delete_parser = rules_sub.add_parser("delete", help="Delete a rule by index")
+    rules_delete_parser = rules_sub.add_parser(
+        "delete",
+        help="Delete a rule by index",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/brz.yaml rules delete 0
+  %(prog)s vehicles/brz.yaml rules delete 0 --dry-run
+""",
+    )
     rules_delete_parser.add_argument(
         "index",
         type=int,
