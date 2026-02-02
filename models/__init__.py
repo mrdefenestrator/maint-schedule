@@ -20,7 +20,6 @@ from .calculations import calc_due_miles, calc_due_date, check_status
 from .loader import (
     load_vehicle,
     save_history_entry,
-    save_current_miles,
     update_history_entry,
     delete_history_entry,
     add_rule,
@@ -43,7 +42,6 @@ __all__ = [
     "check_status",
     "load_vehicle",
     "save_history_entry",
-    "save_current_miles",
     "update_history_entry",
     "delete_history_entry",
     "add_rule",

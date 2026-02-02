@@ -26,7 +26,6 @@ from models import (
     Rule,
     load_vehicle,
     save_history_entry,
-    save_current_miles,
     update_history_entry,
     delete_history_entry,
     add_rule,
@@ -279,13 +278,22 @@ def cmd_history(args):
     """View service history."""
     vehicle = load_vehicle(args.vehicle_file)
 
+    def key_by_date(ie):
+        return ie[1].date
+
+    def key_by_miles(ie):
+        return ie[1].mileage or 0
+
+    def key_by_rule(ie):
+        return (ie[1].rule_key, ie[1].date)
+
     # Build (raw_index, entry) and sort like get_history_sorted for consistent order
     if args.sort == "date":
-        key_fn = lambda ie: ie[1].date
+        key_fn = key_by_date
     elif args.sort == "miles":
-        key_fn = lambda ie: ie[1].mileage or 0
+        key_fn = key_by_miles
     else:
-        key_fn = lambda ie: (ie[1].rule_key, ie[1].date)
+        key_fn = key_by_rule
 
     entries_with_index = sorted(
         enumerate(vehicle.history), key=key_fn, reverse=not args.asc
@@ -296,7 +304,9 @@ def cmd_history(args):
     # Apply filters
     if args.rule:
         filtered = [
-            (i, e) for i, e in zip(indices, entries) if args.rule.lower() in e.rule_key.lower()
+            (i, e)
+            for i, e in zip(indices, entries)
+            if args.rule.lower() in e.rule_key.lower()
         ]
         indices = [f[0] for f in filtered]
         entries = [f[1] for f in filtered]
@@ -341,7 +351,9 @@ def cmd_history(args):
 
     print(
         tabulate(
-            make_history_table(entries, vehicle, show_index=args.show_index, indices=indices),
+            make_history_table(
+                entries, vehicle, show_index=args.show_index, indices=indices
+            ),
             headers=headers,
             tablefmt="simple",
             colalign=colalign,
@@ -444,10 +456,8 @@ def cmd_edit(args):
         if rule is None:
             print(f"Error: Unknown rule key '{args.rule_key}'")
             return 1
-        rule_key = rule.key
         rule_display = rule.display_name
     else:
-        rule_key = existing.rule_key
         rule = vehicle.get_rule(existing.rule_key)
         rule_display = rule.display_name if rule else existing.rule_key
 
@@ -557,7 +567,9 @@ def cmd_edit_rule(args):
         interval_miles=_ov("interval_miles", args.interval_miles),
         interval_months=_ov("interval_months", args.interval_months),
         severe_interval_miles=_ov("severe_interval_miles", args.severe_interval_miles),
-        severe_interval_months=_ov("severe_interval_months", args.severe_interval_months),
+        severe_interval_months=_ov(
+            "severe_interval_months", args.severe_interval_months
+        ),
         notes=_ov("notes", args.notes),
         phase=_ov("phase", args.phase),
         start_miles=_ov("start_miles", args.start_miles),
@@ -624,8 +636,6 @@ def cmd_delete_rule(args):
 
 def cmd_rules_add(args):
     """Add a new rule."""
-    vehicle = load_vehicle(args.vehicle_file)
-
     # Validate item/verb
     item = args.item.strip()
     verb = args.verb.strip()
@@ -693,21 +703,28 @@ def cmd_vehicle_create(args):
         purchase_miles=float(args.purchase_miles),
     )
 
-    current_miles = float(args.current_miles) if args.current_miles is not None else None
+    current_miles = (
+        float(args.current_miles) if args.current_miles is not None else None
+    )
     as_of_date = args.as_of_date
 
     print(f"Creating vehicle file: {args.vehicle_file}")
     print(f"  {car.name}")
     print(f"  Purchase: {car.purchase_date} @ {car.purchase_miles:,.0f} mi")
     if current_miles is not None:
-        print(f"  Current mileage: {current_miles:,.0f}" + (f" (as of {as_of_date})" if as_of_date else ""))
+        print(
+            f"  Current mileage: {current_miles:,.0f}"
+            + (f" (as of {as_of_date})" if as_of_date else "")
+        )
     print()
 
     if args.dry_run:
         print("(dry run - no changes made)")
         return 0
 
-    create_vehicle(args.vehicle_file, car, current_miles=current_miles, as_of_date=as_of_date)
+    create_vehicle(
+        args.vehicle_file, car, current_miles=current_miles, as_of_date=as_of_date
+    )
     print("Vehicle created.")
     return 0
 
@@ -730,20 +747,37 @@ def cmd_vehicle_edit(args):
         car = Car(
             make=args.make.strip() if args.make is not None else vehicle.car.make,
             model=args.model.strip() if args.model is not None else vehicle.car.model,
-            trim=(args.trim.strip() if args.trim else None) if args.trim is not None else vehicle.car.trim,
+            trim=(
+                (args.trim.strip() if args.trim else None)
+                if args.trim is not None
+                else vehicle.car.trim
+            ),
             year=int(args.year) if args.year is not None else vehicle.car.year,
-            purchase_date=args.purchase_date if args.purchase_date is not None else vehicle.car.purchase_date,
-            purchase_miles=float(args.purchase_miles) if args.purchase_miles is not None else vehicle.car.purchase_miles,
+            purchase_date=(
+                args.purchase_date
+                if args.purchase_date is not None
+                else vehicle.car.purchase_date
+            ),
+            purchase_miles=(
+                float(args.purchase_miles)
+                if args.purchase_miles is not None
+                else vehicle.car.purchase_miles
+            ),
         )
 
-    current_miles = float(args.current_miles) if args.current_miles is not None else None
+    current_miles = (
+        float(args.current_miles) if args.current_miles is not None else None
+    )
     as_of_date = args.as_of_date
 
     print(f"Updating vehicle: {args.vehicle_file}")
     if car:
         print(f"  Car: {car.name}")
     if current_miles is not None:
-        print(f"  Current mileage: {current_miles:,.0f}" + (f" (as of {as_of_date})" if as_of_date else ""))
+        print(
+            f"  Current mileage: {current_miles:,.0f}"
+            + (f" (as of {as_of_date})" if as_of_date else "")
+        )
     print()
 
     if args.dry_run:
@@ -814,12 +848,24 @@ def cmd_rules(args):
         severe_time = (
             f"{rule.severe_interval_months} mo" if rule.severe_interval_months else "-"
         )
-        row = [rule.display_name, interval_miles, interval_time, severe_miles, severe_time]
+        row = [
+            rule.display_name,
+            interval_miles,
+            interval_time,
+            severe_miles,
+            severe_time,
+        ]
         if args.show_index:
             row.insert(0, str(indices[len(rows)]))
         rows.append(row)
 
-    headers = ["Rule", "Interval (mi)", "Interval (time)", "Severe (mi)", "Severe (time)"]
+    headers = [
+        "Rule",
+        "Interval (mi)",
+        "Interval (time)",
+        "Severe (mi)",
+        "Severe (time)",
+    ]
     colalign = ("left", "right", "right", "right", "right")
     if args.show_index:
         headers.insert(0, "Index")
@@ -1052,8 +1098,12 @@ examples:
   %(prog)s vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216 --current-miles 60000 --dry-run
 """,
     )
-    add_parser.add_argument("--make", type=str, required=True, help="Make (e.g., Subaru)")
-    add_parser.add_argument("--model", type=str, required=True, help="Model (e.g., BRZ)")
+    add_parser.add_argument(
+        "--make", type=str, required=True, help="Make (e.g., Subaru)"
+    )
+    add_parser.add_argument(
+        "--model", type=str, required=True, help="Model (e.g., BRZ)"
+    )
     add_parser.add_argument("--trim", type=str, help="Trim (optional)")
     add_parser.add_argument("--year", type=int, required=True, help="Year")
     add_parser.add_argument(
@@ -1100,7 +1150,9 @@ examples:
     edit_parser.add_argument("--model", type=str, help="Model")
     edit_parser.add_argument("--trim", type=str, help="Trim")
     edit_parser.add_argument("--year", type=int, help="Year")
-    edit_parser.add_argument("--purchase-date", type=str, help="Purchase date (YYYY-MM-DD)")
+    edit_parser.add_argument(
+        "--purchase-date", type=str, help="Purchase date (YYYY-MM-DD)"
+    )
     edit_parser.add_argument("--purchase-miles", type=float, help="Mileage at purchase")
     edit_parser.add_argument(
         "--current-miles",
@@ -1167,9 +1219,18 @@ examples:
   %(prog)s vehicles/brz.yaml rules add --item "engine oil and filter" --verb replace --interval-miles 7500 --dry-run
 """,
     )
-    rules_add_parser.add_argument("--item", type=str, required=True, help="Item name (e.g., engine oil and filter)")
-    rules_add_parser.add_argument("--verb", type=str, required=True, help="Verb (e.g., replace, inspect)")
-    rules_add_parser.add_argument("--phase", type=str, help="Phase (e.g., initial, ongoing)")
+    rules_add_parser.add_argument(
+        "--item",
+        type=str,
+        required=True,
+        help="Item name (e.g., engine oil and filter)",
+    )
+    rules_add_parser.add_argument(
+        "--verb", type=str, required=True, help="Verb (e.g., replace, inspect)"
+    )
+    rules_add_parser.add_argument(
+        "--phase", type=str, help="Phase (e.g., initial, ongoing)"
+    )
     rules_add_parser.add_argument(
         "--interval-miles",
         type=float,
@@ -1237,9 +1298,15 @@ examples:
         type=int,
         help="Rule index (from: maint rules --show-index)",
     )
-    rules_edit_parser.add_argument("--item", type=str, help="Item name (e.g., engine oil and filter)")
-    rules_edit_parser.add_argument("--verb", type=str, help="Verb (e.g., replace, inspect)")
-    rules_edit_parser.add_argument("--phase", type=str, help="Phase (e.g., initial, ongoing)")
+    rules_edit_parser.add_argument(
+        "--item", type=str, help="Item name (e.g., engine oil and filter)"
+    )
+    rules_edit_parser.add_argument(
+        "--verb", type=str, help="Verb (e.g., replace, inspect)"
+    )
+    rules_edit_parser.add_argument(
+        "--phase", type=str, help="Phase (e.g., initial, ongoing)"
+    )
     rules_edit_parser.add_argument(
         "--interval-miles",
         type=float,

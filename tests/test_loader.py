@@ -9,7 +9,6 @@ import yaml
 from models import (
     load_vehicle,
     save_history_entry,
-    save_current_miles,
     update_history_entry,
     delete_history_entry,
     add_rule,
@@ -663,104 +662,6 @@ rules:
 
 
 # =============================================================================
-# save_current_miles tests
-# =============================================================================
-
-
-class TestSaveCurrentMiles:
-    """Tests for save_current_miles function."""
-
-    def test_updates_current_miles_when_state_exists(self, tmp_path):
-        """Update currentMiles when state section already exists."""
-        yaml_content = """
-car:
-  make: Test
-  model: Car
-  trim: Base
-  year: 2020
-  purchaseDate: '2020-01-01'
-  purchaseMiles: 0
-
-state:
-  currentMiles: 50000
-  asOfDate: '2025-01-01'
-
-rules: []
-"""
-        yaml_file = tmp_path / "test_vehicle.yaml"
-        yaml_file.write_text(yaml_content)
-
-        save_current_miles(yaml_file, 60000)
-
-        # Reload and verify
-        with open(yaml_file) as f:
-            data = yaml.safe_load(f)
-
-        assert data["state"]["currentMiles"] == 60000
-        # asOfDate should be preserved
-        assert data["state"]["asOfDate"] == "2025-01-01"
-
-    def test_creates_state_section_when_missing(self, tmp_path):
-        """Create state section if it doesn't exist."""
-        yaml_content = """
-car:
-  make: Test
-  model: Car
-  trim: Base
-  year: 2020
-  purchaseDate: '2020-01-01'
-  purchaseMiles: 0
-
-rules: []
-"""
-        yaml_file = tmp_path / "test_vehicle.yaml"
-        yaml_file.write_text(yaml_content)
-
-        save_current_miles(yaml_file, 75000)
-
-        # Reload and verify
-        with open(yaml_file) as f:
-            data = yaml.safe_load(f)
-
-        assert "state" in data
-        assert data["state"]["currentMiles"] == 75000
-
-    def test_preserves_other_sections(self, tmp_path):
-        """Updating currentMiles doesn't affect other sections."""
-        yaml_content = """
-car:
-  make: Test
-  model: Car
-  trim: Base
-  year: 2020
-  purchaseDate: '2020-01-01'
-  purchaseMiles: 0
-
-rules:
-  - item: oil
-    verb: replace
-    intervalMiles: 7500
-
-history:
-  - ruleKey: oil/replace
-    date: '2024-06-15'
-    mileage: 40000
-"""
-        yaml_file = tmp_path / "test_vehicle.yaml"
-        yaml_file.write_text(yaml_content)
-
-        save_current_miles(yaml_file, 42000)
-
-        # Reload and verify
-        vehicle = load_vehicle(yaml_file)
-
-        assert vehicle.current_miles == 42000
-        assert len(vehicle.rules) == 1
-        assert len(vehicle.history) == 1
-        assert vehicle.history[0].mileage == 40000
-
-
-# =============================================================================
 # create_vehicle tests
 # =============================================================================
 
@@ -885,7 +786,9 @@ class TestDeleteVehicle:
     def test_removes_file(self, tmp_path):
         """delete_vehicle removes the YAML file."""
         path = tmp_path / "todelete.yaml"
-        path.write_text("car:\n  make: X\n  model: Y\n  year: 2020\n  purchaseDate: '2020-01-01'\n  purchaseMiles: 0\nrules: []\n")
+        path.write_text(
+            "car:\n  make: X\n  model: Y\n  year: 2020\n  purchaseDate: '2020-01-01'\n  purchaseMiles: 0\nrules: []\n"
+        )
 
         assert path.exists()
         delete_vehicle(path)

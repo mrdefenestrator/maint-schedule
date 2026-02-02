@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 """Tests for validate_yaml schema validation."""
 
-from pathlib import Path
-
-import pytest
-
 from validate_yaml import load_schema, validate_vehicle_file
 
 
@@ -61,7 +57,9 @@ rules: []
         schema = load_schema()
         errors = validate_vehicle_file(path, schema)
         assert len(errors) >= 1
-        assert any("Schema validation" in e or "validation" in e.lower() for e in errors)
+        assert any(
+            "Schema validation" in e or "validation" in e.lower() for e in errors
+        )
 
     def test_invalid_yaml_returns_parse_error(self, tmp_path):
         """Invalid YAML syntax returns YAML parse error."""
@@ -83,4 +81,6 @@ car:
         path = tmp_path / "does_not_exist.yaml"
         errors = validate_vehicle_file(path, schema)
         assert len(errors) >= 1
-        assert any("Error" in e or "exist" in e.lower() or "found" in e.lower() for e in errors)
+        assert any(
+            "Error" in e or "exist" in e.lower() or "found" in e.lower() for e in errors
+        )

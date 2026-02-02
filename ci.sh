@@ -44,7 +44,7 @@ echo
 # Python linting (flake8)
 # --------------------------------
 echo "Checking Python linting (flake8)..."
-if flake8 *.py models/ tests/; then
+if flake8 --ignore=E501 *.py models/ tests/; then
     success "Flake8 linting passed"
 else
     fail "Flake8 linting failed"

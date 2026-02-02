@@ -3,7 +3,6 @@
 import os
 from datetime import date
 from pathlib import Path
-from glob import glob
 
 from flask import Flask, make_response, render_template, request, redirect, url_for, flash
 

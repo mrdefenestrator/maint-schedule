@@ -91,7 +91,10 @@ class TestTruncate:
 
     def test_short_text_unchanged(self):
         assert truncate("short") == "short"
-        assert truncate("exactly thirty chars!!!!!!!!!!", max_len=30) == "exactly thirty chars!!!!!!!!!!"
+        assert (
+            truncate("exactly thirty chars!!!!!!!!!!", max_len=30)
+            == "exactly thirty chars!!!!!!!!!!"
+        )
 
     def test_long_text_truncated_with_ellipsis(self):
         # max_len=15 → 12 chars + "..." = 15 total
@@ -150,7 +153,14 @@ class TestMakeHistoryTable:
         rules = [Rule(item="oil", verb="replace", interval_miles=7500)]
         vehicle = Vehicle(car=car, rules=rules, history=[])
         entries = [
-            HistoryEntry("oil/replace", "2025-01-15", mileage=95000, performed_by="self", cost=45.0, notes="Motul"),
+            HistoryEntry(
+                "oil/replace",
+                "2025-01-15",
+                mileage=95000,
+                performed_by="self",
+                cost=45.0,
+                notes="Motul",
+            ),
         ]
         rows = make_history_table(entries, vehicle)
         assert len(rows) == 1
