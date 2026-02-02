@@ -136,7 +136,7 @@ hostname -I | awk '{print $1}'
 
 ### CLI
 
-The `maint.py` CLI provides five commands: `status`, `history`, `log`, `update-miles`, and `rules`.
+The `maint.py` CLI provides commands: `status`, `history` (with add/edit/delete), `add` / `edit` / `delete` (vehicle file), and `rules` (with add/edit/delete).
 
 ### View Maintenance Status
 
@@ -187,20 +187,26 @@ python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.0
 - `--cost <number>` - Cost of service
 - `--dry-run` - Show what would be added without saving
 
-### Update Current Mileage
+### Create, Edit, and Delete Vehicles
 
 ```bash
-python maint.py <vehicle-file> update-miles <mileage> [options]
+# Create a new vehicle file (path must not exist)
+python maint.py vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216 [--current-miles 60000] [--as-of-date 2025-01-01]
 
-# Examples:
-python maint.py vehicles/wrx.yaml update-miles 95000
-python maint.py vehicles/wrx.yaml update-miles 95000 --dry-run
+# Edit vehicle info and/or current mileage (replaces the old update-miles command)
+python maint.py vehicles/wrx.yaml edit --current-miles 95000
+python maint.py vehicles/wrx.yaml edit --current-miles 95000 --as-of-date 2025-01-15
+python maint.py vehicles/wrx.yaml edit --make Subaru --model Impreza --trim "WRX Limited" --dry-run
+
+# Delete a vehicle file (requires --force to confirm)
+python maint.py vehicles/wrx.yaml delete --force
 ```
 
-This command updates the `currentMiles` field in the vehicle's `state` section. The mileage is used to calculate which services are due. The date is automatically set to today.
+**Create options:** `--make`, `--model`, `--trim`, `--year`, `--purchase-date`, `--purchase-miles` (required); `--current-miles`, `--as-of-date`, `--dry-run`.
 
-**Options:**
-- `--dry-run` - Show what would be updated without saving
+**Edit options:** any of `--make`, `--model`, `--trim`, `--year`, `--purchase-date`, `--purchase-miles`, `--current-miles`, `--as-of-date`; `--dry-run`.
+
+**Delete options:** `--force` (required to confirm), `--dry-run`.
 
 ### List Maintenance Rules
 
@@ -237,10 +243,10 @@ state:
 
 The `currentMiles` field represents the current odometer reading and is used to calculate which services are due. If not explicitly set, it is automatically computed as the maximum mileage from the history log.
 
-To update the current mileage without logging a service, use the `update-miles` command:
+To update the current mileage without logging a service, use the `edit` command:
 
 ```bash
-python maint.py vehicles/wrx.yaml update-miles 95000
+python maint.py vehicles/wrx.yaml edit --current-miles 95000
 ```
 
 ### Maintenance History

@@ -3,10 +3,12 @@
 Unified CLI for vehicle maintenance tracking.
 
 Commands:
-  status       - Show what maintenance is due, overdue, or upcoming
-  history      - View service history (default); subcommands: add, edit, delete
-  update-miles - Update current vehicle mileage
-  rules        - List maintenance rules (default); subcommands: add, edit, delete
+  status  - Show what maintenance is due, overdue, or upcoming
+  history - View service history (default); subcommands: add, edit, delete
+  add     - Create a new vehicle file
+  edit    - Edit vehicle info and/or current mileage
+  delete  - Delete the vehicle file
+  rules   - List maintenance rules (default); subcommands: add, edit, delete
 """
 
 import argparse
@@ -17,6 +19,7 @@ from tabulate import tabulate
 from typing import List, Optional
 
 from models import (
+    Car,
     Status,
     ServiceDue,
     HistoryEntry,
@@ -29,6 +32,9 @@ from models import (
     add_rule,
     update_rule,
     delete_rule,
+    create_vehicle,
+    update_vehicle_meta,
+    delete_vehicle,
 )
 
 # =============================================================================
@@ -672,29 +678,106 @@ def cmd_rules_add(args):
 
 
 # =============================================================================
-# Update Miles command
+# Vehicle create / edit / delete
 # =============================================================================
 
 
-def cmd_update_miles(args):
-    """Update current vehicle mileage."""
-    vehicle = load_vehicle(args.vehicle_file)
-    old_miles = vehicle.current_miles
+def cmd_vehicle_create(args):
+    """Create a new vehicle file."""
+    car = Car(
+        make=args.make.strip(),
+        model=args.model.strip(),
+        trim=args.trim.strip() if args.trim else None,
+        year=int(args.year),
+        purchase_date=args.purchase_date,
+        purchase_miles=float(args.purchase_miles),
+    )
 
-    # Show what will be updated
-    print(f"Vehicle: {vehicle.car.name}")
-    print(f"Current mileage: {old_miles:,.0f}")
-    print(f"New mileage:     {args.mileage:,.0f}")
+    current_miles = float(args.current_miles) if args.current_miles is not None else None
+    as_of_date = args.as_of_date
+
+    print(f"Creating vehicle file: {args.vehicle_file}")
+    print(f"  {car.name}")
+    print(f"  Purchase: {car.purchase_date} @ {car.purchase_miles:,.0f} mi")
+    if current_miles is not None:
+        print(f"  Current mileage: {current_miles:,.0f}" + (f" (as of {as_of_date})" if as_of_date else ""))
     print()
 
     if args.dry_run:
         print("(dry run - no changes made)")
         return 0
 
-    # Save the new mileage
-    save_current_miles(args.vehicle_file, args.mileage)
-    print("Mileage updated.")
+    create_vehicle(args.vehicle_file, car, current_miles=current_miles, as_of_date=as_of_date)
+    print("Vehicle created.")
+    return 0
 
+
+def cmd_vehicle_edit(args):
+    """Edit an existing vehicle (car info and/or current mileage)."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    car = None
+    if any(
+        (
+            args.make is not None,
+            args.model is not None,
+            args.trim is not None,
+            args.year is not None,
+            args.purchase_date is not None,
+            args.purchase_miles is not None,
+        )
+    ):
+        car = Car(
+            make=args.make.strip() if args.make is not None else vehicle.car.make,
+            model=args.model.strip() if args.model is not None else vehicle.car.model,
+            trim=(args.trim.strip() if args.trim else None) if args.trim is not None else vehicle.car.trim,
+            year=int(args.year) if args.year is not None else vehicle.car.year,
+            purchase_date=args.purchase_date if args.purchase_date is not None else vehicle.car.purchase_date,
+            purchase_miles=float(args.purchase_miles) if args.purchase_miles is not None else vehicle.car.purchase_miles,
+        )
+
+    current_miles = float(args.current_miles) if args.current_miles is not None else None
+    as_of_date = args.as_of_date
+
+    print(f"Updating vehicle: {args.vehicle_file}")
+    if car:
+        print(f"  Car: {car.name}")
+    if current_miles is not None:
+        print(f"  Current mileage: {current_miles:,.0f}" + (f" (as of {as_of_date})" if as_of_date else ""))
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    update_vehicle_meta(
+        args.vehicle_file,
+        car=car,
+        current_miles=current_miles,
+        as_of_date=as_of_date,
+    )
+    print("Vehicle updated.")
+    return 0
+
+
+def cmd_vehicle_delete(args):
+    """Delete a vehicle file."""
+    vehicle = load_vehicle(args.vehicle_file)
+
+    print(f"Deleting vehicle file: {args.vehicle_file}")
+    print(f"  {vehicle.car.name}")
+    print()
+
+    if args.dry_run:
+        print("(dry run - no changes made)")
+        return 0
+
+    if not args.force:
+        print("Use --force to confirm deletion.")
+        return 1
+
+    delete_vehicle(args.vehicle_file)
+    print("Vehicle deleted.")
     return 0
 
 
@@ -767,7 +850,9 @@ Examples:
   %(prog)s vehicles/brz.yaml rules
   %(prog)s vehicles/brz.yaml history add "engine oil and filter/replace" \\
       --mileage 58000 --by self
-  %(prog)s vehicles/brz.yaml update-miles 58000
+  %(prog)s vehicles/brz.yaml edit --current-miles 58000
+  %(prog)s vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216
+  %(prog)s vehicles/brz.yaml delete --force
   %(prog)s vehicles/brz.yaml history --show-index
   %(prog)s vehicles/brz.yaml history edit 0 --date 2024-01-15 --notes "Corrected date"
   %(prog)s vehicles/brz.yaml history delete 0 --dry-run
@@ -780,7 +865,7 @@ Examples:
     parser.add_argument(
         "vehicle_file",
         type=Path,
-        help="Path to vehicle YAML file",
+        help="Path to vehicle YAML file (for create: path for new file; for others: existing file)",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -931,19 +1016,75 @@ Examples:
         help="Show what would be deleted without saving",
     )
 
-    # Update Miles subcommand
-    update_miles_parser = subparsers.add_parser(
-        "update-miles", help="Update current vehicle mileage"
+    # Add (create vehicle file)
+    add_parser = subparsers.add_parser("add", help="Create a new vehicle file")
+    add_parser.add_argument("--make", type=str, required=True, help="Make (e.g., Subaru)")
+    add_parser.add_argument("--model", type=str, required=True, help="Model (e.g., BRZ)")
+    add_parser.add_argument("--trim", type=str, help="Trim (optional)")
+    add_parser.add_argument("--year", type=int, required=True, help="Year")
+    add_parser.add_argument(
+        "--purchase-date",
+        type=str,
+        required=True,
+        help="Purchase date (YYYY-MM-DD)",
     )
-    update_miles_parser.add_argument(
-        "mileage",
+    add_parser.add_argument(
+        "--purchase-miles",
+        type=float,
+        required=True,
+        help="Mileage at purchase",
+    )
+    add_parser.add_argument(
+        "--current-miles",
+        type=float,
+        help="Current mileage (default: purchase miles)",
+    )
+    add_parser.add_argument(
+        "--as-of-date",
+        type=str,
+        help="Date for current mileage (YYYY-MM-DD)",
+    )
+    add_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be created without saving",
+    )
+
+    # Edit (vehicle info and/or current mileage)
+    edit_parser = subparsers.add_parser("edit", help="Edit vehicle info and/or current mileage")
+    edit_parser.add_argument("--make", type=str, help="Make")
+    edit_parser.add_argument("--model", type=str, help="Model")
+    edit_parser.add_argument("--trim", type=str, help="Trim")
+    edit_parser.add_argument("--year", type=int, help="Year")
+    edit_parser.add_argument("--purchase-date", type=str, help="Purchase date (YYYY-MM-DD)")
+    edit_parser.add_argument("--purchase-miles", type=float, help="Mileage at purchase")
+    edit_parser.add_argument(
+        "--current-miles",
         type=float,
         help="Current mileage",
     )
-    update_miles_parser.add_argument(
+    edit_parser.add_argument(
+        "--as-of-date",
+        type=str,
+        help="Date for current mileage (YYYY-MM-DD)",
+    )
+    edit_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be updated without saving",
+    )
+
+    # Delete (vehicle file)
+    delete_parser = subparsers.add_parser("delete", help="Delete the vehicle file")
+    delete_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Confirm deletion (required)",
+    )
+    delete_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be deleted without saving",
     )
 
     # Rules subcommand (with nested edit/delete)
@@ -1085,10 +1226,15 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validate vehicle file exists
-    if not args.vehicle_file.exists():
-        print(f"Error: File not found: {args.vehicle_file}")
-        return 1
+    # Validate vehicle file: for "add" it must not exist; otherwise it must exist
+    if args.command == "add":
+        if args.vehicle_file.exists():
+            print(f"Error: File already exists: {args.vehicle_file}")
+            return 1
+    else:
+        if not args.vehicle_file.exists():
+            print(f"Error: File not found: {args.vehicle_file}")
+            return 1
 
     # Dispatch to command handler
     if args.command == "status":
@@ -1101,8 +1247,12 @@ Examples:
         if getattr(args, "history_command", None) == "delete":
             return cmd_delete(args)
         return cmd_history(args)
-    elif args.command == "update-miles":
-        return cmd_update_miles(args)
+    elif args.command == "add":
+        return cmd_vehicle_create(args)
+    elif args.command == "edit":
+        return cmd_vehicle_edit(args)
+    elif args.command == "delete":
+        return cmd_vehicle_delete(args)
     elif args.command == "rules":
         if getattr(args, "rules_command", None) == "add":
             return cmd_rules_add(args)

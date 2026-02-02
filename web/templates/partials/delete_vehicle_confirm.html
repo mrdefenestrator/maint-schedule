@@ -1,0 +1,36 @@
+<!-- Delete Vehicle - Confirmation dialog -->
+<div>
+    {% with modal_title="Delete vehicle?" %}
+    {% include "partials/modal_header.html" %}
+    {% endwith %}
+
+    <p class="text-gray-600 text-sm mb-4">
+        This will permanently delete this vehicle and all its rules and history. This cannot be undone.
+    </p>
+
+    <div class="bg-gray-50 rounded-lg border border-gray-200 p-3 mb-6 text-sm">
+        <p class="font-medium text-gray-900">{{ vehicle.car.name }}</p>
+    </div>
+
+    <div class="flex gap-3">
+        <button type="button"
+                onclick="document.getElementById('modal').classList.add('hidden')"
+                class="flex-1 py-3 px-4 rounded-lg border border-gray-300 text-gray-700 font-medium touch-target
+                       hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            Cancel
+        </button>
+        <form method="post"
+              action="{{ url_for('delete_vehicle_view', vehicle_id=vehicle_id) }}"
+              class="flex-1"
+              hx-post="{{ url_for('delete_vehicle_view', vehicle_id=vehicle_id) }}"
+              hx-target="body"
+              hx-swap="none"
+              hx-headers='{"HX-Request": "true"}'>
+            <button type="submit"
+                    class="w-full py-3 px-4 rounded-lg bg-red-600 text-white font-medium touch-target
+                           hover:bg-red-700 active:bg-red-800 transition-colors">
+                Delete vehicle
+            </button>
+        </form>
+    </div>
+</div>

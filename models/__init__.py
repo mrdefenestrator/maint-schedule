@@ -26,6 +26,9 @@ from .loader import (
     add_rule,
     update_rule,
     delete_rule,
+    create_vehicle,
+    update_vehicle_meta,
+    delete_vehicle,
 )
 
 __all__ = [
@@ -46,4 +49,7 @@ __all__ = [
     "add_rule",
     "update_rule",
     "delete_rule",
+    "create_vehicle",
+    "update_vehicle_meta",
+    "delete_vehicle",
 ]

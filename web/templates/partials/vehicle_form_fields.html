@@ -1,0 +1,65 @@
+{# Shared vehicle form fields for add and edit. Pass vehicle (optional) and today (optional, for default dates when adding). #}
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label for="make" class="block text-sm font-medium text-gray-700 mb-1">Make <span class="text-red-500">*</span></label>
+        <input type="text" name="make" id="make" required
+               value="{{ vehicle.car.make if vehicle else '' }}"
+               placeholder="{{ 'e.g., Subaru' if not vehicle else '' }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+    <div>
+        <label for="model" class="block text-sm font-medium text-gray-700 mb-1">Model <span class="text-red-500">*</span></label>
+        <input type="text" name="model" id="model" required
+               value="{{ vehicle.car.model if vehicle else '' }}"
+               placeholder="{{ 'e.g., WRX' if not vehicle else '' }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+</div>
+
+<div>
+    <label for="trim" class="block text-sm font-medium text-gray-700 mb-1">Trim</label>
+    <input type="text" name="trim" id="trim"
+           value="{{ vehicle.car.trim or '' if vehicle else '' }}"
+           placeholder="{{ 'e.g., Limited' if not vehicle else '' }}"
+           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Year <span class="text-red-500">*</span></label>
+        <input type="number" name="year" id="year" required min="1900" max="2100"
+               value="{{ vehicle.car.year if vehicle else '' }}"
+               placeholder="{{ 'e.g., 2015' if not vehicle else '' }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+    <div>
+        <label for="purchase_date" class="block text-sm font-medium text-gray-700 mb-1">Purchase date <span class="text-red-500">*</span></label>
+        <input type="date" name="purchase_date" id="purchase_date" required
+               value="{{ vehicle.car.purchase_date if vehicle else (today or '') }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+</div>
+
+<div>
+    <label for="purchase_miles" class="block text-sm font-medium text-gray-700 mb-1">Purchase mileage <span class="text-red-500">*</span></label>
+    <input type="number" name="purchase_miles" id="purchase_miles" required min="0" step="1"
+           value="{{ vehicle.car.purchase_miles | int if vehicle and vehicle.car.purchase_miles is not none else '' }}"
+           placeholder="{{ '0' if not vehicle else '' }}"
+           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label for="current_miles" class="block text-sm font-medium text-gray-700 mb-1">Current mileage</label>
+        <input type="number" name="current_miles" id="current_miles" min="0" step="1"
+               value="{{ vehicle.current_miles | int if vehicle and vehicle.current_miles else '' }}"
+               placeholder="{{ 'Same as purchase' if not vehicle else 'Current odometer' }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+    <div>
+        <label for="as_of_date" class="block text-sm font-medium text-gray-700 mb-1">Mileage as of date</label>
+        <input type="date" name="as_of_date" id="as_of_date"
+               value="{{ vehicle.as_of_date or '' if vehicle else (today or '') }}"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+    </div>
+</div>

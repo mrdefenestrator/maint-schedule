@@ -15,6 +15,9 @@ from models import (
     add_rule,
     update_rule,
     delete_rule,
+    create_vehicle,
+    update_vehicle_meta,
+    delete_vehicle,
     Car,
     Rule,
     HistoryEntry,
@@ -755,3 +758,135 @@ history:
         assert len(vehicle.rules) == 1
         assert len(vehicle.history) == 1
         assert vehicle.history[0].mileage == 40000
+
+
+# =============================================================================
+# create_vehicle tests
+# =============================================================================
+
+
+class TestCreateVehicle:
+    """Tests for create_vehicle function."""
+
+    def test_creates_minimal_vehicle_file(self, tmp_path):
+        """Create a new vehicle file with required car fields only."""
+        path = tmp_path / "newcar.yaml"
+        car = Car(
+            make="Subaru",
+            model="BRZ",
+            trim=None,
+            year=2015,
+            purchase_date="2016-11-12",
+            purchase_miles=21216,
+        )
+
+        create_vehicle(path, car)
+
+        assert path.exists()
+        vehicle = load_vehicle(path)
+        assert vehicle.car.make == "Subaru"
+        assert vehicle.car.model == "BRZ"
+        assert vehicle.car.year == 2015
+        assert vehicle.car.purchase_miles == 21216
+        assert vehicle.current_miles == 21216  # default from purchase_miles
+        assert vehicle.rules == []
+        assert vehicle.history == []
+
+    def test_creates_vehicle_with_state(self, tmp_path):
+        """Create vehicle with current_miles and as_of_date."""
+        path = tmp_path / "newcar.yaml"
+        car = Car(
+            make="Tesla",
+            model="Model S",
+            trim="75D",
+            year=2018,
+            purchase_date="2025-08-13",
+            purchase_miles=0,
+        )
+
+        create_vehicle(path, car, current_miles=50000, as_of_date="2025-01-15")
+
+        vehicle = load_vehicle(path)
+        assert vehicle.car.trim == "75D"
+        assert vehicle.current_miles == 50000
+        assert vehicle.as_of_date == "2025-01-15"
+
+
+# =============================================================================
+# update_vehicle_meta tests
+# =============================================================================
+
+
+class TestUpdateVehicleMeta:
+    """Tests for update_vehicle_meta function."""
+
+    def test_updates_current_miles_only(self, tmp_path):
+        """Update only currentMiles in state."""
+        yaml_content = """
+car:
+  make: Test
+  model: Car
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+state:
+  currentMiles: 50000
+rules: []
+"""
+        path = tmp_path / "v.yaml"
+        path.write_text(yaml_content)
+
+        update_vehicle_meta(path, current_miles=60000)
+
+        vehicle = load_vehicle(path)
+        assert vehicle.current_miles == 60000
+        assert vehicle.car.make == "Test"
+
+    def test_updates_car_only(self, tmp_path):
+        """Update only car section."""
+        yaml_content = """
+car:
+  make: Old
+  model: Car
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+rules: []
+"""
+        path = tmp_path / "v.yaml"
+        path.write_text(yaml_content)
+
+        new_car = Car(
+            make="New",
+            model="Model",
+            trim="Limited",
+            year=2021,
+            purchase_date="2021-06-01",
+            purchase_miles=1000,
+        )
+        update_vehicle_meta(path, car=new_car)
+
+        vehicle = load_vehicle(path)
+        assert vehicle.car.make == "New"
+        assert vehicle.car.model == "Model"
+        assert vehicle.car.trim == "Limited"
+        assert vehicle.car.year == 2021
+        assert vehicle.car.purchase_miles == 1000
+
+
+# =============================================================================
+# delete_vehicle tests
+# =============================================================================
+
+
+class TestDeleteVehicle:
+    """Tests for delete_vehicle function."""
+
+    def test_removes_file(self, tmp_path):
+        """delete_vehicle removes the YAML file."""
+        path = tmp_path / "todelete.yaml"
+        path.write_text("car:\n  make: X\n  model: Y\n  year: 2020\n  purchaseDate: '2020-01-01'\n  purchaseMiles: 0\nrules: []\n")
+
+        assert path.exists()
+        delete_vehicle(path)
+        assert not path.exists()

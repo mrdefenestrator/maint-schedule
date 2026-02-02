@@ -14,13 +14,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from models.loader import (
     load_vehicle,
     save_history_entry,
-    save_current_miles,
     update_history_entry,
     delete_history_entry,
     add_rule,
     update_rule,
     delete_rule,
+    create_vehicle,
+    update_vehicle_meta,
+    delete_vehicle,
 )
+from models.car import Car
 from models.history_entry import HistoryEntry
 from models.rule import Rule
 from models.status import Status
@@ -132,6 +135,17 @@ app.jinja_env.filters["status_badge_color"] = status_badge_color
 app.jinja_env.filters["status_display_name"] = status_display_name
 
 
+def _float_or_none_form(key: str):
+    """Get float or None from request.form."""
+    val = request.form.get(key)
+    if val is None or (isinstance(val, str) and not val.strip()):
+        return None
+    try:
+        return float(val)
+    except ValueError:
+        return None
+
+
 @app.route("/")
 def index():
     """Dashboard showing all vehicles."""
@@ -159,6 +173,87 @@ def index():
         })
 
     return render_template("index.html", vehicles=vehicles)
+
+
+@app.route("/vehicle/new", methods=["GET", "POST"])
+def create_vehicle_view():
+    """GET: show create vehicle form (modal partial via HTMX). POST: create the vehicle file."""
+    if request.method == "GET":
+        if not request.headers.get("HX-Request"):
+            return redirect(url_for("index"))
+        return render_template(
+            "partials/add_vehicle_form.html",
+            today=date.today().isoformat(),
+        )
+
+    # POST: validate and create
+    slug = (request.form.get("slug") or "").strip().lower()
+    if not slug:
+        flash("Vehicle ID (slug) is required", "error")
+        return redirect(url_for("create_vehicle_view"))
+
+    # Restrict to safe filename characters
+    if not all(c.isalnum() or c in "-_" for c in slug):
+        flash("Vehicle ID may only contain letters, numbers, hyphens, and underscores", "error")
+        return redirect(url_for("create_vehicle_view"))
+
+    path = get_vehicle_path(slug)
+    if path.exists():
+        flash(f"A vehicle with ID '{slug}' already exists", "error")
+        return redirect(url_for("create_vehicle_view"))
+
+    make = (request.form.get("make") or "").strip()
+    model = (request.form.get("model") or "").strip()
+    trim = (request.form.get("trim") or "").strip() or None
+    year_str = request.form.get("year")
+    purchase_date = (request.form.get("purchase_date") or "").strip()
+    purchase_miles = _float_or_none_form("purchase_miles")
+    current_miles = _float_or_none_form("current_miles")
+    as_of_date = (request.form.get("as_of_date") or "").strip() or None
+
+    if not make or not model:
+        flash("Make and model are required", "error")
+        return redirect(url_for("create_vehicle_view"))
+    if not year_str:
+        flash("Year is required", "error")
+        return redirect(url_for("create_vehicle_view"))
+    try:
+        year = int(year_str)
+    except ValueError:
+        flash("Year must be a number", "error")
+        return redirect(url_for("create_vehicle_view"))
+    if not purchase_date:
+        flash("Purchase date is required", "error")
+        return redirect(url_for("create_vehicle_view"))
+    if purchase_miles is None:
+        flash("Purchase mileage is required", "error")
+        return redirect(url_for("create_vehicle_view"))
+
+    car = Car(
+        make=make,
+        model=model,
+        trim=trim,
+        year=year,
+        purchase_date=purchase_date,
+        purchase_miles=purchase_miles,
+    )
+
+    try:
+        create_vehicle(path, car, current_miles=current_miles, as_of_date=as_of_date)
+    except Exception:
+        flash("Failed to create vehicle", "error")
+        return redirect(url_for("create_vehicle_view"))
+
+    flash(f"Vehicle '{car.name}' created.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Vehicle created.")
+        )
+        response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=slug)
+        return response
+
+    return redirect(url_for("vehicle_detail", vehicle_id=slug))
 
 
 @app.route("/vehicle/<vehicle_id>")
@@ -311,47 +406,124 @@ def log_service(vehicle_id: str):
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
 
 
-@app.route("/vehicle/<vehicle_id>/mileage", methods=["GET"])
-def update_mileage_form(vehicle_id: str):
-    """HTMX partial: update mileage form."""
+@app.route("/vehicle/<vehicle_id>/edit", methods=["GET", "POST"])
+def edit_vehicle_view(vehicle_id: str):
+    """GET: show edit vehicle form (HTMX partial or full). POST: update vehicle."""
     path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
     vehicle = load_vehicle(path)
 
-    return render_template(
-        "partials/mileage_form.html",
-        vehicle_id=vehicle_id,
-        vehicle=vehicle,
+    if request.method == "GET":
+        if request.headers.get("HX-Request"):
+            return render_template(
+                "partials/edit_vehicle_form.html",
+                vehicle_id=vehicle_id,
+                vehicle=vehicle,
+            )
+        return render_template(
+            "edit_vehicle.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+            today=date.today().isoformat(),
+        )
+
+    # POST: update
+    make = (request.form.get("make") or "").strip()
+    model = (request.form.get("model") or "").strip()
+    trim = (request.form.get("trim") or "").strip() or None
+    year_str = request.form.get("year")
+    purchase_date = (request.form.get("purchase_date") or "").strip()
+    purchase_miles = _float_or_none_form("purchase_miles")
+    current_miles = _float_or_none_form("current_miles")
+    as_of_date = (request.form.get("as_of_date") or "").strip() or None
+
+    if not make or not model:
+        flash("Make and model are required", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
+    if not year_str:
+        flash("Year is required", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
+    try:
+        year = int(year_str)
+    except ValueError:
+        flash("Year must be a number", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
+    if not purchase_date:
+        flash("Purchase date is required", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
+    if purchase_miles is None:
+        flash("Purchase mileage is required", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
+
+    car = Car(
+        make=make,
+        model=model,
+        trim=trim,
+        year=year,
+        purchase_date=purchase_date,
+        purchase_miles=purchase_miles,
     )
 
-
-@app.route("/vehicle/<vehicle_id>/mileage", methods=["POST"])
-def update_mileage(vehicle_id: str):
-    """Handle update mileage form submission."""
-    path = get_vehicle_path(vehicle_id)
-
-    mileage = request.form.get("mileage")
-    if not mileage:
-        flash("Please enter mileage", "error")
-        return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
-
     try:
-        miles = float(mileage)
-    except ValueError:
-        flash("Invalid mileage value", "error")
-        return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
+        update_vehicle_meta(
+            path,
+            car=car,
+            current_miles=current_miles,
+            as_of_date=as_of_date,
+        )
+    except Exception:
+        flash("Failed to update vehicle", "error")
+        return redirect(url_for("edit_vehicle_view", vehicle_id=vehicle_id))
 
-    save_current_miles(path, miles)
-    flash(f"Updated mileage to {miles:,.0f}", "success")
+    flash("Vehicle updated.", "success")
 
-    # HTMX: redirect to vehicle status so target (#modal-content or #status-table) always works
     if request.headers.get("HX-Request"):
         response = make_response(
-            render_template("partials/success_redirect.html", message="Mileage updated.")
+            render_template("partials/success_redirect.html", message="Vehicle updated.")
         )
         response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=vehicle_id)
         return response
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
+
+
+@app.route("/vehicle/<vehicle_id>/delete", methods=["GET", "POST"])
+def delete_vehicle_view(vehicle_id: str):
+    """GET: show delete confirmation (HTMX partial). POST: delete the vehicle file."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+
+    if request.method == "GET":
+        return render_template(
+            "partials/delete_vehicle_confirm.html",
+            vehicle_id=vehicle_id,
+            vehicle=vehicle,
+        )
+
+    # POST: delete
+    try:
+        delete_vehicle(path)
+    except Exception:
+        flash("Failed to delete vehicle", "error")
+        return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
+
+    flash(f"Vehicle '{vehicle.car.name}' deleted.", "success")
+
+    if request.headers.get("HX-Request"):
+        response = make_response(
+            render_template("partials/success_redirect.html", message="Vehicle deleted.")
+        )
+        response.headers["HX-Redirect"] = url_for("index")
+        return response
+
+    return redirect(url_for("index"))
 
 
 @app.route("/vehicle/<vehicle_id>/history")

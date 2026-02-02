@@ -80,6 +80,19 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Modal (used by index for Add vehicle; vehicle pages have their own) -->
+    {% block modal %}
+    <div id="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="min-h-screen px-4 flex items-center justify-center">
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                 onclick="document.getElementById('modal').classList.add('hidden')"></div>
+            <div id="modal-content" class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10 max-h-[90vh] overflow-y-auto">
+                <div class="text-center py-8 text-gray-500">Loading...</div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
     <!-- Bottom Navigation (mobile) -->
     {% block bottom_nav %}{% endblock %}
 
@@ -93,6 +106,22 @@
                     setTimeout(function() { el.remove(); }, 300);
                 });
             }, 3000);
+        });
+
+        // Modal: Escape to close; focus first field after HTMX swap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var modal = document.getElementById('modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                }
+            }
+        });
+        document.body.addEventListener('htmx:afterSwap', function(ev) {
+            if (ev.detail.target.id === 'modal-content') {
+                var first = ev.detail.target.querySelector('input:not([type="hidden"]):not([readonly]), select, textarea, button[type="submit"]');
+                if (first) first.focus();
+            }
         });
     </script>
 </body>

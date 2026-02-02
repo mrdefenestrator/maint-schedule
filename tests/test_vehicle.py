@@ -705,3 +705,72 @@ class TestGetAllServiceStatus:
         assert ok[0].rule.item == "coolant"
         assert len(inactive) == 1
         assert inactive[0].rule.item == "lsd"
+
+    def test_exclude_verbs_filters_rules(self, car):
+        """exclude_verbs omits rules whose verb is in the list."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),
+            Rule(item="brakes", verb="inspect", interval_miles=15000),
+            Rule(item="tires", verb="rotate", interval_miles=7500),
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[], state_current_miles=50000)
+
+        statuses_all = vehicle.get_all_service_status()
+        statuses_no_inspect = vehicle.get_all_service_status(exclude_verbs=["inspect"])
+
+        assert len(statuses_all) == 3
+        assert len(statuses_no_inspect) == 2
+        verbs_no_inspect = [s.rule.verb for s in statuses_no_inspect]
+        assert "replace" in verbs_no_inspect
+        assert "rotate" in verbs_no_inspect
+        assert "inspect" not in verbs_no_inspect
+
+    def test_include_verbs_filters_rules(self, car):
+        """include_verbs returns only rules whose verb is in the list."""
+        rules = [
+            Rule(item="oil", verb="replace", interval_miles=7500),
+            Rule(item="brakes", verb="inspect", interval_miles=15000),
+            Rule(item="tires", verb="rotate", interval_miles=7500),
+        ]
+        vehicle = Vehicle(car=car, rules=rules, history=[], state_current_miles=50000)
+
+        statuses = vehicle.get_all_service_status(include_verbs=["replace"])
+
+        assert len(statuses) == 1
+        assert statuses[0].rule.verb == "replace"
+        assert statuses[0].rule.item == "oil"
+
+    def test_miles_only_ignores_time_intervals(self, car):
+        """miles_only passes through to calculate_service_due (time not considered)."""
+        rule = Rule(
+            item="oil",
+            verb="replace",
+            interval_miles=7500,
+            interval_months=6,
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[rule],
+            history=[HistoryEntry("oil/replace", "2025-01-15", mileage=90000)],
+            state_current_miles=91000,
+            state_as_of_date="2025-03-15",
+        )
+        # With miles_only, time_remaining_days should be None (interval_months ignored)
+        statuses = vehicle.get_all_service_status(miles_only=True)
+        assert len(statuses) == 1
+        assert statuses[0].time_remaining_days is None
+        assert statuses[0].miles_remaining == 6500  # 102000 - 91000 from miles interval
+
+    def test_time_only_ignores_mileage_intervals(self, car):
+        """time_only passes through to calculate_service_due (mileage not considered)."""
+        rule = Rule(
+            item="airbags",
+            verb="inspect",
+            interval_months=120,
+        )
+        vehicle = Vehicle(car=car, rules=[rule], history=[], state_current_miles=100000)
+        # Rule has no interval_miles; with time_only we still get UNKNOWN (no history for date)
+        statuses = vehicle.get_all_service_status(time_only=True)
+        assert len(statuses) == 1
+        assert statuses[0].status == Status.UNKNOWN
+        assert statuses[0].due_miles is None

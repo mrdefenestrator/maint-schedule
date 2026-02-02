@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import yaml
 
@@ -316,3 +316,93 @@ def save_current_miles(filename: Union[str, Path], miles: float) -> None:
             sort_keys=False,
             width=120,
         )
+
+
+def _car_to_dict(car: Car) -> Dict[str, Any]:
+    """Serialize a Car to the YAML dict format (camelCase keys)."""
+    d: Dict[str, Any] = {
+        "make": car.make,
+        "model": car.model,
+        "year": car.year,
+        "purchaseDate": car.purchase_date,
+        "purchaseMiles": car.purchase_miles,
+    }
+    if car.trim is not None:
+        d["trim"] = car.trim
+    return d
+
+
+def create_vehicle(
+    filename: Union[str, Path],
+    car: Car,
+    current_miles: Optional[float] = None,
+    as_of_date: Optional[str] = None,
+) -> None:
+    """
+    Create a new vehicle YAML file with the given car and optional state.
+
+    Initializes with empty rules and history.
+    """
+    data: Dict[str, Any] = {
+        "car": _car_to_dict(car),
+        "state": {},
+        "rules": [],
+        "history": [],
+    }
+    if current_miles is not None:
+        data["state"]["currentMiles"] = current_miles
+    if as_of_date is not None:
+        data["state"]["asOfDate"] = as_of_date
+    if not data["state"]:
+        data["state"] = {"currentMiles": car.purchase_miles}
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
+def update_vehicle_meta(
+    filename: Union[str, Path],
+    car: Optional[Car] = None,
+    current_miles: Optional[float] = None,
+    as_of_date: Optional[str] = None,
+) -> None:
+    """
+    Update car and/or state (currentMiles, asOfDate) in a vehicle YAML file.
+
+    Only updates fields that are provided (non-None). Leaves other keys unchanged.
+    """
+    with open(filename, "r") as fp:
+        data = yaml.load(fp, Loader=yaml.SafeLoader)
+
+    if car is not None:
+        data["car"] = _car_to_dict(car)
+
+    if current_miles is not None or as_of_date is not None:
+        if data.get("state") is None:
+            data["state"] = {}
+        if current_miles is not None:
+            data["state"]["currentMiles"] = current_miles
+        if as_of_date is not None:
+            data["state"]["asOfDate"] = as_of_date
+
+    with open(filename, "w") as fp:
+        yaml.dump(
+            data,
+            fp,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+            width=120,
+        )
+
+
+def delete_vehicle(filename: Union[str, Path]) -> None:
+    """Remove a vehicle YAML file from disk."""
+    Path(filename).unlink()

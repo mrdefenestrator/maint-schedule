@@ -67,3 +67,18 @@ class TestRule:
         assert rule.is_active_at(50000)
         assert rule.is_active_at(75000)
         assert not rule.is_active_at(100000)
+
+    def test_display_name_without_phase(self):
+        """Display name is 'Verb - item' when no phase."""
+        rule = Rule(item="engine oil", verb="replace", interval_miles=7500)
+        assert rule.display_name == "Replace - engine oil"
+
+    def test_display_name_with_phase(self):
+        """Display name includes phase in brackets when present."""
+        rule = Rule(
+            item="engine coolant",
+            verb="replace",
+            phase="initial",
+            interval_miles=137500,
+        )
+        assert rule.display_name == "Replace - engine coolant [initial]"
