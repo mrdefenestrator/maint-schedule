@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Flask web application for vehicle maintenance tracking."""
 
 import os
@@ -986,5 +987,5 @@ def vehicle_rules(vehicle_id: str):
 if __name__ == "__main__":
     # Run with debug mode for development
     # Access from phone: use your computer's local IP (e.g., 192.168.1.x:5001)
-    # Using 5001 to avoid conflict with macOS AirPlay Receiver on 5000
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    # Using 5002 to avoid conflict with macOS AirPlay Receiver on 5000
+    app.run(debug=True, host="0.0.0.0", port=5002)
