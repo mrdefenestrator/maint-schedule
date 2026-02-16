@@ -1,3 +1,38 @@
 [tools]
-python = "3.12"
 uv = "latest"
+
+[tasks.setup]
+run = "uv sync"
+description = "Install all dependencies into .venv"
+
+[tasks.test]
+run = "uv run pytest tests/ -v --cov=models --cov-report=term-missing"
+description = "Run tests with coverage"
+
+[tasks.format]
+run = "uv run ruff format *.py models/ tests/ web/"
+description = "Format code with ruff"
+
+[tasks.format-check]
+run = "uv run ruff format --check *.py models/ tests/ web/"
+description = "Check code formatting"
+
+[tasks.lint]
+run = "uv run ruff check *.py models/ tests/ web/"
+description = "Lint with ruff"
+
+[tasks.lint-fix]
+run = "uv run ruff check --fix *.py models/ tests/ web/"
+description = "Fix lint issues with ruff"
+
+[tasks.validate]
+run = "uv run python validate_yaml.py"
+description = "Validate vehicle YAML files against schema"
+
+[tasks.ci]
+depends = ["format-check", "lint", "validate", "test"]
+description = "Run all CI checks"
+
+[tasks.serve]
+run = "uv run python web/app.py"
+description = "Start the web server"

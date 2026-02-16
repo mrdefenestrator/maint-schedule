@@ -6,8 +6,8 @@ Vehicle maintenance schedule manager using YAML-based configuration files. Suppo
 
 ## Tech Stack
 
-- Python 3.12 (managed via `mise`, see `.mise.toml`)
-- Package manager: `uv`
+- Python 3.12 (managed via `uv`, see `requires-python` in pyproject.toml)
+- Package manager: `uv` (pyproject.toml, `uv sync`), installed via `mise`
 - Virtual environment: `.venv/`
 - Flask for web UI (port 5001)
 - YAML files as the data store (no database)
@@ -16,31 +16,31 @@ Vehicle maintenance schedule manager using YAML-based configuration files. Suppo
 
 ```bash
 # Setup
-./setup.sh                # Install Python, create venv, install deps
-source .venv/bin/activate  # Activate venv (also handled by direnv/.envrc)
+mise run setup             # Install all deps into .venv via uv sync
 
 # Run tests
-python -m pytest tests/ -v
-pytest tests/ -v --cov=models --cov-report=term-missing
+mise run test              # pytest with coverage
 
 # Format code
-black *.py models/ tests/
+mise run format            # ruff formatter
+mise run format-check      # check formatting without changing files
 
 # Lint
-flake8 --ignore=E501 *.py models/ tests/
+mise run lint              # ruff linter
+mise run lint-fix          # auto-fix lint issues
 
 # Validate vehicle YAML files
-python validate_yaml.py
+mise run validate
 
-# Run all CI checks (format, lint, validate, test)
-./ci.sh
+# Run all CI checks (format-check, lint, validate, test)
+mise run ci
 
 # CLI usage
-python maint.py vehicles/wrx.yaml status
-python maint.py vehicles/wrx.yaml history
+uv run python maint.py vehicles/wrx.yaml status
+uv run python maint.py vehicles/wrx.yaml history
 
 # Web UI
-python web/app.py
+mise run serve
 ```
 
 ## Project Structure
@@ -55,8 +55,7 @@ python web/app.py
 
 ## Code Style
 
-- **Black** formatter, 88-char line length
-- **Flake8** with E203, W503 ignored (setup.cfg); CI also ignores E501
+- **Ruff** for formatting (88-char line length) and linting (E501 ignored)
 - Modern Python: type hints, f-strings, dataclasses
 - PEP 8 compliant
 

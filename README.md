@@ -28,32 +28,20 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 │   ├── calculations.py    # Helper functions for due calculations
 │   └── loader.py          # YAML loading utilities
 ├── tests/                 # Test files (1:1 with models)
-│   ├── test_status.py
-│   ├── test_car.py
-│   ├── test_rule.py
-│   ├── test_history_entry.py
-│   ├── test_service_due.py
-│   ├── test_vehicle.py
-│   └── test_calculations.py
 ├── vehicles/              # Vehicle YAML files
-│   ├── wrx.yaml           # 2012 Subaru WRX
-│   └── brz.yaml           # 2015 Subaru BRZ
-├── maint.py               # Unified CLI for all commands
 ├── web/                   # Flask web application
 │   ├── app.py             # Flask app with routes
 │   └── templates/         # Jinja2 HTML templates
+├── maint.py               # Unified CLI for all commands
 ├── validate_yaml.py       # Schema validation script
 ├── schema.yaml            # YAML schema definition
-├── requirements.txt       # Runtime dependencies
-├── requirements-dev.txt   # Development/CI dependencies
-├── setup.sh               # Environment setup script
-├── ci.sh                  # CI checks (lint, test, validate)
-└── .mise.toml             # mise configuration (Python + uv versions)
+├── pyproject.toml         # Project metadata and dependencies
+└── .mise.toml             # mise task runner configuration
 ```
 
 ## Prerequisites
 
-- [mise](https://mise.jdx.dev/) - Runtime version manager
+- [mise](https://mise.jdx.dev/) - Task runner (also installs uv)
 
 ## Setup
 
@@ -61,43 +49,30 @@ This project allows you to define comprehensive maintenance schedules for vehicl
 # Install mise if you haven't already
 # See https://mise.jdx.dev/getting-started.html
 
-# Run setup script (installs Python via mise, creates venv, installs deps with uv)
-./setup.sh
-source .venv/bin/activate
-```
-
-Or manually:
-
-```bash
-# Install tools via mise
+# Install tools and dependencies
 mise install
-
-# Create venv and install dependencies
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+mise run setup
 ```
 
-## Testing
-
-Run the test suite with pytest:
+## Development
 
 ```bash
-# Run all tests
-python -m pytest tests/ -v
+# Run tests with coverage
+mise run test
 
-# Run a specific test file
-python -m pytest tests/test_vehicle.py -v
+# Format code
+mise run format
 
-# Run CI checks (lint, format, test, validate)
-./ci.sh
+# Lint
+mise run lint
+mise run lint-fix          # auto-fix lint issues
+
+# Validate vehicle YAML files
+mise run validate
+
+# Run all CI checks (format, lint, validate, test)
+mise run ci
 ```
-
-The project includes comprehensive tests for all models and calculations:
-- **Unit tests** for data models (`Car`, `Rule`, `HistoryEntry`, `Status`, `ServiceDue`)
-- **Integration tests** for service due calculations (mileage, time, lifecycle rules, severe mode)
-- **Calculation tests** for due date/mileage logic and status determination
-- All tests maintain 1:1 correspondence with model files in `models/`
 
 ## Usage
 
@@ -109,7 +84,7 @@ The web interface provides a mobile-friendly dashboard for viewing status and lo
 
 ```bash
 # Start the web server
-python web/app.py
+mise run serve
 
 # The app will be available at:
 # - http://localhost:5001 (on your computer)
@@ -141,11 +116,11 @@ The `maint.py` CLI provides commands: `status`, `history` (with add/edit/delete)
 ### View Maintenance Status
 
 ```bash
-python maint.py <vehicle-file> status [--severe]
+uv run python maint.py <vehicle-file> status [--severe]
 
 # Examples:
-python maint.py vehicles/wrx.yaml status           # Normal driving intervals
-python maint.py vehicles/wrx.yaml status --severe  # Severe driving intervals
+uv run python maint.py vehicles/wrx.yaml status           # Normal driving intervals
+uv run python maint.py vehicles/wrx.yaml status --severe   # Severe driving intervals
 ```
 
 The `--severe` flag switches to severe driving intervals (shorter intervals for demanding conditions like frequent short trips, dusty environments, towing, etc.). If a rule doesn't define a severe interval, it falls back to the normal interval.
@@ -153,14 +128,14 @@ The `--severe` flag switches to severe driving intervals (shorter intervals for 
 ### View Maintenance History
 
 ```bash
-python maint.py <vehicle-file> history [options]
+uv run python maint.py <vehicle-file> history [options]
 
 # Examples:
-python maint.py vehicles/wrx.yaml history                    # All history
-python maint.py vehicles/wrx.yaml history --rule "oil"       # Filter by rule
-python maint.py vehicles/wrx.yaml history --since 2023-01-01 # Filter by date
-python maint.py vehicles/wrx.yaml history --sort miles       # Sort by mileage
-python maint.py vehicles/wrx.yaml history --asc              # Ascending order
+uv run python maint.py vehicles/wrx.yaml history                    # All history
+uv run python maint.py vehicles/wrx.yaml history --rule "oil"       # Filter by rule
+uv run python maint.py vehicles/wrx.yaml history --since 2023-01-01 # Filter by date
+uv run python maint.py vehicles/wrx.yaml history --sort miles       # Sort by mileage
+uv run python maint.py vehicles/wrx.yaml history --asc              # Ascending order
 ```
 
 **Options:**
@@ -172,11 +147,11 @@ python maint.py vehicles/wrx.yaml history --asc              # Ascending order
 ### Log a Service Entry
 
 ```bash
-python maint.py <vehicle-file> log <rule-key> [options]
+uv run python maint.py <vehicle-file> log <rule-key> [options]
 
 # Examples:
-python maint.py vehicles/wrx.yaml log "engine oil and filter/replace" --mileage 95000 --by self
-python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.00 --dry-run
+uv run python maint.py vehicles/wrx.yaml log "engine oil and filter/replace" --mileage 95000 --by self
+uv run python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.00 --dry-run
 ```
 
 **Options:**
@@ -191,15 +166,15 @@ python maint.py vehicles/wrx.yaml log "tires/rotate" --mileage 95000 --cost 25.0
 
 ```bash
 # Create a new vehicle file (path must not exist)
-python maint.py vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216 [--current-miles 60000] [--as-of-date 2025-01-01]
+uv run python maint.py vehicles/newcar.yaml add --make Subaru --model BRZ --year 2015 --purchase-date 2016-11-12 --purchase-miles 21216 [--current-miles 60000] [--as-of-date 2025-01-01]
 
-# Edit vehicle info and/or current mileage (replaces the old update-miles command)
-python maint.py vehicles/wrx.yaml edit --current-miles 95000
-python maint.py vehicles/wrx.yaml edit --current-miles 95000 --as-of-date 2025-01-15
-python maint.py vehicles/wrx.yaml edit --make Subaru --model Impreza --trim "WRX Limited" --dry-run
+# Edit vehicle info and/or current mileage
+uv run python maint.py vehicles/wrx.yaml edit --current-miles 95000
+uv run python maint.py vehicles/wrx.yaml edit --current-miles 95000 --as-of-date 2025-01-15
+uv run python maint.py vehicles/wrx.yaml edit --make Subaru --model Impreza --trim "WRX Limited" --dry-run
 
 # Delete a vehicle file (requires --force to confirm)
-python maint.py vehicles/wrx.yaml delete --force
+uv run python maint.py vehicles/wrx.yaml delete --force
 ```
 
 **Create options:** `--make`, `--model`, `--trim`, `--year`, `--purchase-date`, `--purchase-miles` (required); `--current-miles`, `--as-of-date`, `--dry-run`.
@@ -211,15 +186,15 @@ python maint.py vehicles/wrx.yaml delete --force
 ### List Maintenance Rules
 
 ```bash
-python maint.py <vehicle-file> rules
+uv run python maint.py <vehicle-file> rules
 
 # Example:
-python maint.py vehicles/brz.yaml rules
+uv run python maint.py vehicles/brz.yaml rules
 ```
 
 ## Vehicle File Format
 
-Each vehicle has a YAML file (e.g., `wrx-rules.yaml`) containing four sections:
+Each vehicle has a YAML file (e.g., `wrx.yaml`) containing four sections:
 
 ### Vehicle Information
 
@@ -246,7 +221,7 @@ The `currentMiles` field represents the current odometer reading and is used to 
 To update the current mileage without logging a service, use the `edit` command:
 
 ```bash
-python maint.py vehicles/wrx.yaml edit --current-miles 95000
+uv run python maint.py vehicles/wrx.yaml edit --current-miles 95000
 ```
 
 ### Maintenance History

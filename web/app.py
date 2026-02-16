@@ -5,10 +5,19 @@ import os
 from datetime import date
 from pathlib import Path
 
-from flask import Flask, make_response, render_template, request, redirect, url_for, flash
+from flask import (
+    Flask,
+    make_response,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+)
 
 # Add parent directory to path for model imports
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models.loader import (
@@ -162,15 +171,17 @@ def index():
         # Get last service info
         last_service = vehicle.last_service
 
-        vehicles.append({
-            "id": get_vehicle_id(path),
-            "vehicle": vehicle,
-            "overdue": overdue,
-            "due_soon": due_soon,
-            "ok": ok,
-            "last_service": last_service,
-            "total_rules": len(vehicle.rules),
-        })
+        vehicles.append(
+            {
+                "id": get_vehicle_id(path),
+                "vehicle": vehicle,
+                "overdue": overdue,
+                "due_soon": due_soon,
+                "ok": ok,
+                "last_service": last_service,
+                "total_rules": len(vehicle.rules),
+            }
+        )
 
     return render_template("index.html", vehicles=vehicles)
 
@@ -194,7 +205,10 @@ def create_vehicle_view():
 
     # Restrict to safe filename characters
     if not all(c.isalnum() or c in "-_" for c in slug):
-        flash("Vehicle ID may only contain letters, numbers, hyphens, and underscores", "error")
+        flash(
+            "Vehicle ID may only contain letters, numbers, hyphens, and underscores",
+            "error",
+        )
         return redirect(url_for("create_vehicle_view"))
 
     path = get_vehicle_path(slug)
@@ -248,7 +262,9 @@ def create_vehicle_view():
 
     if request.headers.get("HX-Request"):
         response = make_response(
-            render_template("partials/success_redirect.html", message="Vehicle created.")
+            render_template(
+                "partials/success_redirect.html", message="Vehicle created."
+            )
         )
         response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=slug)
         return response
@@ -275,29 +291,33 @@ def vehicle_detail(vehicle_id: str):
     include_verbs = request.args.getlist("show")
     include_verbs = [v.lower() for v in include_verbs] if include_verbs else None
 
-    all_status = vehicle.get_all_service_status(severe=severe, include_verbs=include_verbs)
+    all_status = vehicle.get_all_service_status(
+        severe=severe, include_verbs=include_verbs
+    )
 
     # Calculate counts before filtering for display
     status_counts = {
-        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
-        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
-        'ok': sum(1 for s in all_status if s.status == Status.OK),
-        'inactive': sum(1 for s in all_status if s.status == Status.INACTIVE),
-        'unknown': sum(1 for s in all_status if s.status == Status.UNKNOWN),
+        "overdue": sum(1 for s in all_status if s.status == Status.OVERDUE),
+        "due_soon": sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        "ok": sum(1 for s in all_status if s.status == Status.OK),
+        "inactive": sum(1 for s in all_status if s.status == Status.INACTIVE),
+        "unknown": sum(1 for s in all_status if s.status == Status.UNKNOWN),
     }
 
     # Filter by status if requested
     filtered_status = all_status
     if status_filter:
         status_map = {
-            'overdue': Status.OVERDUE,
-            'due_soon': Status.DUE_SOON,
-            'ok': Status.OK,
-            'inactive': Status.INACTIVE,
-            'unknown': Status.UNKNOWN,
+            "overdue": Status.OVERDUE,
+            "due_soon": Status.DUE_SOON,
+            "ok": Status.OK,
+            "inactive": Status.INACTIVE,
+            "unknown": Status.UNKNOWN,
         }
         if status_filter in status_map:
-            filtered_status = [s for s in all_status if s.status == status_map[status_filter]]
+            filtered_status = [
+                s for s in all_status if s.status == status_map[status_filter]
+            ]
 
     # Sort by urgency (OVERDUE first, then DUE_SOON, etc.)
     filtered_status.sort(key=lambda s: (s.status.value, s.rule.item))
@@ -313,7 +333,7 @@ def vehicle_detail(vehicle_id: str):
         include_verbs=include_verbs or [],
         status_filter=status_filter,
         Status=Status,
-        active_tab='status',
+        active_tab="status",
         standalone=False,
     )
 
@@ -328,7 +348,9 @@ def vehicle_status_partial(vehicle_id: str):
     exclude_inspect = request.args.get("exclude_inspect", "").lower() == "true"
 
     exclude_verbs = ["inspect"] if exclude_inspect else None
-    all_status = vehicle.get_all_service_status(severe=severe, exclude_verbs=exclude_verbs)
+    all_status = vehicle.get_all_service_status(
+        severe=severe, exclude_verbs=exclude_verbs
+    )
     all_status.sort(key=lambda s: (s.status.value, s.rule.item))
 
     return render_template(
@@ -400,7 +422,9 @@ def log_service(vehicle_id: str):
         response = make_response(
             render_template("partials/success_redirect.html", message="Service logged.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_detail", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
@@ -482,9 +506,13 @@ def edit_vehicle_view(vehicle_id: str):
 
     if request.headers.get("HX-Request"):
         response = make_response(
-            render_template("partials/success_redirect.html", message="Vehicle updated.")
+            render_template(
+                "partials/success_redirect.html", message="Vehicle updated."
+            )
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_detail", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_detail", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_detail", vehicle_id=vehicle_id))
@@ -518,7 +546,9 @@ def delete_vehicle_view(vehicle_id: str):
 
     if request.headers.get("HX-Request"):
         response = make_response(
-            render_template("partials/success_redirect.html", message="Vehicle deleted.")
+            render_template(
+                "partials/success_redirect.html", message="Vehicle deleted."
+            )
         )
         response.headers["HX-Redirect"] = url_for("index")
         return response
@@ -568,9 +598,9 @@ def vehicle_history(vehicle_id: str):
 
     all_status = vehicle.get_all_service_status(severe=False)
     status_counts = {
-        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
-        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
-        'ok': sum(1 for s in all_status if s.status == Status.OK),
+        "overdue": sum(1 for s in all_status if s.status == Status.OVERDUE),
+        "due_soon": sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        "ok": sum(1 for s in all_status if s.status == Status.OK),
     }
 
     return render_template(
@@ -582,7 +612,7 @@ def vehicle_history(vehicle_id: str):
         all_verbs=all_verbs,
         include_verbs=include_verbs,
         status_counts=status_counts,
-        active_tab='history',
+        active_tab="history",
     )
 
 
@@ -658,7 +688,9 @@ def edit_history(vehicle_id: str, index: int):
         response = make_response(
             render_template("partials/success_redirect.html", message="Entry updated.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_history", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_history", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
@@ -699,7 +731,9 @@ def delete_history(vehicle_id: str, index: int):
         response = make_response(
             render_template("partials/success_redirect.html", message="Entry deleted.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_history", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_history", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_history", vehicle_id=vehicle_id))
@@ -778,7 +812,9 @@ def add_rule_view(vehicle_id: str):
         response = make_response(
             render_template("partials/success_redirect.html", message="Rule added.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_rules", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
@@ -864,7 +900,9 @@ def edit_rule(vehicle_id: str, index: int):
         response = make_response(
             render_template("partials/success_redirect.html", message="Rule updated.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_rules", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
@@ -905,7 +943,9 @@ def delete_rule_view(vehicle_id: str, index: int):
         response = make_response(
             render_template("partials/success_redirect.html", message="Rule deleted.")
         )
-        response.headers["HX-Redirect"] = url_for("vehicle_rules", vehicle_id=vehicle_id)
+        response.headers["HX-Redirect"] = url_for(
+            "vehicle_rules", vehicle_id=vehicle_id
+        )
         return response
 
     return redirect(url_for("vehicle_rules", vehicle_id=vehicle_id))
@@ -934,8 +974,7 @@ def vehicle_rules(vehicle_id: str):
     rules_with_index = list(enumerate(vehicle.rules))
     if include_verbs:
         rules_with_index = [
-            (i, r) for i, r in rules_with_index
-            if r.verb.lower() in include_verbs
+            (i, r) for i, r in rules_with_index if r.verb.lower() in include_verbs
         ]
 
     # Count active vs inactive (before status filter, after verb filter)
@@ -944,9 +983,13 @@ def vehicle_rules(vehicle_id: str):
 
     # Filter by status if requested
     if status_filter == "active":
-        rules_with_index = [(i, r) for i, r in rules_with_index if r.is_active_at(current_miles)]
+        rules_with_index = [
+            (i, r) for i, r in rules_with_index if r.is_active_at(current_miles)
+        ]
     elif status_filter == "inactive":
-        rules_with_index = [(i, r) for i, r in rules_with_index if not r.is_active_at(current_miles)]
+        rules_with_index = [
+            (i, r) for i, r in rules_with_index if not r.is_active_at(current_miles)
+        ]
 
     # Group by item: rules_by_item[item] = [(index, rule), ...]
     rules_by_item = {}
@@ -962,9 +1005,9 @@ def vehicle_rules(vehicle_id: str):
 
     all_status = vehicle.get_all_service_status(severe=False)
     status_counts = {
-        'overdue': sum(1 for s in all_status if s.status == Status.OVERDUE),
-        'due_soon': sum(1 for s in all_status if s.status == Status.DUE_SOON),
-        'ok': sum(1 for s in all_status if s.status == Status.OK),
+        "overdue": sum(1 for s in all_status if s.status == Status.OVERDUE),
+        "due_soon": sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        "ok": sum(1 for s in all_status if s.status == Status.OK),
     }
 
     return render_template(
@@ -980,7 +1023,7 @@ def vehicle_rules(vehicle_id: str):
         all_verbs=all_verbs,
         include_verbs=include_verbs,
         status_counts=status_counts,
-        active_tab='rules',
+        active_tab="rules",
     )
 
 
