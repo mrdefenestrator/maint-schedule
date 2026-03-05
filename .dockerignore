@@ -3,6 +3,7 @@
 .github/
 tests/
 vehicles/
+docker-compose.yml
 .ruff_cache/
 .pytest_cache/
 __pycache__/
