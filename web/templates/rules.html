@@ -8,18 +8,18 @@
     {% if status_filter %}
     <input type="hidden" name="status" value="{{ status_filter }}">
     {% endif %}
-    <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+    <div class="flex flex-wrap items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
         <!-- Summary - clickable filters -->
         <button type="button" onclick="filterStatus('all')"
                 class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                       {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+                       {% if not status_filter %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}"
                 data-status="all">
             All ({{ active_count + inactive_count }})
         </button>
         {% if active_count > 0 %}
         <button type="button" onclick="filterStatus('active')"
                 class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                       {% if status_filter == 'active' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+                       {% if status_filter == 'active' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50{% endif %}"
                 data-status="active">
             {{ active_count }} Active
         </button>
@@ -27,7 +27,7 @@
         {% if inactive_count > 0 %}
         <button type="button" onclick="filterStatus('inactive')"
                 class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-                       {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+                       {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600{% endif %}"
                 data-status="inactive">
             {{ inactive_count }} Inactive
         </button>
@@ -57,7 +57,7 @@
     {% for item in sorted_items %}
     {% for index, rule in rules_by_item[item] %}
     {% set is_active = rule.is_active_at(current_miles) %}
-    <div class="rounded-lg border overflow-hidden {% if is_active %}bg-green-100 text-green-800 border-green-200{% else %}bg-gray-100 text-gray-500 border-gray-200{% endif %}">
+    <div class="rounded-lg border overflow-hidden {% if is_active %}bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700{% else %}bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700{% endif %}">
         <!-- Collapsed header - clickable -->
         <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
@@ -66,7 +66,7 @@
                     {% if is_active %}bg-green-500 text-white{% else %}bg-gray-400 text-white{% endif %}">
                     {% if is_active %}Active{% else %}Inactive{% endif %}
                 </span>
-                <span class="font-medium text-gray-900 text-sm truncate">
+                <span class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
                     {{ rule.verb | title }} {{ rule.item }}{% if rule.phase %} <span class="text-gray-400">[{{ rule.phase }}]</span>{% endif %}
                 </span>
                 {% if rule.aftermarket %}
@@ -74,7 +74,7 @@
                 {% endif %}
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-xs text-gray-600 whitespace-nowrap">
+                <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
                     {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
                     {% if rule.interval_miles and rule.interval_months %} / {% endif %}
                     {% if rule.interval_months %}{{ rule.interval_months | int }} mo{% endif %}
@@ -86,10 +86,10 @@
         </div>
 
         <!-- Expanded details - hidden by default -->
-        <div class="hidden border-t border-gray-100 px-3 py-2 bg-gray-50">
+        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-700">
             <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                    <p class="text-gray-500 text-xs">Normal interval</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Normal interval</p>
                     <p class="font-medium">
                         {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
                         {% if rule.interval_miles and rule.interval_months %} / {% endif %}
@@ -98,7 +98,7 @@
                     </p>
                 </div>
                 <div>
-                    <p class="text-gray-500 text-xs">Severe interval</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Severe interval</p>
                     <p class="font-medium">
                         {% if rule.severe_interval_miles %}{{ rule.severe_interval_miles | format_miles }} mi{% endif %}
                         {% if rule.severe_interval_miles and rule.severe_interval_months %} / {% endif %}
@@ -107,7 +107,7 @@
                     </p>
                 </div>
                 <div>
-                    <p class="text-gray-500 text-xs">Active range</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Active range</p>
                     <p class="font-medium">
                         {% if rule.start_miles > 0 or rule.stop_miles < 999999999 %}
                             {{ rule.start_miles | format_miles }} – {% if rule.stop_miles >= 999999999 %}∞{% else %}{{ rule.stop_miles | format_miles }}{% endif %} mi
@@ -117,11 +117,11 @@
                     </p>
                 </div>
                 <div>
-                    <p class="text-gray-500 text-xs">Key</p>
-                    <p class="font-medium text-xs font-mono text-gray-600">{{ rule.key }}</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Key</p>
+                    <p class="font-medium text-xs font-mono text-gray-600 dark:text-gray-400">{{ rule.key }}</p>
                 </div>
                 <div class="col-span-2">
-                    <p class="text-gray-500 text-xs">Notes</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Notes</p>
                     <p class="font-medium">{% if rule.notes %}{{ rule.notes }}{% else %}—{% endif %}</p>
                 </div>
             </div>

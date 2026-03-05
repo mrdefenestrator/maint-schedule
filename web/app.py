@@ -85,13 +85,15 @@ def format_time_remaining(days):
 def status_color(status: Status) -> str:
     """Get Tailwind color classes for status."""
     colors = {
-        Status.OVERDUE: "bg-red-100 text-red-800 border-red-200",
-        Status.DUE_SOON: "bg-yellow-100 text-yellow-800 border-yellow-200",
-        Status.OK: "bg-green-100 text-green-800 border-green-200",
-        Status.INACTIVE: "bg-gray-100 text-gray-500 border-gray-200",
-        Status.UNKNOWN: "bg-purple-100 text-purple-800 border-purple-200",
+        Status.OVERDUE: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700",
+        Status.DUE_SOON: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700",
+        Status.OK: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700",
+        Status.INACTIVE: "bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700",
+        Status.UNKNOWN: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700",
     }
-    return colors.get(status, "bg-gray-100 text-gray-800")
+    return colors.get(
+        status, "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+    )
 
 
 def status_badge_color(status: Status) -> str:

@@ -1,13 +1,13 @@
 <button type="button" onclick="filterStatus('all')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if not status_filter %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}"
+               {% if not status_filter %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600{% endif %}"
         data-status="all">
     All ({{ status_counts.overdue + status_counts.due_soon + status_counts.ok }})
 </button>
 {% if status_counts.overdue > 0 %}
 <button type="button" onclick="filterStatus('overdue')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
+               {% if status_filter == 'overdue' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50{% endif %}"
         data-status="overdue">
     {{ status_counts.overdue }} Overdue
 </button>
@@ -15,7 +15,7 @@
 {% if status_counts.due_soon > 0 %}
 <button type="button" onclick="filterStatus('due_soon')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}"
+               {% if status_filter == 'due_soon' %}bg-yellow-500 text-white{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:hover:bg-yellow-900/50{% endif %}"
         data-status="due_soon">
     {{ status_counts.due_soon }} Due Soon
 </button>
@@ -23,7 +23,7 @@
 {% if status_counts.ok > 0 %}
 <button type="button" onclick="filterStatus('ok')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}"
+               {% if status_filter == 'ok' %}bg-green-500 text-white{% else %}bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50{% endif %}"
         data-status="ok">
     {{ status_counts.ok }} OK
 </button>
@@ -32,7 +32,7 @@
 {% if status_counts.inactive > 0 %}
 <button type="button" onclick="filterStatus('inactive')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200{% endif %}"
+               {% if status_filter == 'inactive' %}bg-gray-500 text-white{% else %}bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600{% endif %}"
         data-status="inactive">
     {{ status_counts.inactive }} Inactive
 </button>
@@ -40,7 +40,7 @@
 {% if status_counts.unknown > 0 %}
 <button type="button" onclick="filterStatus('unknown')"
         class="status-filter px-2 py-1 rounded-full text-xs font-medium transition-colors
-               {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200{% endif %}"
+               {% if status_filter == 'unknown' %}bg-purple-500 text-white{% else %}bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50{% endif %}"
         data-status="unknown">
     {{ status_counts.unknown }} Unknown
 </button>

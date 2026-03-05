@@ -8,17 +8,17 @@
     {% if status_filter %}
     <input type="hidden" name="status" value="{{ status_filter }}">
     {% endif %}
-    <div class="flex flex-wrap items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-600">
+    <div class="flex flex-wrap items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
         {% include "partials/status_filter_chips.html" %}
 
         <!-- Severe mode -->
-        <label class="inline-flex items-center bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 text-sm cursor-pointer hover:bg-gray-100">
+        <label class="inline-flex items-center bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
             <input type="checkbox"
                    name="severe"
                    value="true"
                    {% if severe %}checked{% endif %}
                    onchange="this.form.submit()"
-                   class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                   class="mr-2 rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500">
             Severe mode
         </label>
 
