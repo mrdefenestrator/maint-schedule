@@ -1,4 +1,5 @@
 """Status page e2e tests: filter chips, severe mode, theme switcher."""
+
 import pytest
 
 

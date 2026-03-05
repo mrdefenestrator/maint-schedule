@@ -1,4 +1,5 @@
 """History e2e tests: log service, edit entry, delete entry."""
+
 import pytest
 
 

@@ -1,4 +1,5 @@
 """Shared fixtures for e2e Playwright tests."""
+
 import os
 import shutil
 import socket

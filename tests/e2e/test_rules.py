@@ -1,4 +1,5 @@
 """Rules e2e tests: add, edit, delete rule."""
+
 import pytest
 
 

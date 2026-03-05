@@ -1,4 +1,5 @@
 """Vehicle CRUD e2e tests: create, edit, delete."""
+
 import pytest
 
 

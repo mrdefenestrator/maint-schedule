@@ -1,4 +1,5 @@
 """Navigation e2e tests: index page, vehicle tabs, back navigation."""
+
 import pytest
 
 

@@ -41,7 +41,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
 
 # Path to vehicles directory (env var override for testing)
-VEHICLES_DIR = Path(os.environ.get("VEHICLES_DIR", str(Path(__file__).parent.parent / "vehicles")))
+VEHICLES_DIR = Path(
+    os.environ.get("VEHICLES_DIR", str(Path(__file__).parent.parent / "vehicles"))
+)
 
 
 def get_vehicle_files():
