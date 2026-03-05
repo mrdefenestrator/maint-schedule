@@ -1,20 +1,23 @@
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=builder /app/.venv ./.venv
 
-# Install runtime dependencies (no dev deps)
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev
-
-# Copy app source
 COPY models/ ./models/
 COPY web/ ./web/
 COPY maint.py ./
 
-# Vehicle YAML files are loaded from /app/vehicles — mount a volume there
 VOLUME ["/app/vehicles"]
 
 EXPOSE 5002
