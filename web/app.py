@@ -40,8 +40,8 @@ from models.status import Status
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
 
-# Path to vehicles directory (relative to project root)
-VEHICLES_DIR = Path(__file__).parent.parent / "vehicles"
+# Path to vehicles directory (env var override for testing)
+VEHICLES_DIR = Path(os.environ.get("VEHICLES_DIR", str(Path(__file__).parent.parent / "vehicles")))
 
 
 def get_vehicle_files():
@@ -1033,4 +1033,5 @@ if __name__ == "__main__":
     # Run with debug mode for development
     # Access from phone: use your computer's local IP (e.g., 192.168.1.x:5001)
     # Using 5002 to avoid conflict with macOS AirPlay Receiver on 5000
-    app.run(debug=True, host="0.0.0.0", port=5002)
+    port = int(os.environ.get("FLASK_RUN_PORT", "5002"))
+    app.run(debug=True, host="0.0.0.0", port=port)

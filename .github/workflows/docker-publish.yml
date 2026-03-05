@@ -33,6 +33,12 @@ jobs:
       - name: Test
         run: mise run test
 
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
+
+      - name: E2E Tests
+        run: mise run test-e2e
+
   build-and-push:
     needs: ci
     if: github.event_name != 'pull_request'

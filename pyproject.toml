@@ -15,10 +15,13 @@ dev = [
     "pytest-cov>=7.0",
     "ruff>=0.8",
     "jsonschema>=4.0",
+    "playwright>=1.40",
+    "pytest-playwright>=0.4",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["e2e: end-to-end browser tests (require Playwright)"]
 
 [tool.ruff]
 line-length = 88

@@ -1,0 +1,33 @@
+car:
+  make: Test
+  model: Car
+  trim: Base
+  year: 2020
+  purchaseDate: '2020-01-01'
+  purchaseMiles: 0
+state:
+  currentMiles: 15500
+history:
+- ruleKey: engine oil and filter/replace
+  date: '2024-01-01'
+  mileage: 10000
+  performedBy: self
+  notes: Test oil change entry
+  cost: 35.00
+- ruleKey: tires/rotate
+  date: '2024-06-01'
+  mileage: 8500
+  performedBy: dealer
+rules:
+- item: engine oil and filter
+  verb: replace
+  intervalMiles: 5000
+  intervalMonths: 6
+- item: tires
+  verb: rotate
+  intervalMiles: 7500
+  intervalMonths: 12
+- item: brakes
+  verb: inspect
+  intervalMiles: 20000
+  intervalMonths: 24
