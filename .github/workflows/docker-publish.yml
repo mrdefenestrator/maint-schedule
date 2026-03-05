@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/maint-schedule
 
 jobs:
   ci:
@@ -29,20 +28,16 @@ jobs:
     needs: ci
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Log in to GHCR
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -54,7 +49,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
