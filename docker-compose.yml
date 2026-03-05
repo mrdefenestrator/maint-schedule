@@ -1,8 +1,0 @@
-services:
-  maint-schedule:
-    image: mrdefenestrator/maint-schedule:latest
-    ports:
-      - "5002:5002"
-    volumes:
-      - /volume1/docker/maint-schedule:/app/vehicles
-    restart: unless-stopped
