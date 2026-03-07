@@ -78,27 +78,27 @@
         </div>
 
         <!-- Expanded details - hidden by default -->
-        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-700">
+        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-900">
             <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Date</p>
-                    <p class="font-medium">{{ entry.date }}</p>
+                    <p class="font-medium dark:text-gray-200">{{ entry.date }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Mileage</p>
-                    <p class="font-medium">{% if entry.mileage %}{{ entry.mileage | format_miles }} mi{% else %}—{% endif %}</p>
+                    <p class="font-medium dark:text-gray-200">{% if entry.mileage %}{{ entry.mileage | format_miles }} mi{% else %}—{% endif %}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Cost</p>
-                    <p class="font-medium">{% if entry.cost %}${{ "%.2f" | format(entry.cost) }}{% else %}—{% endif %}</p>
+                    <p class="font-medium dark:text-gray-200">{% if entry.cost %}${{ "%.2f" | format(entry.cost) }}{% else %}—{% endif %}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Performed by</p>
-                    <p class="font-medium">{% if entry.performed_by %}{{ entry.performed_by }}{% else %}—{% endif %}</p>
+                    <p class="font-medium dark:text-gray-200">{% if entry.performed_by %}{{ entry.performed_by }}{% else %}—{% endif %}</p>
                 </div>
                 <div class="col-span-2">
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Notes</p>
-                    <p class="font-medium">{% if entry.notes %}{{ entry.notes }}{% else %}—{% endif %}</p>
+                    <p class="font-medium dark:text-gray-200">{% if entry.notes %}{{ entry.notes }}{% else %}—{% endif %}</p>
                 </div>
             </div>
             {% with edit_url=url_for('edit_history_form', vehicle_id=vehicle_id, index=index), delete_url=url_for('delete_history', vehicle_id=vehicle_id, index=index), edit_label="Edit entry", delete_label="Delete entry" %}

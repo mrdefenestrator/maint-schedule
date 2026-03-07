@@ -72,18 +72,18 @@
         </div>
 
         <!-- Expanded details - hidden by default -->
-        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-700">
+        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-900">
             {% if service.status == Status.INACTIVE %}
             <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Active range</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {{ service.rule.start_miles | format_miles }} – {{ service.rule.stop_miles | format_miles }} mi
                     </p>
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Interval</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if service.rule.interval_miles %}{{ service.rule.interval_miles | format_miles }} mi{% endif %}
                         {% if service.rule.interval_miles and service.rule.interval_months %} / {% endif %}
                         {% if service.rule.interval_months %}{{ service.rule.interval_months }} mo{% endif %}
@@ -95,7 +95,7 @@
             <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Interval</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if service.rule.interval_miles %}{{ service.rule.interval_miles | format_miles }} mi{% endif %}
                         {% if service.rule.interval_miles and service.rule.interval_months %} / {% endif %}
                         {% if service.rule.interval_months %}{{ service.rule.interval_months }} mo{% endif %}
@@ -104,7 +104,7 @@
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs">Last service</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if service.last_service_miles %}
                             {{ service.last_service_miles | format_miles }} mi
                         {% elif service.last_service_date %}
@@ -116,7 +116,7 @@
                 </div>
                 <div class="col-span-2">
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Why unknown</p>
-                    <p class="font-medium text-purple-600">Time-based rule with no service history</p>
+                    <p class="font-medium text-purple-600 dark:text-purple-400">Time-based rule with no service history</p>
                 </div>
             </div>
             {% else %}
@@ -128,13 +128,13 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Due at miles</p>
-                            <p class="font-medium">
+                            <p class="font-medium dark:text-gray-200">
                                 {% if service.due_miles %}{{ service.due_miles | format_miles }} mi{% else %}—{% endif %}
                             </p>
                         </div>
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Due date</p>
-                            <p class="font-medium {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600{% endif %}">
+                            <p class="font-medium {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 dark:text-red-400{% else %}dark:text-gray-200{% endif %}">
                                 {{ service.due_date | format_date }}
                             </p>
                         </div>
@@ -146,7 +146,7 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Miles</p>
-                            <p class="font-medium {% if service.miles_remaining is not none and service.miles_remaining < 0 %}text-red-600{% endif %}">
+                            <p class="font-medium {% if service.miles_remaining is not none and service.miles_remaining < 0 %}text-red-600 dark:text-red-400{% else %}dark:text-gray-200{% endif %}">
                                 {% if service.miles_remaining is not none %}
                                     {% if service.miles_remaining < 0 %}
                                         {{ (service.miles_remaining | abs) | format_miles }} mi over
@@ -158,7 +158,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Time</p>
-                            <p class="font-medium {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600{% endif %}">
+                            <p class="font-medium {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 dark:text-red-400{% else %}dark:text-gray-200{% endif %}">
                                 {{ service.time_remaining_days | format_time_remaining }}
                             </p>
                         </div>
@@ -171,13 +171,13 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Miles</p>
-                            <p class="font-medium">
+                            <p class="font-medium dark:text-gray-200">
                                 {% if service.last_service_miles %}{{ service.last_service_miles | format_miles }} mi{% else %}—{% endif %}
                             </p>
                         </div>
                         <div>
                             <p class="text-gray-500 dark:text-gray-400 text-xs">Date</p>
-                            <p class="font-medium">
+                            <p class="font-medium dark:text-gray-200">
                                 {% if service.last_service_date %}{{ service.last_service_date | format_date }}{% else %}—{% endif %}
                             </p>
                         </div>

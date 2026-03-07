@@ -57,7 +57,7 @@
     {% for item in sorted_items %}
     {% for index, rule in rules_by_item[item] %}
     {% set is_active = rule.is_active_at(current_miles) %}
-    <div class="rounded-lg border overflow-hidden {% if is_active %}bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700{% else %}bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700{% endif %}">
+    <div class="rounded-lg border overflow-hidden {% if is_active %}bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-900{% else %}bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700{% endif %}">
         <!-- Collapsed header - clickable -->
         <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
@@ -86,11 +86,11 @@
         </div>
 
         <!-- Expanded details - hidden by default -->
-        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-700">
+        <div class="hidden border-t border-gray-100 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-900">
             <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Normal interval</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if rule.interval_miles %}{{ rule.interval_miles | format_miles }} mi{% endif %}
                         {% if rule.interval_miles and rule.interval_months %} / {% endif %}
                         {% if rule.interval_months %}{{ rule.interval_months | int }} months{% endif %}
@@ -99,7 +99,7 @@
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Severe interval</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if rule.severe_interval_miles %}{{ rule.severe_interval_miles | format_miles }} mi{% endif %}
                         {% if rule.severe_interval_miles and rule.severe_interval_months %} / {% endif %}
                         {% if rule.severe_interval_months %}{{ rule.severe_interval_months | int }} months{% endif %}
@@ -108,7 +108,7 @@
                 </div>
                 <div>
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Active range</p>
-                    <p class="font-medium">
+                    <p class="font-medium dark:text-gray-200">
                         {% if rule.start_miles > 0 or rule.stop_miles < 999999999 %}
                             {{ rule.start_miles | format_miles }} – {% if rule.stop_miles >= 999999999 %}∞{% else %}{{ rule.stop_miles | format_miles }}{% endif %} mi
                         {% else %}
@@ -122,7 +122,7 @@
                 </div>
                 <div class="col-span-2">
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Notes</p>
-                    <p class="font-medium">{% if rule.notes %}{{ rule.notes }}{% else %}—{% endif %}</p>
+                    <p class="font-medium dark:text-gray-200">{% if rule.notes %}{{ rule.notes }}{% else %}—{% endif %}</p>
                 </div>
             </div>
             {% with edit_url=url_for('edit_rule', vehicle_id=vehicle_id, index=index), delete_url=url_for('delete_rule_view', vehicle_id=vehicle_id, index=index), edit_label="Edit rule", delete_label="Delete rule" %}
