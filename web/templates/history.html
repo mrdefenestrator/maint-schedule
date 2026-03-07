@@ -46,25 +46,34 @@
     {% endif %}
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Collapsed header - clickable -->
-        <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
+        <div class="px-3 py-2 cursor-pointer"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
-            <div class="flex-1 min-w-0 overflow-hidden">
-                {% set rk_parts = entry.rule_key.split("/") %}
-                <span class="block font-medium text-gray-900 dark:text-gray-100 text-sm truncate min-w-0">
-                    {% if rk_parts | length > 1 %}{{ rk_parts[1] | title }} {{ rk_parts[0] }}{% if rk_parts | length > 2 %} <span class="text-gray-400">[{{ rk_parts[2] }}]</span>{% endif %}{% else %}{{ entry.rule_key }}{% endif %}
-                </span>
+            <!-- Row 1: title left, metrics (desktop) + chevron right -->
+            <div class="flex items-center gap-2">
+                <div class="flex-1 min-w-0 overflow-hidden">
+                    {% set rk_parts = entry.rule_key.split("/") %}
+                    <span class="block font-medium text-gray-900 dark:text-gray-100 text-sm truncate min-w-0">
+                        {% if rk_parts | length > 1 %}{{ rk_parts[1] | title }} {{ rk_parts[0] }}{% if rk_parts | length > 2 %} <span class="text-gray-400">[{{ rk_parts[2] }}]</span>{% endif %}{% else %}{{ entry.rule_key }}{% endif %}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-[7rem] text-right tabular-nums">{{ entry.date }}</span>
+                    <span class="hidden sm:inline text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap w-[5.5rem] text-right tabular-nums">
+                        {% if entry.mileage %}{{ entry.mileage | format_miles }} mi{% else %}—{% endif %}
+                    </span>
+                    <span class="hidden sm:inline text-xs font-medium text-green-600 whitespace-nowrap w-[4.5rem] text-right tabular-nums">
+                        {% if entry.cost %}${{ "%.2f" | format(entry.cost) }}{% else %}—{% endif %}
+                    </span>
+                    <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-[7rem] text-right tabular-nums">{{ entry.date }}</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap w-[5.5rem] text-right tabular-nums">
-                    {% if entry.mileage %}{{ entry.mileage | format_miles }} mi{% else %}—{% endif %}
-                </span>
-                <span class="text-xs font-medium text-green-600 whitespace-nowrap w-[4.5rem] text-right tabular-nums">
-                    {% if entry.cost %}${{ "%.2f" | format(entry.cost) }}{% else %}—{% endif %}
-                </span>
-                <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
+            <!-- Row 2: metrics on mobile only -->
+            <div class="flex sm:hidden items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <span>{{ entry.date }}</span>
+                <span>{% if entry.mileage %}{{ entry.mileage | format_miles }} mi{% else %}—{% endif %}</span>
+                <span class="ml-auto font-medium text-green-600">{% if entry.cost %}${{ "%.2f" | format(entry.cost) }}{% else %}—{% endif %}</span>
             </div>
         </div>
 
@@ -113,15 +122,23 @@
     </div>
     {% endif %}
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-3 py-2 flex items-center justify-between gap-2">
-            <div class="flex-1 min-w-0 overflow-hidden">
-                <span class="block font-medium text-gray-500 dark:text-gray-400 text-sm">Purchased</span>
+        <div class="px-3 py-2">
+            <!-- Row 1 -->
+            <div class="flex items-center gap-2">
+                <div class="flex-1 min-w-0 overflow-hidden">
+                    <span class="block font-medium text-gray-500 dark:text-gray-400 text-sm">Purchased</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-[7rem] text-right tabular-nums">{{ vehicle.car.purchase_date }}</span>
+                    <span class="hidden sm:inline text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap w-[5.5rem] text-right tabular-nums">{{ vehicle.car.purchase_miles | format_miles }} mi</span>
+                    <span class="hidden sm:inline text-xs font-medium text-green-600 whitespace-nowrap w-[4.5rem] text-right tabular-nums">—</span>
+                    <span class="w-4 flex-shrink-0" aria-hidden="true"></span>
+                </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap w-[7rem] text-right tabular-nums">{{ vehicle.car.purchase_date }}</span>
-                <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap w-[5.5rem] text-right tabular-nums">{{ vehicle.car.purchase_miles | format_miles }} mi</span>
-                <span class="text-xs font-medium text-green-600 whitespace-nowrap w-[4.5rem] text-right tabular-nums">—</span>
-                <span class="w-4 flex-shrink-0" aria-hidden="true"></span>
+            <!-- Row 2: mobile only -->
+            <div class="flex sm:hidden items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <span>{{ vehicle.car.purchase_date }}</span>
+                <span class="ml-auto">{{ vehicle.car.purchase_miles | format_miles }} mi</span>
             </div>
         </div>
     </div>

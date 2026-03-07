@@ -10,29 +10,55 @@
     {% for service in all_status %}
     <div class="rounded-lg border {{ service.status | status_color }} overflow-hidden">
         <!-- Compact header - clickable -->
-        <div class="px-3 py-2 cursor-pointer flex items-center justify-between gap-2"
+        <div class="px-3 py-2 cursor-pointer"
              onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }} whitespace-nowrap">
-                    {{ service.status | status_display_name }}
-                </span>
-                <span class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
-                    {{ service.rule.verb | title }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
-                </span>
-                {% if service.rule.aftermarket %}
-                <span class="text-xs text-purple-600">★</span>
-                {% endif %}
+            <!-- Row 1: badge + title left, metrics (desktop) + chevron right -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 min-w-0 flex-1">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ service.status | status_badge_color }} whitespace-nowrap">
+                        {{ service.status | status_display_name }}
+                    </span>
+                    <span class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
+                        {{ service.rule.verb | title }} {{ service.rule.item }}{% if service.rule.phase %} <span class="text-gray-400">[{{ service.rule.phase }}]</span>{% endif %}
+                    </span>
+                    {% if service.rule.aftermarket %}
+                    <span class="text-xs text-purple-600">★</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
+                    <span class="hidden sm:inline text-xs whitespace-nowrap w-[7rem] text-right tabular-nums
+                        {% if service.due_date %}
+                            {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-500 dark:text-gray-400{% endif %}
+                        {% else %}text-gray-400{% endif %}">
+                        {% if service.due_date %}{{ service.due_date | format_date }}{% else %}—{% endif %}
+                    </span>
+                    <span class="hidden sm:inline text-xs whitespace-nowrap w-[5.5rem] text-right tabular-nums
+                        {% if service.miles_remaining is not none and service.miles_remaining < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-600 dark:text-gray-400{% endif %}">
+                        {% if service.miles_remaining is not none %}
+                            {% if service.miles_remaining < 0 %}
+                                {{ (service.miles_remaining | abs) | format_miles }} mi over
+                            {% else %}
+                                {{ service.miles_remaining | format_miles }} mi left
+                            {% endif %}
+                        {% else %}—{% endif %}
+                    </span>
+                    {% else %}
+                    <span class="hidden sm:inline text-xs text-gray-400 w-[7rem] text-right">—</span>
+                    <span class="hidden sm:inline text-xs text-gray-400 w-[5.5rem] text-right">—</span>
+                    {% endif %}
+                    <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
-                <span class="text-xs whitespace-nowrap w-[7rem] text-right tabular-nums
-                    {% if service.due_date %}
-                        {% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-500 dark:text-gray-400{% endif %}
-                    {% else %}text-gray-400{% endif %}">
+            <!-- Row 2: metrics on mobile only -->
+            {% if service.status != Status.INACTIVE and service.status != Status.UNKNOWN %}
+            <div class="flex sm:hidden items-center mt-1 text-xs">
+                <span class="{% if service.due_date %}{% if service.time_remaining_days is not none and service.time_remaining_days < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-500 dark:text-gray-400{% endif %}{% else %}text-gray-400{% endif %}">
                     {% if service.due_date %}{{ service.due_date | format_date }}{% else %}—{% endif %}
                 </span>
-                <span class="text-xs whitespace-nowrap w-[5.5rem] text-right tabular-nums
-                    {% if service.miles_remaining is not none and service.miles_remaining < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-600 dark:text-gray-400{% endif %}">
+                <span class="ml-auto tabular-nums {% if service.miles_remaining is not none and service.miles_remaining < 0 %}text-red-600 dark:text-red-400 font-medium{% else %}text-gray-600 dark:text-gray-400{% endif %}">
                     {% if service.miles_remaining is not none %}
                         {% if service.miles_remaining < 0 %}
                             {{ (service.miles_remaining | abs) | format_miles }} mi over
@@ -41,14 +67,8 @@
                         {% endif %}
                     {% else %}—{% endif %}
                 </span>
-                {% else %}
-                <span class="text-xs text-gray-400 w-[7rem] text-right">—</span>
-                <span class="text-xs text-gray-400 w-[5.5rem] text-right">—</span>
-                {% endif %}
-                <svg class="chevron w-4 h-4 text-gray-400 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
             </div>
+            {% endif %}
         </div>
 
         <!-- Expanded details - hidden by default -->
