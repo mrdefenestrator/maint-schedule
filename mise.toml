@@ -5,9 +5,9 @@ uv = "latest"
 run = "uv sync"
 description = "Install all dependencies into .venv"
 
-[tasks.test]
+[tasks.test-unit]
 run = "uv run pytest tests/ -v --cov=models --cov-report=term-missing -m 'not e2e'"
-description = "Run tests with coverage"
+description = "Run unit tests with coverage"
 
 [tasks.format]
 run = "uv run ruff format *.py models/ tests/ web/"
@@ -29,16 +29,16 @@ description = "Fix lint issues with ruff"
 run = "uv run python validate_yaml.py"
 description = "Validate vehicle YAML files against schema"
 
-[tasks.test-e2e]
+[tasks.test-web]
 run = "uv run pytest tests/e2e/ -v"
-description = "Run end-to-end browser tests with Playwright"
+description = "Run web browser tests with Playwright"
 
 [tasks.playwright-install]
 run = "uv run playwright install chromium"
 description = "Install Playwright browser binaries"
 
-[tasks.ci]
-depends = ["format-check", "lint", "validate", "test", "test-e2e"]
+[tasks.test]
+depends = ["format-check", "lint", "validate", "test-unit", "test-web"]
 description = "Run all CI checks"
 
 [tasks.serve]

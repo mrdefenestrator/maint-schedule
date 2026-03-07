@@ -19,7 +19,9 @@ Vehicle maintenance schedule manager using YAML-based configuration files. Suppo
 mise run setup             # Install all deps into .venv via uv sync
 
 # Run tests
-mise run test              # pytest with coverage
+mise run test              # all CI checks (format, lint, validate, unit tests, web tests)
+mise run test-unit         # pytest unit tests with coverage
+mise run test-web          # Playwright web browser tests only
 
 # Format code
 mise run format            # ruff formatter
@@ -32,8 +34,8 @@ mise run lint-fix          # auto-fix lint issues
 # Validate vehicle YAML files
 mise run validate
 
-# Run all CI checks (format-check, lint, validate, test)
-mise run ci
+# Run all CI checks (format-check, lint, validate, test-unit, test-web)
+mise run test
 
 # CLI usage
 uv run python maint.py vehicles/wrx.yaml status
