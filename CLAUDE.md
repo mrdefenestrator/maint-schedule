@@ -69,3 +69,7 @@ mise run serve
 - Current mileage derived from history if not explicit
 - `dateutil.relativedelta` for month-based interval calculations
 - YAML SafeLoader for parsing, omit None values on save
+
+## Documentation
+
+- Keep `README.md` up to date when adding or changing CLI commands, web features, or project structure
