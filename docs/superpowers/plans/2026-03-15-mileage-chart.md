@@ -468,7 +468,7 @@ Expected: All tests pass (including new TestExtractChartData and TestCmdChartEdg
 - [ ] **Step 8: Commit**
 
 ```bash
-git add maint.py
+git add maint.py tests/test_maint.py
 git commit -m "add chart CLI command"
 ```
 
@@ -519,7 +519,7 @@ def _build_service_markers(vehicle):
 
 - [ ] **Step 2: Update history route to pass sparkline data**
 
-In the `vehicle_history` function in `web/app.py` (around line 563), add before the `return render_template(...)` call:
+In the `vehicle_history` function in `web/app.py`, add before the `return render_template(...)` call (around line 610):
 
 ```python
     mileage_points = _build_mileage_points(vehicle)
