@@ -13,6 +13,7 @@ Commands:
 
 import argparse
 import sys
+from collections import defaultdict
 from datetime import date
 from pathlib import Path
 from tabulate import tabulate
@@ -90,6 +91,56 @@ def truncate(text: Optional[str], max_len: int = 30) -> str:
     if len(text) <= max_len:
         return text
     return text[: max_len - 3] + "..."
+
+
+def extract_chart_data(vehicle, rule_filter=None):
+    """Extract mileage timeline and grouped service markers for charting.
+
+    Returns None if fewer than 2 data points are available.
+    Otherwise returns a dict with:
+    - line_dates: list of date strings for the mileage line
+    - line_mileages: list of mileage floats for the mileage line
+    - single_dates/single_mileages: points where 1 service occurred
+    - multi_dates/multi_mileages: points where 2+ services occurred
+    """
+    # Collect unique (date, mileage) points for the line
+    points = {(vehicle.car.purchase_date, vehicle.car.purchase_miles)}
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            points.add((entry.date, entry.mileage))
+
+    if len(points) < 2:
+        return None
+
+    sorted_points = sorted(points, key=lambda p: p[0])
+    line_dates = [p[0] for p in sorted_points]
+    line_mileages = [p[1] for p in sorted_points]
+
+    # Group services by (date, mileage) for markers
+    groups = defaultdict(list)
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            if rule_filter is None or rule_filter.lower() in entry.rule_key.lower():
+                groups[(entry.date, entry.mileage)].append(entry.rule_key)
+
+    single_dates, single_mileages = [], []
+    multi_dates, multi_mileages = [], []
+    for (dt, miles), services in sorted(groups.items()):
+        if len(services) == 1:
+            single_dates.append(dt)
+            single_mileages.append(miles)
+        else:
+            multi_dates.append(dt)
+            multi_mileages.append(miles)
+
+    return {
+        "line_dates": line_dates,
+        "line_mileages": line_mileages,
+        "single_dates": single_dates,
+        "single_mileages": single_mileages,
+        "multi_dates": multi_dates,
+        "multi_mileages": multi_mileages,
+    }
 
 
 # =============================================================================
@@ -877,6 +928,54 @@ def cmd_rules(args):
 
 
 # =============================================================================
+# Chart command
+# =============================================================================
+
+
+def cmd_chart(args):
+    """Show mileage over time with service markers."""
+    import plotext as plt
+
+    vehicle = load_vehicle(args.vehicle_file)
+    data = extract_chart_data(vehicle, rule_filter=args.rule)
+
+    if data is None:
+        has_mileage_entries = any(e.mileage is not None for e in vehicle.history)
+        if has_mileage_entries:
+            print("Not enough mileage data to chart (need at least 2 data points).")
+        else:
+            print("No mileage data to chart.")
+        return 0
+
+    plt.date_form("Y-m-d")
+    plt.plot(data["line_dates"], data["line_mileages"], label="Mileage")
+
+    if data["single_dates"]:
+        plt.scatter(
+            data["single_dates"],
+            data["single_mileages"],
+            marker="dot",
+            color="green",
+            label="Single service",
+        )
+
+    if data["multi_dates"]:
+        plt.scatter(
+            data["multi_dates"],
+            data["multi_mileages"],
+            marker="hd",
+            color="yellow",
+            label="Multi service",
+        )
+
+    plt.title(f"{vehicle.car.name} — Mileage Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Miles")
+    plt.show()
+    return 0
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -1380,6 +1479,23 @@ examples:
         help="Show what would be deleted without saving",
     )
 
+    # Chart subcommand
+    chart_parser = subparsers.add_parser(
+        "chart",
+        help="Show mileage over time with service markers",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/wrx.yaml chart
+  %(prog)s vehicles/wrx.yaml chart --rule oil
+""",
+    )
+    chart_parser.add_argument(
+        "--rule",
+        type=str,
+        help="Filter service markers to rules containing text (case-insensitive)",
+    )
+
     args = parser.parse_args()
 
     # Validate vehicle file: for "add" it must not exist; otherwise it must exist
@@ -1417,6 +1533,8 @@ examples:
         if getattr(args, "rules_command", None) == "delete":
             return cmd_delete_rule(args)
         return cmd_rules(args)
+    elif args.command == "chart":
+        return cmd_chart(args)
 
     return 0
 

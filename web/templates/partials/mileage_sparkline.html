@@ -1,0 +1,51 @@
+{% if mileage_points and mileage_points | length >= 2 %}
+<a href="{{ url_for('vehicle_chart', vehicle_id=vehicle_id) }}"
+   class="block mb-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+    <div class="flex justify-between items-center mb-1">
+        <span class="text-xs text-gray-500 dark:text-gray-400">Mileage Over Time</span>
+        <span class="text-xs text-blue-500">View full chart &rarr;</span>
+    </div>
+    <div style="height: 48px;">
+        <canvas id="sparkline-chart"></canvas>
+    </div>
+    <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
+        <span>{{ mileage_points[0]['x'][:4] }}</span>
+        <span>{{ mileage_points[-1]['y'] | format_miles }} mi</span>
+    </div>
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<script>
+(function() {
+    const ctx = document.getElementById('sparkline-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                data: {{ mileage_points | tojson }},
+                borderColor: '#3b82f6',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.1,
+                fill: false,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            events: [],
+            scales: {
+                x: { type: 'time', display: false },
+                y: { display: false },
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+            },
+        },
+    });
+})();
+</script>
+{% endif %}

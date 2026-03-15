@@ -106,12 +106,13 @@ hostname -I | awk '{print $1}'
 - Log services with forms (no command-line needed)
 - Update current mileage
 - View service history
+- Mileage-over-time chart with service markers (sparkline preview on History tab, full interactive chart page)
 - Toggle severe mode and hide inspections
 - Uses HTMX for dynamic updates without page reloads
 
 ### CLI
 
-The `maint.py` CLI provides commands: `status`, `history` (with add/edit/delete), `add` / `edit` / `delete` (vehicle file), and `rules` (with add/edit/delete).
+The `maint.py` CLI provides commands: `status`, `history` (with add/edit/delete), `chart`, `add` / `edit` / `delete` (vehicle file), and `rules` (with add/edit/delete).
 
 ### View Maintenance Status
 
@@ -143,6 +144,21 @@ uv run python maint.py vehicles/wrx.yaml history --asc              # Ascending 
 - `--since <YYYY-MM-DD>` - Show only entries since date
 - `--sort <date|miles|rule>` - Sort order (default: date)
 - `--asc` - Sort ascending instead of descending
+
+### View Mileage Chart
+
+```bash
+uv run python maint.py <vehicle-file> chart [--rule <text>]
+
+# Examples:
+uv run python maint.py vehicles/wrx.yaml chart              # Full mileage chart
+uv run python maint.py vehicles/wrx.yaml chart --rule oil    # Only oil service markers
+```
+
+Displays an ASCII chart of mileage over time with service markers. Green dots indicate single services, yellow dots indicate multiple services at the same date/mileage.
+
+**Options:**
+- `--rule <text>` - Filter service markers to rules containing text (case-insensitive)
 
 ### Log a Service Entry
 
