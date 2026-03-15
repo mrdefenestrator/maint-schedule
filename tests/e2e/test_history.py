@@ -13,6 +13,43 @@ def _expand_first_entry(page):
 
 
 @pytest.mark.e2e
+def test_sparkline_visible_on_history(page, flask_server):
+    """Sparkline card appears on history tab when mileage data exists."""
+    page.goto(f"{flask_server}/vehicle/test_vehicle/history")
+    sparkline = page.locator("#sparkline-chart")
+    assert sparkline.count() == 1
+    assert "View full chart" in page.content()
+
+
+@pytest.mark.e2e
+def test_sparkline_links_to_chart(page, flask_server):
+    """Clicking sparkline navigates to chart page."""
+    page.goto(f"{flask_server}/vehicle/test_vehicle/history")
+    page.locator("a:has(#sparkline-chart)").click()
+    page.wait_for_url("**/chart")
+    assert "/vehicle/test_vehicle/chart" in page.url
+    assert page.locator("#mileage-chart").count() == 1
+
+
+@pytest.mark.e2e
+def test_chart_filter_input_exists(page, flask_server):
+    """Chart page has a filter input and legend."""
+    page.goto(f"{flask_server}/vehicle/test_vehicle/chart")
+    assert page.locator("#rule-filter").count() == 1
+    assert "Single service" in page.content()
+    assert "Multiple services" in page.content()
+
+
+@pytest.mark.e2e
+def test_chart_back_to_history(page, flask_server):
+    """Chart page has a back link to history."""
+    page.goto(f"{flask_server}/vehicle/test_vehicle/chart")
+    page.get_by_text("Back to history").click()
+    page.wait_for_url("**/history")
+    assert "/vehicle/test_vehicle/history" in page.url
+
+
+@pytest.mark.e2e
 def test_log_service(page, flask_server):
     page.goto(f"{flask_server}/vehicle/test_vehicle/history")
     page.get_by_text("Add entry").click()
