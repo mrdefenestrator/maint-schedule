@@ -148,6 +148,37 @@ app.jinja_env.filters["status_badge_color"] = status_badge_color
 app.jinja_env.filters["status_display_name"] = status_display_name
 
 
+def _build_mileage_points(vehicle):
+    """Build mileage timeline data for sparkline and chart."""
+    points = {(vehicle.car.purchase_date, vehicle.car.purchase_miles)}
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            points.add((entry.date, entry.mileage))
+    sorted_points = sorted(points, key=lambda p: p[0])
+    return [{"x": d, "y": m} for d, m in sorted_points]
+
+
+def _build_service_markers(vehicle):
+    """Build grouped service markers for chart."""
+    from collections import defaultdict
+
+    groups = defaultdict(list)
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            groups[(entry.date, entry.mileage)].append(entry.rule_key)
+    markers = []
+    for (dt, miles), services in sorted(groups.items()):
+        markers.append(
+            {
+                "x": dt,
+                "y": miles,
+                "services": services,
+                "count": len(services),
+            }
+        )
+    return markers
+
+
 def _float_or_none_form(key: str):
     """Get float or None from request.form."""
     val = request.form.get(key)
@@ -607,6 +638,8 @@ def vehicle_history(vehicle_id: str):
         "ok": sum(1 for s in all_status if s.status == Status.OK),
     }
 
+    mileage_points = _build_mileage_points(vehicle)
+
     return render_template(
         "history.html",
         vehicle_id=vehicle_id,
@@ -615,6 +648,37 @@ def vehicle_history(vehicle_id: str):
         total_cost=total_cost,
         all_verbs=all_verbs,
         include_verbs=include_verbs,
+        status_counts=status_counts,
+        mileage_points=mileage_points,
+        active_tab="history",
+    )
+
+
+@app.route("/vehicle/<vehicle_id>/chart")
+def vehicle_chart(vehicle_id: str):
+    """Full mileage chart page."""
+    path = get_vehicle_path(vehicle_id)
+    if not path.exists():
+        flash(f"Vehicle '{vehicle_id}' not found", "error")
+        return redirect(url_for("index"))
+
+    vehicle = load_vehicle(path)
+    mileage_points = _build_mileage_points(vehicle)
+    service_markers = _build_service_markers(vehicle)
+
+    all_status = vehicle.get_all_service_status(severe=False)
+    status_counts = {
+        "overdue": sum(1 for s in all_status if s.status == Status.OVERDUE),
+        "due_soon": sum(1 for s in all_status if s.status == Status.DUE_SOON),
+        "ok": sum(1 for s in all_status if s.status == Status.OK),
+    }
+
+    return render_template(
+        "chart.html",
+        vehicle_id=vehicle_id,
+        vehicle=vehicle,
+        mileage_points=mileage_points,
+        service_markers=service_markers,
         status_counts=status_counts,
         active_tab="history",
     )
