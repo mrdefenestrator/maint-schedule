@@ -13,6 +13,7 @@ Commands:
 
 import argparse
 import sys
+from collections import defaultdict
 from datetime import date
 from pathlib import Path
 from tabulate import tabulate
@@ -90,6 +91,56 @@ def truncate(text: Optional[str], max_len: int = 30) -> str:
     if len(text) <= max_len:
         return text
     return text[: max_len - 3] + "..."
+
+
+def extract_chart_data(vehicle, rule_filter=None):
+    """Extract mileage timeline and grouped service markers for charting.
+
+    Returns None if fewer than 2 data points are available.
+    Otherwise returns a dict with:
+    - line_dates: list of date strings for the mileage line
+    - line_mileages: list of mileage floats for the mileage line
+    - single_dates/single_mileages: points where 1 service occurred
+    - multi_dates/multi_mileages: points where 2+ services occurred
+    """
+    # Collect unique (date, mileage) points for the line
+    points = {(vehicle.car.purchase_date, vehicle.car.purchase_miles)}
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            points.add((entry.date, entry.mileage))
+
+    if len(points) < 2:
+        return None
+
+    sorted_points = sorted(points, key=lambda p: p[0])
+    line_dates = [p[0] for p in sorted_points]
+    line_mileages = [p[1] for p in sorted_points]
+
+    # Group services by (date, mileage) for markers
+    groups = defaultdict(list)
+    for entry in vehicle.history:
+        if entry.mileage is not None:
+            if rule_filter is None or rule_filter.lower() in entry.rule_key.lower():
+                groups[(entry.date, entry.mileage)].append(entry.rule_key)
+
+    single_dates, single_mileages = [], []
+    multi_dates, multi_mileages = [], []
+    for (date, miles), services in sorted(groups.items()):
+        if len(services) == 1:
+            single_dates.append(date)
+            single_mileages.append(miles)
+        else:
+            multi_dates.append(date)
+            multi_mileages.append(miles)
+
+    return {
+        "line_dates": line_dates,
+        "line_mileages": line_mileages,
+        "single_dates": single_dates,
+        "single_mileages": single_mileages,
+        "multi_dates": multi_dates,
+        "multi_mileages": multi_mileages,
+    }
 
 
 # =============================================================================

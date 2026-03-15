@@ -10,6 +10,7 @@ from maint import (
     truncate,
     make_status_table,
     make_history_table,
+    extract_chart_data,
 )
 
 
@@ -187,3 +188,128 @@ class TestMakeHistoryTable:
         entries = [HistoryEntry("deleted/rule", "2025-01-15")]
         rows = make_history_table(entries, vehicle)
         assert rows[0][2] == "deleted/rule"
+
+
+class TestExtractChartData:
+    """Tests for extract_chart_data."""
+
+    def _make_vehicle(self, history=None):
+        car = Car(
+            make="Test",
+            model="Car",
+            trim=None,
+            year=2020,
+            purchase_date="2020-01-01",
+            purchase_miles=100,
+        )
+        return Vehicle(car=car, rules=[], history=history or [])
+
+    def test_no_history_returns_none(self):
+        vehicle = self._make_vehicle()
+        assert extract_chart_data(vehicle) is None
+
+    def test_single_entry_returns_none(self):
+        """Purchase point + 0 history entries with mileage = 1 point total."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=None
+                )
+            ]
+        )
+        assert extract_chart_data(vehicle) is None
+
+    def test_basic_extraction(self):
+        """Purchase + 2 entries = 3 line points, 2 single markers."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=5000
+                ),
+                HistoryEntry(
+                    rule_key="oil/replace", date="2021-01-01", mileage=10000
+                ),
+            ]
+        )
+        result = extract_chart_data(vehicle)
+        assert result is not None
+        assert result["line_dates"] == ["2020-01-01", "2020-06-01", "2021-01-01"]
+        assert result["line_mileages"] == [100, 5000, 10000]
+        assert len(result["single_dates"]) == 2
+        assert len(result["multi_dates"]) == 0
+
+    def test_grouped_markers(self):
+        """Two services on same date/mileage create a multi marker."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=5000
+                ),
+                HistoryEntry(
+                    rule_key="tires/rotate", date="2020-06-01", mileage=5000
+                ),
+                HistoryEntry(
+                    rule_key="oil/replace", date="2021-01-01", mileage=10000
+                ),
+            ]
+        )
+        result = extract_chart_data(vehicle)
+        assert result is not None
+        assert len(result["line_dates"]) == 3
+        assert result["single_dates"] == ["2021-01-01"]
+        assert result["single_mileages"] == [10000]
+        assert result["multi_dates"] == ["2020-06-01"]
+        assert result["multi_mileages"] == [5000]
+
+    def test_rule_filter(self):
+        """--rule filter only affects markers, not line data."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=5000
+                ),
+                HistoryEntry(
+                    rule_key="tires/rotate", date="2020-06-01", mileage=5000
+                ),
+                HistoryEntry(
+                    rule_key="oil/replace", date="2021-01-01", mileage=10000
+                ),
+            ]
+        )
+        result = extract_chart_data(vehicle, rule_filter="oil")
+        assert result is not None
+        assert len(result["line_dates"]) == 3
+        assert len(result["single_dates"]) == 2
+        assert len(result["multi_dates"]) == 0
+
+    def test_entries_without_mileage_excluded(self):
+        """History entries with mileage=None are excluded from everything."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=None
+                ),
+                HistoryEntry(
+                    rule_key="oil/replace", date="2021-01-01", mileage=10000
+                ),
+            ]
+        )
+        result = extract_chart_data(vehicle)
+        assert result is not None
+        assert len(result["line_dates"]) == 2
+        assert result["line_dates"] == ["2020-01-01", "2021-01-01"]
+
+    def test_sorted_by_date(self):
+        """Output is sorted by date regardless of input order."""
+        vehicle = self._make_vehicle(
+            history=[
+                HistoryEntry(
+                    rule_key="oil/replace", date="2021-01-01", mileage=10000
+                ),
+                HistoryEntry(
+                    rule_key="oil/replace", date="2020-06-01", mileage=5000
+                ),
+            ]
+        )
+        result = extract_chart_data(vehicle)
+        assert result["line_dates"] == ["2020-01-01", "2020-06-01", "2021-01-01"]
