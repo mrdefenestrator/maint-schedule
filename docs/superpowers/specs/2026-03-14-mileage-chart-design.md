@@ -120,12 +120,12 @@ Loaded only on `chart.html` and `history.html` (when sparkline is present), not 
 1. Flask route loads vehicle, extracts history entries with mileage
 2. Includes purchase date/mileage as the first data point
 3. Sorts by date, groups by `(date, mileage)` pair
-4. Route also computes `status_counts` (required by `vehicle_base.html` for the status summary bars)
-5. Passes two datasets to template as JSON:
+5. Route also computes `status_counts` (required by `vehicle_base.html` for the status summary bars)
+6. Passes two datasets to template as JSON:
    - `mileage_points`: `[{x: "2012-04-30", y: 2970}, ...]` for the line
    - `service_markers`: `[{x: "2012-04-30", y: 2970, services: ["oil/replace", "tires/rotate"], count: 2}, ...]` for the scatter overlay
-4. Template renders Chart.js with these datasets
-5. Client-side JS handles filtering and tooltip rendering
+7. Template renders Chart.js with these datasets
+8. Client-side JS handles filtering and tooltip rendering
 
 ## Files Changed/Created
 
