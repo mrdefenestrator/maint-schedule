@@ -928,6 +928,54 @@ def cmd_rules(args):
 
 
 # =============================================================================
+# Chart command
+# =============================================================================
+
+
+def cmd_chart(args):
+    """Show mileage over time with service markers."""
+    import plotext as plt
+
+    vehicle = load_vehicle(args.vehicle_file)
+    data = extract_chart_data(vehicle, rule_filter=args.rule)
+
+    if data is None:
+        has_mileage_entries = any(e.mileage is not None for e in vehicle.history)
+        if has_mileage_entries:
+            print("Not enough mileage data to chart (need at least 2 data points).")
+        else:
+            print("No mileage data to chart.")
+        return 0
+
+    plt.date_form("Y-m-d")
+    plt.plot(data["line_dates"], data["line_mileages"], label="Mileage")
+
+    if data["single_dates"]:
+        plt.scatter(
+            data["single_dates"],
+            data["single_mileages"],
+            marker="dot",
+            color="green",
+            label="Single service",
+        )
+
+    if data["multi_dates"]:
+        plt.scatter(
+            data["multi_dates"],
+            data["multi_mileages"],
+            marker="hd",
+            color="yellow",
+            label="Multi service",
+        )
+
+    plt.title(f"{vehicle.car.name} — Mileage Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Miles")
+    plt.show()
+    return 0
+
+
+# =============================================================================
 # Main
 # =============================================================================
 
@@ -1431,6 +1479,23 @@ examples:
         help="Show what would be deleted without saving",
     )
 
+    # Chart subcommand
+    chart_parser = subparsers.add_parser(
+        "chart",
+        help="Show mileage over time with service markers",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  %(prog)s vehicles/wrx.yaml chart
+  %(prog)s vehicles/wrx.yaml chart --rule oil
+""",
+    )
+    chart_parser.add_argument(
+        "--rule",
+        type=str,
+        help="Filter service markers to rules containing text (case-insensitive)",
+    )
+
     args = parser.parse_args()
 
     # Validate vehicle file: for "add" it must not exist; otherwise it must exist
@@ -1468,6 +1533,8 @@ examples:
         if getattr(args, "rules_command", None) == "delete":
             return cmd_delete_rule(args)
         return cmd_rules(args)
+    elif args.command == "chart":
+        return cmd_chart(args)
 
     return 0
 

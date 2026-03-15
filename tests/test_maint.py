@@ -11,6 +11,7 @@ from maint import (
     make_status_table,
     make_history_table,
     extract_chart_data,
+    cmd_chart,
 )
 
 
@@ -287,3 +288,38 @@ class TestExtractChartData:
         )
         result = extract_chart_data(vehicle)
         assert result["line_dates"] == ["2020-01-01", "2020-06-01", "2021-01-01"]
+
+
+class TestCmdChartEdgeCases:
+    """Tests for cmd_chart error message selection."""
+
+    def test_no_history_message(self, capsys, tmp_path):
+        """No history at all -> 'No mileage data to chart.'"""
+        import argparse
+
+        yaml_path = tmp_path / "test.yaml"
+        yaml_path.write_text(
+            "car:\n  make: Test\n  model: Car\n  trim: Base\n"
+            "  year: 2020\n  purchaseDate: '2020-01-01'\n  purchaseMiles: 100\n"
+            "history: []\nrules: []\n"
+        )
+        args = argparse.Namespace(vehicle_file=yaml_path, rule=None)
+        result = cmd_chart(args)
+        assert result == 0
+        assert "No mileage data to chart." in capsys.readouterr().out
+
+    def test_only_null_mileage_message(self, capsys, tmp_path):
+        """History entries but all mileage=None -> 'No mileage data to chart.'"""
+        import argparse
+
+        yaml_path = tmp_path / "test.yaml"
+        yaml_path.write_text(
+            "car:\n  make: Test\n  model: Car\n  trim: Base\n"
+            "  year: 2020\n  purchaseDate: '2020-01-01'\n  purchaseMiles: 100\n"
+            "history:\n- ruleKey: oil/replace\n  date: '2020-06-01'\n"
+            "rules: []\n"
+        )
+        args = argparse.Namespace(vehicle_file=yaml_path, rule=None)
+        result = cmd_chart(args)
+        assert result == 0
+        assert "No mileage data to chart." in capsys.readouterr().out
