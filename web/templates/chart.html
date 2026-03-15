@@ -41,8 +41,8 @@
 <script>
 (function() {
     const isDark = document.documentElement.classList.contains('dark');
-    const textColor = isDark ? '#e2e8f0' : '#1e293b';
-    const gridColor = isDark ? '#334155' : '#e2e8f0';
+    const textColor = isDark ? '#e2e8f0' : '#374151';
+    const gridColor = isDark ? '#334155' : '#f3f4f6';
 
     const mileagePoints = {{ mileage_points | tojson }};
     const serviceMarkers = {{ service_markers | tojson }};
