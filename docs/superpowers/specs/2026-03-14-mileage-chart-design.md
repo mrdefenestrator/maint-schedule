@@ -32,10 +32,16 @@ uv run python maint.py vehicles/wrx.yaml chart --rule oil
 ### Data Extraction
 
 - Load vehicle via `load_vehicle(path)`
+- Include purchase date/mileage as the first data point (anchors the mileage line at vehicle acquisition)
 - Filter `vehicle.history` to entries where `mileage is not None`
 - Sort by date ascending
 - Group entries sharing the same `(date, mileage)` pair
 - Plot date vs. mileage as a line, overlay grouped markers
+
+### Edge Cases
+
+- **No mileage data** (zero history entries with mileage, or no history at all): Print "No mileage data to chart." and exit with return code 0
+- **Single data point** (only purchase mileage, or one history entry): Print "Not enough mileage data to chart (need at least 2 data points)." and exit with return code 0
 
 ### Dependency
 
@@ -65,7 +71,8 @@ Top of the History tab (`history.html`), above the year-grouped service entries.
 
 ### Route Changes
 
-- The existing `/vehicle/<vehicle_id>/history` route needs to pass sparkline data (list of `{date, mileage}` objects) to the template context
+- The existing `/vehicle/<vehicle_id>/history` route needs to pass sparkline data to the template context, using the same `mileage_points` format as the full chart: `[{x: "2012-04-30", y: 2970}, ...]`
+- If there are fewer than 2 mileage data points, the sparkline card is not rendered (hidden via Jinja2 conditional)
 
 ## Web App — Full Chart Page
 
@@ -77,7 +84,7 @@ Top of the History tab (`history.html`), above the year-grouped service entries.
 
 `web/templates/chart.html` extending `vehicle_base.html` to get the vehicle header and tab navigation. The chart page is not a tab itself — it is accessed via the sparkline link on the History tab.
 
-### Layout (Option A: Filters Above)
+### Layout
 
 1. **Filter bar** at the top: text input for rule filtering (mirrors CLI `--rule` behavior)
 2. **Chart area** below: Chart.js line chart filling available width
@@ -91,7 +98,7 @@ Top of the History tab (`history.html`), above the year-grouped service entries.
 - **Line**: Blue (#3b82f6), mileage progression over time
 - **Markers**: Green (#22c55e) for single-service points, amber (#f59e0b) for grouped points
 - **Tooltips**: On hover, show date, mileage, and list of services performed at that point
-- **Dark mode**: Chart.js theme colors match Tailwind dark mode (detected via existing theme toggle)
+- **Dark mode**: Read the current theme on page load from `document.documentElement.classList.contains('dark')`. Set Chart.js `color` (text/labels) and `borderColor` (grid lines) to light values in dark mode, dark values in light mode. The chart does not need to re-render on theme toggle — a page reload applies the new theme (consistent with how other page elements work).
 - **Responsive**: Chart.js `responsive: true` with `maintainAspectRatio: false`, container has a fixed min-height
 
 ### Filtering
@@ -111,8 +118,10 @@ Loaded only on `chart.html` and `history.html` (when sparkline is present), not 
 ### Data Flow
 
 1. Flask route loads vehicle, extracts history entries with mileage
-2. Sorts by date, groups by `(date, mileage)` pair
-3. Passes two datasets to template as JSON:
+2. Includes purchase date/mileage as the first data point
+3. Sorts by date, groups by `(date, mileage)` pair
+4. Route also computes `status_counts` (required by `vehicle_base.html` for the status summary bars)
+5. Passes two datasets to template as JSON:
    - `mileage_points`: `[{x: "2012-04-30", y: 2970}, ...]` for the line
    - `service_markers`: `[{x: "2012-04-30", y: 2970, services: ["oil/replace", "tires/rotate"], count: 2}, ...]` for the scatter overlay
 4. Template renders Chart.js with these datasets
@@ -129,6 +138,7 @@ Loaded only on `chart.html` and `history.html` (when sparkline is present), not 
 | `web/templates/partials/mileage_sparkline.html` | Create | Sparkline card partial for History tab |
 | `web/templates/history.html` | Edit | Include sparkline partial at top |
 | `tests/test_maint.py` | Edit | Add tests for `chart` subcommand |
+| `tests/e2e/` | Edit | Add Playwright tests for sparkline and chart page (if e2e suite exists) |
 
 ## No New Models
 
