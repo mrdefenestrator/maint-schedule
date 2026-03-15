@@ -125,12 +125,12 @@ def extract_chart_data(vehicle, rule_filter=None):
 
     single_dates, single_mileages = [], []
     multi_dates, multi_mileages = [], []
-    for (date, miles), services in sorted(groups.items()):
+    for (dt, miles), services in sorted(groups.items()):
         if len(services) == 1:
-            single_dates.append(date)
+            single_dates.append(dt)
             single_mileages.append(miles)
         else:
-            multi_dates.append(date)
+            multi_dates.append(dt)
             multi_mileages.append(miles)
 
     return {

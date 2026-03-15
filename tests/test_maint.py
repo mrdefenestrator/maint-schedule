@@ -212,9 +212,7 @@ class TestExtractChartData:
         """Purchase point + 0 history entries with mileage = 1 point total."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=None
-                )
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=None)
             ]
         )
         assert extract_chart_data(vehicle) is None
@@ -223,12 +221,8 @@ class TestExtractChartData:
         """Purchase + 2 entries = 3 line points, 2 single markers."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=5000
-                ),
-                HistoryEntry(
-                    rule_key="oil/replace", date="2021-01-01", mileage=10000
-                ),
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=5000),
+                HistoryEntry(rule_key="oil/replace", date="2021-01-01", mileage=10000),
             ]
         )
         result = extract_chart_data(vehicle)
@@ -242,15 +236,9 @@ class TestExtractChartData:
         """Two services on same date/mileage create a multi marker."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=5000
-                ),
-                HistoryEntry(
-                    rule_key="tires/rotate", date="2020-06-01", mileage=5000
-                ),
-                HistoryEntry(
-                    rule_key="oil/replace", date="2021-01-01", mileage=10000
-                ),
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=5000),
+                HistoryEntry(rule_key="tires/rotate", date="2020-06-01", mileage=5000),
+                HistoryEntry(rule_key="oil/replace", date="2021-01-01", mileage=10000),
             ]
         )
         result = extract_chart_data(vehicle)
@@ -265,15 +253,9 @@ class TestExtractChartData:
         """--rule filter only affects markers, not line data."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=5000
-                ),
-                HistoryEntry(
-                    rule_key="tires/rotate", date="2020-06-01", mileage=5000
-                ),
-                HistoryEntry(
-                    rule_key="oil/replace", date="2021-01-01", mileage=10000
-                ),
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=5000),
+                HistoryEntry(rule_key="tires/rotate", date="2020-06-01", mileage=5000),
+                HistoryEntry(rule_key="oil/replace", date="2021-01-01", mileage=10000),
             ]
         )
         result = extract_chart_data(vehicle, rule_filter="oil")
@@ -286,12 +268,8 @@ class TestExtractChartData:
         """History entries with mileage=None are excluded from everything."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=None
-                ),
-                HistoryEntry(
-                    rule_key="oil/replace", date="2021-01-01", mileage=10000
-                ),
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=None),
+                HistoryEntry(rule_key="oil/replace", date="2021-01-01", mileage=10000),
             ]
         )
         result = extract_chart_data(vehicle)
@@ -303,12 +281,8 @@ class TestExtractChartData:
         """Output is sorted by date regardless of input order."""
         vehicle = self._make_vehicle(
             history=[
-                HistoryEntry(
-                    rule_key="oil/replace", date="2021-01-01", mileage=10000
-                ),
-                HistoryEntry(
-                    rule_key="oil/replace", date="2020-06-01", mileage=5000
-                ),
+                HistoryEntry(rule_key="oil/replace", date="2021-01-01", mileage=10000),
+                HistoryEntry(rule_key="oil/replace", date="2020-06-01", mileage=5000),
             ]
         )
         result = extract_chart_data(vehicle)
