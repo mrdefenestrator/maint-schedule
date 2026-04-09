@@ -333,7 +333,10 @@ def vehicle_detail(vehicle_id: str):
     include_verbs = [v.lower() for v in include_verbs] if include_verbs else None
 
     all_status = vehicle.get_all_service_status(
-        severe=severe, include_verbs=include_verbs, miles_only=miles_only, time_only=time_only
+        severe=severe,
+        include_verbs=include_verbs,
+        miles_only=miles_only,
+        time_only=time_only,
     )
 
     # Calculate counts before filtering for display
