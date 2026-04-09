@@ -319,6 +319,12 @@ def vehicle_detail(vehicle_id: str):
     severe = request.args.get("severe", "").lower() == "true"
     status_filter = request.args.get("status", "").lower() or None
 
+    basis = request.args.get("basis", "all").lower()
+    if basis not in ("all", "mileage", "time"):
+        basis = "all"
+    miles_only = basis == "mileage"
+    time_only = basis == "time"
+
     # Get all unique verbs from vehicle rules
     all_verbs = sorted(set(r.verb.lower() for r in vehicle.rules))
 
@@ -327,7 +333,7 @@ def vehicle_detail(vehicle_id: str):
     include_verbs = [v.lower() for v in include_verbs] if include_verbs else None
 
     all_status = vehicle.get_all_service_status(
-        severe=severe, include_verbs=include_verbs
+        severe=severe, include_verbs=include_verbs, miles_only=miles_only, time_only=time_only
     )
 
     # Calculate counts before filtering for display
@@ -367,6 +373,7 @@ def vehicle_detail(vehicle_id: str):
         all_verbs=all_verbs,
         include_verbs=include_verbs or [],
         status_filter=status_filter,
+        basis=basis,
         Status=Status,
         active_tab="status",
         standalone=False,

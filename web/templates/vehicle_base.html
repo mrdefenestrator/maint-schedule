@@ -152,6 +152,17 @@
         window.location.href = url.toString();
     }
 
+    // filterBasis: toggle mileage/time/all basis for status calculations
+    function filterBasis(basis) {
+        var url = new URL(window.location.href);
+        if (basis === 'all') {
+            url.searchParams.delete('basis');
+        } else {
+            url.searchParams.set('basis', basis);
+        }
+        window.location.href = url.toString();
+    }
+
     // Close verb dropdown on outside click (no-op if dropdown not on page)
     document.addEventListener('click', function(e) {
         var dropdown = document.getElementById('verb-dropdown');

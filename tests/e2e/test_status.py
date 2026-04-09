@@ -24,6 +24,40 @@ def test_severe_mode(page, flask_server):
 
 
 @pytest.mark.e2e
+def test_basis_filter_mileage(page, flask_server):
+    page.goto(f"{flask_server}/vehicle/test_vehicle")
+    page.get_by_role("button", name="Mileage").click()
+    page.wait_for_url("**/vehicle/test_vehicle?basis=mileage")
+    assert "basis=mileage" in page.url
+
+
+@pytest.mark.e2e
+def test_basis_filter_time(page, flask_server):
+    page.goto(f"{flask_server}/vehicle/test_vehicle")
+    page.get_by_role("button", name="Time").click()
+    page.wait_for_url("**/vehicle/test_vehicle?basis=time")
+    assert "basis=time" in page.url
+
+
+@pytest.mark.e2e
+def test_basis_filter_all_clears_param(page, flask_server):
+    page.goto(f"{flask_server}/vehicle/test_vehicle?basis=mileage")
+    page.locator('[aria-label="Basis filter"]').get_by_role("button", name="All").click()
+    page.wait_for_url("**/vehicle/test_vehicle")
+    assert "basis" not in page.url
+
+
+@pytest.mark.e2e
+def test_basis_filter_preserved_on_severe_toggle(page, flask_server):
+    page.goto(f"{flask_server}/vehicle/test_vehicle?basis=mileage")
+    page.wait_for_selector('input[name="severe"]')
+    with page.expect_navigation():
+        page.check('input[name="severe"]')
+    assert "basis=mileage" in page.url
+    assert "severe=true" in page.url
+
+
+@pytest.mark.e2e
 def test_theme_switcher(page, flask_server):
     page.goto(flask_server)
     # Cycle theme 3 times: system → light → dark → system
