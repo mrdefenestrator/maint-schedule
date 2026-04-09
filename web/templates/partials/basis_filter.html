@@ -1,0 +1,14 @@
+<div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-sm" role="group" aria-label="Basis filter">
+    <button type="button" onclick="filterBasis('all')"
+            class="px-3 py-2 {% if basis == 'all' %}bg-blue-600 text-white{% else %}bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600{% endif %}">
+        All
+    </button>
+    <button type="button" onclick="filterBasis('mileage')"
+            class="px-3 py-2 border-l border-gray-200 dark:border-gray-600 {% if basis == 'mileage' %}bg-blue-600 text-white{% else %}bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600{% endif %}">
+        Mileage
+    </button>
+    <button type="button" onclick="filterBasis('time')"
+            class="px-3 py-2 border-l border-gray-200 dark:border-gray-600 {% if basis == 'time' %}bg-blue-600 text-white{% else %}bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600{% endif %}">
+        Time
+    </button>
+</div>
