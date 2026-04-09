@@ -134,6 +134,132 @@ class TestVehicleHistoryLookup:
         assert last.mileage is None
 
 
+class TestVehicleHistoryLookupCountsAs:
+    """Tests for Vehicle history lookup with counts_as rules."""
+
+    @pytest.fixture
+    def car(self):
+        return Car("Subaru", "WRX", "Limited", 2012, "2012-03-23", 6)
+
+    def test_replacement_satisfies_inspect_when_counts_as_set(self, car):
+        """Replace history counts as inspect when countsAs includes 'inspect'."""
+        replace_rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect"],
+        )
+        inspect_rule = Rule(
+            item="engine air filter",
+            verb="inspect",
+            interval_miles=7500,
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[replace_rule, inspect_rule],
+            history=[
+                HistoryEntry("engine air filter/replace", "2025-01-15", mileage=100000),
+            ],
+            state_current_miles=104000,
+        )
+        last = vehicle.get_last_service_for_item("engine air filter", "inspect")
+        assert last is not None
+        assert last.mileage == 100000
+        assert last.rule_key == "engine air filter/replace"
+
+    def test_replacement_does_not_satisfy_inspect_without_counts_as(self, car):
+        """Replace history does not satisfy inspect when countsAs is not set."""
+        replace_rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[replace_rule],
+            history=[
+                HistoryEntry("engine air filter/replace", "2025-01-15", mileage=100000),
+            ],
+            state_current_miles=104000,
+        )
+        last = vehicle.get_last_service_for_item("engine air filter", "inspect")
+        assert last is None
+
+    def test_counts_as_uses_most_recent_across_sources(self, car):
+        """Most recent entry is selected even when sourced from a counts_as rule."""
+        replace_rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect"],
+        )
+        inspect_rule = Rule(
+            item="engine air filter",
+            verb="inspect",
+            interval_miles=7500,
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[replace_rule, inspect_rule],
+            history=[
+                HistoryEntry("engine air filter/inspect", "2024-06-01", mileage=92500),
+                HistoryEntry("engine air filter/replace", "2025-01-15", mileage=100000),
+            ],
+            state_current_miles=104000,
+        )
+        last = vehicle.get_last_service_for_item("engine air filter", "inspect")
+        assert last is not None
+        assert last.mileage == 100000  # replace entry is more recent
+
+    def test_counts_as_does_not_affect_unrelated_items(self, car):
+        """counts_as only applies to same-item rules."""
+        replace_rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect"],
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[replace_rule],
+            history=[
+                HistoryEntry("engine air filter/replace", "2025-01-15", mileage=100000),
+            ],
+            state_current_miles=104000,
+        )
+        # Brakes inspect is a different item — should not be affected
+        last = vehicle.get_last_service_for_item("brakes", "inspect")
+        assert last is None
+
+    def test_counts_as_drives_service_due_calculation(self, car):
+        """calculate_service_due uses counts_as history for due date calculation."""
+        replace_rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect"],
+        )
+        inspect_rule = Rule(
+            item="engine air filter",
+            verb="inspect",
+            interval_miles=7500,
+        )
+        vehicle = Vehicle(
+            car=car,
+            rules=[replace_rule, inspect_rule],
+            history=[
+                HistoryEntry("engine air filter/replace", "2025-01-15", mileage=100000),
+            ],
+            state_current_miles=104000,
+        )
+        result = vehicle.calculate_service_due(inspect_rule)
+        # Due at 100000 + 7500 = 107500; current is 104000 → OK with 3500 remaining
+        assert result.due_miles == 107500
+        assert result.last_service_miles == 100000
+        assert result.miles_remaining == 3500
+        assert result.status == Status.OK
+
+
 class TestVehicleLastServiceProperty:
     """Tests for Vehicle.last_service property."""
 

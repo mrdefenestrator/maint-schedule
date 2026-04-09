@@ -1,6 +1,6 @@
 """Rule class for maintenance interval definitions."""
 
-from typing import Optional
+from typing import List, Optional
 
 
 class Rule:
@@ -21,6 +21,7 @@ class Rule:
         start_months: float = 0,
         stop_months: float = 9999,
         aftermarket: bool = False,
+        counts_as: Optional[List[str]] = None,
     ):
         self.item = item
         self.verb = verb
@@ -35,6 +36,7 @@ class Rule:
         self.start_months = start_months or 0
         self.stop_months = stop_months or 9999
         self.aftermarket = aftermarket or False
+        self.counts_as: List[str] = counts_as or []
 
     @property
     def key(self) -> str:

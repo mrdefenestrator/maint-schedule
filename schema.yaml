@@ -76,6 +76,14 @@ properties:
         aftermarket:
           type: boolean
           default: false
+        countsAs:
+          type: array
+          items:
+            type: string
+          description: >
+            List of verbs that this service also satisfies for the same item.
+            For example, a replacement rule with countsAs: [inspect] means that
+            logging a replacement will also reset the inspection interval.
       required:
         - item
         - verb
