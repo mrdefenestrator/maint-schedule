@@ -292,6 +292,7 @@ rules:
 | `startMonths` | No | Month threshold when this rule becomes active |
 | `stopMonths` | No | Month threshold when this rule stops applying |
 | `aftermarket` | No | Boolean flag for non-OEM parts |
+| `countsAs` | No | List of verbs this service also satisfies (e.g., `[inspect]`) |
 
 *At least one of `intervalMiles` or `intervalMonths` should be provided.
 
@@ -359,6 +360,23 @@ When looking up service history, the system matches on **item + verb** regardles
 2. At 200,000 mi, the "ongoing" rule is now active (startMiles: 137500)
 3. System finds last coolant service at 140,000 mi (ignoring phase)
 4. Next due: 140,000 + 75,000 = 215,000 mi
+
+### Replacement Counts as Inspection (`countsAs`)
+
+A rule can declare that its service history also satisfies other verbs for the same item using `countsAs`. The most common use case: replacing a part resets the inspection interval too.
+
+```yaml
+- item: engine air filter
+  verb: replace
+  intervalMiles: 15000
+  countsAs: [inspect]   # replacement also resets the inspect interval
+
+- item: engine air filter
+  verb: inspect
+  intervalMiles: 7500
+```
+
+When calculating the due date for `engine air filter/inspect`, the system also looks at `engine air filter/replace` history and uses whichever service is most recent. Without `countsAs`, the two rules track their history independently.
 
 ### Start/Stop Thresholds
 
