@@ -42,7 +42,9 @@ def test_basis_filter_time(page, flask_server):
 @pytest.mark.e2e
 def test_basis_filter_all_clears_param(page, flask_server):
     page.goto(f"{flask_server}/vehicle/test_vehicle?basis=mileage")
-    page.locator('[aria-label="Basis filter"]').get_by_role("button", name="All").click()
+    page.locator('[aria-label="Basis filter"]').get_by_role(
+        "button", name="All"
+    ).click()
     page.wait_for_url("**/vehicle/test_vehicle")
     assert "basis" not in page.url
 
