@@ -40,6 +40,7 @@ def _parse_object(dct: Dict[str, Any]) -> Union[Car, Rule, HistoryEntry, Vehicle
             dct.get("startMonths"),
             dct.get("stopMonths"),
             dct.get("aftermarket"),
+            dct.get("countsAs"),
         )
     # History entry
     elif "ruleKey" in dct:
@@ -178,6 +179,8 @@ def _rule_to_dict(rule: Rule) -> Dict[str, Any]:
         d["stopMonths"] = rule.stop_months
     if rule.aftermarket:
         d["aftermarket"] = rule.aftermarket
+    if rule.counts_as:
+        d["countsAs"] = rule.counts_as
     return d
 
 

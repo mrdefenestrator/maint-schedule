@@ -82,3 +82,28 @@ class TestRule:
             interval_miles=137500,
         )
         assert rule.display_name == "Replace - engine coolant [initial]"
+
+    def test_counts_as_defaults_to_empty_list(self):
+        """counts_as defaults to empty list when not specified."""
+        rule = Rule(item="engine air filter", verb="replace", interval_miles=15000)
+        assert rule.counts_as == []
+
+    def test_counts_as_stores_verb_list(self):
+        """counts_as stores the provided list of verbs."""
+        rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect"],
+        )
+        assert rule.counts_as == ["inspect"]
+
+    def test_counts_as_multiple_verbs(self):
+        """counts_as can hold multiple verbs."""
+        rule = Rule(
+            item="engine air filter",
+            verb="replace",
+            interval_miles=15000,
+            counts_as=["inspect", "clean"],
+        )
+        assert rule.counts_as == ["inspect", "clean"]

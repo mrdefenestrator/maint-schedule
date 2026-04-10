@@ -79,9 +79,19 @@ class Vehicle:
         Get the most recent service for an item/verb combination,
         regardless of phase. Used for lifecycle rules where history
         may be logged under different phases.
+
+        Also considers history from rules whose counts_as includes this verb,
+        so that e.g. a replacement can satisfy an inspection interval.
         """
         base_key = f"{item}/{verb}"
         matching = [h for h in self.history if h.rule_key.startswith(base_key)]
+        # Include history from same-item rules that count as this verb
+        for rule in self.rules:
+            if rule.item == item and verb in rule.counts_as:
+                alias_base = f"{item}/{rule.verb}"
+                matching.extend(
+                    h for h in self.history if h.rule_key.startswith(alias_base)
+                )
         if not matching:
             return None
         # Prefer entries with mileage for calculation
