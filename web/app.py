@@ -857,6 +857,12 @@ def add_rule_view(vehicle_id: str):
     start_months = _float_or_none(request.form.get("start_months"))
     stop_months = _float_or_none(request.form.get("stop_months"))
     aftermarket = request.form.get("aftermarket") == "true"
+    counts_as_raw = request.form.get("counts_as", "").strip()
+    counts_as = (
+        [v.strip() for v in counts_as_raw.split(",") if v.strip()]
+        if counts_as_raw
+        else []
+    )
 
     if not item or not verb:
         flash("Item and verb are required", "error")
@@ -876,6 +882,7 @@ def add_rule_view(vehicle_id: str):
         start_months=start_months if start_months is not None else 0,
         stop_months=stop_months if stop_months is not None else 9999,
         aftermarket=aftermarket,
+        counts_as=counts_as,
     )
 
     try:
@@ -945,6 +952,12 @@ def edit_rule(vehicle_id: str, index: int):
     start_months = _float_or_none(request.form.get("start_months"))
     stop_months = _float_or_none(request.form.get("stop_months"))
     aftermarket = request.form.get("aftermarket") == "true"
+    counts_as_raw = request.form.get("counts_as", "").strip()
+    counts_as = (
+        [v.strip() for v in counts_as_raw.split(",") if v.strip()]
+        if counts_as_raw
+        else []
+    )
 
     if not item or not verb:
         flash("Item and verb are required", "error")
@@ -964,6 +977,7 @@ def edit_rule(vehicle_id: str, index: int):
         start_months=start_months if start_months is not None else 0,
         stop_months=stop_months if stop_months is not None else 9999,
         aftermarket=aftermarket,
+        counts_as=counts_as,
     )
 
     try:

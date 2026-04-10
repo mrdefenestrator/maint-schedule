@@ -120,6 +120,12 @@
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Key</p>
                     <p class="font-medium text-xs font-mono text-gray-600 dark:text-gray-400">{{ rule.key }}</p>
                 </div>
+                {% if rule.counts_as %}
+                <div>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Counts as</p>
+                    <p class="font-medium dark:text-gray-200">{{ rule.counts_as | join(', ') }}</p>
+                </div>
+                {% endif %}
                 <div class="col-span-2">
                     <p class="text-gray-500 dark:text-gray-400 text-xs">Notes</p>
                     <p class="font-medium dark:text-gray-200">{% if rule.notes %}{{ rule.notes }}{% else %}—{% endif %}</p>

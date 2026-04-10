@@ -73,3 +73,13 @@ mise run serve
 ## Documentation
 
 - Keep `README.md` up to date when adding or changing CLI commands, web features, or project structure
+
+## Before Creating a PR
+
+Always run the following and fix any issues before pushing/creating a PR:
+
+```bash
+uv run ruff format .       # auto-format all files
+uv run ruff check .        # lint all files
+uv run python -m pytest tests/ -q --ignore=tests/e2e  # unit tests
+```
