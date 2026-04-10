@@ -7,100 +7,100 @@
     <form hx-post="{{ url_for('edit_rule', vehicle_id=vehicle_id, index=index) }}"
           hx-target="#modal-content"
           hx-swap="innerHTML"
-          class="space-y-4">
+          class="space-y-3">
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="item" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item <span class="text-red-500">*</span></label>
                 <input type="text" name="item" id="item" value="{{ rule.item }}" required
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="verb" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Verb <span class="text-red-500">*</span></label>
                 <input type="text" name="verb" id="verb" value="{{ rule.verb }}" required
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
         </div>
 
         <div>
             <label for="phase" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phase</label>
             <select name="phase" id="phase"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
                 <option value="">—</option>
                 <option value="initial" {% if rule.phase == 'initial' %}selected{% endif %}>initial</option>
                 <option value="ongoing" {% if rule.phase == 'ongoing' %}selected{% endif %}>ongoing</option>
             </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="interval_miles" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interval (miles)</label>
                 <input type="number" name="interval_miles" id="interval_miles" min="0" step="1"
                        value="{{ rule.interval_miles | int if rule.interval_miles is not none else '' }}"
                        placeholder="—"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="interval_months" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interval (months)</label>
                 <input type="number" name="interval_months" id="interval_months" min="0" step="1"
                        value="{{ rule.interval_months | int if rule.interval_months is not none else '' }}"
                        placeholder="—"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="severe_interval_miles" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Severe interval (miles)</label>
                 <input type="number" name="severe_interval_miles" id="severe_interval_miles" min="0" step="1"
                        value="{{ rule.severe_interval_miles | int if rule.severe_interval_miles is not none else '' }}"
                        placeholder="—"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="severe_interval_months" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Severe interval (months)</label>
                 <input type="number" name="severe_interval_months" id="severe_interval_months" min="0" step="1"
                        value="{{ rule.severe_interval_months | int if rule.severe_interval_months is not none else '' }}"
                        placeholder="—"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="start_miles" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start miles</label>
                 <input type="number" name="start_miles" id="start_miles" min="0" step="1"
                        value="{{ rule.start_miles | int if rule.start_miles and rule.start_miles != 0 else '' }}"
                        placeholder="0"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="stop_miles" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop miles</label>
                 <input type="number" name="stop_miles" id="stop_miles" min="0" step="1"
                        value="{{ rule.stop_miles | int if rule.stop_miles and rule.stop_miles < 999999999 else '' }}"
                        placeholder="∞"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="start_months" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start months</label>
                 <input type="number" name="start_months" id="start_months" min="0" step="1"
                        value="{{ rule.start_months | int if rule.start_months and rule.start_months != 0 else '' }}"
                        placeholder="0"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
                 <label for="stop_months" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stop months</label>
                 <input type="number" name="stop_months" id="stop_months" min="0" step="1"
                        value="{{ rule.stop_months | int if rule.stop_months and rule.stop_months < 9999 else '' }}"
                        placeholder="—"
-                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 touch-target">
+                       class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">
             </div>
         </div>
 
         <div>
             <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
             <textarea name="notes" id="notes" rows="2"
-                      class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ rule.notes or '' }}</textarea>
+                      class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none">{{ rule.notes or '' }}</textarea>
         </div>
 
         <div>
@@ -112,15 +112,15 @@
             </label>
         </div>
 
-        <div class="flex gap-3 pt-2">
+        <div class="flex gap-3 pt-1">
             <button type="button"
                     onclick="document.getElementById('modal').classList.add('hidden')"
-                    class="flex-1 py-3 px-4 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium touch-target
+                    class="flex-1 py-2.5 px-4 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium touch-target
                            hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 Cancel
             </button>
             <button type="submit"
-                    class="flex-1 py-3 px-4 rounded-lg bg-blue-600 text-white font-medium touch-target
+                    class="flex-1 py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium touch-target
                            hover:bg-blue-700 active:bg-blue-800 transition-colors">
                 <span class="htmx-indicator">…</span>
                 Update Rule
